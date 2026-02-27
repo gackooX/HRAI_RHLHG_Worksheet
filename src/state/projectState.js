@@ -7,9 +7,20 @@ export const initialState = {
     hasBasement: true,
     numStoreys: 1, // Max 3
   },
+  environmental: {
+    hl_odt: -6,
+    hl_idt: 72,
+    mean_soil_temp: 50,
+    hg_odt: -6, // User specifically said -6 (even if odd for gain)
+    hg_idt: 72, // User specifically said 72
+    daily_range: 20,
+    north_latitude: 44,
+  },
+  system: {
+    hrv_effectiveness: 0.6,
+    system_case: 'Case #3', // Case #1, #2, #3
+  },
   designMultipliers: {
-    hl_delta_t: 78.00,
-    hg_delta_t: 13.0,
     header_height: 0.75, // ft
   },
   externalValues: {

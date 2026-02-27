@@ -18,6 +18,10 @@ export const convertTemp = (val, toMetric = true) => {
   return toMetric ? (val - 32) * (5/9) : (val * (9/5)) + 32; // F to C
 };
 
+export const convertTempDelta = (val, toMetric = true) => {
+  return toMetric ? val * (5/9) : val * (9/5); // Delta F to Delta C
+};
+
 export const convertPower = (val, toMetric = true) => {
   return toMetric ? val * 0.293071 : val / 0.293071; // Btuh to W
 };

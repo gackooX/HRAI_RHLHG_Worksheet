@@ -11,7 +11,8 @@
       "type": "window",
       "description": "Double Glazed, Low-E, Argon, Vinyl Frame",
       "uFactor": 0.28,
-      "shgc": 0.40
+      "shgc": 0.40,
+      "glazingType": "Double"
     },
     {
       "id": "door-1",
@@ -36,14 +37,16 @@
       "type": "window",
       "description": "Triple Glazed, Low-E, Krypton, Wood Frame",
       "uFactor": 0.18,
-      "shgc": 0.32
+      "shgc": 0.32,
+      "glazingType": "Triple"
     },
     {
       "id": "window-3",
       "type": "window",
       "description": "Single Glazed, Wood Frame (Old)",
       "uFactor": 1.10,
-      "shgc": 0.75
+      "shgc": 0.75,
+      "glazingType": "Single"
     },
     {
       "id": "ceiling-1",
@@ -77,14 +80,83 @@
       }
     ]
   },
-  "solarGainFactors": {
-    "North": 25,
-    "NorthEast": 45,
-    "East": 85,
-    "SouthEast": 105,
-    "South": 115,
-    "SouthWest": 105,
-    "West": 85,
-    "NorthWest": 45
+  "solarTable": {
+    "40": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 51, "met": 160 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 80, "met": 252 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "41": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 53, "met": 166 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 83, "met": 261 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "42": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 55, "met": 172 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 86, "met": 271 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "43": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 56, "met": 178 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 89, "met": 280 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "44": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 58, "met": 184 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 92, "met": 290 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "45": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 60, "met": 190 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 95, "met": 299 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "46": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 62, "met": 196 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 98, "met": 309 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "47": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 64, "met": 202 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 101, "met": 318 },
+      "H": { "imp": 169, "met": 534 }
+    },
+    "48": {
+      "N_S": { "imp": 29, "met": 93 },
+      "S": { "imp": 66, "met": 208 },
+      "E_W": { "imp": 90, "met": 285 },
+      "NE_NW": { "imp": 62, "met": 194 },
+      "SE_SW": { "imp": 104, "met": 328 },
+      "H": { "imp": 169, "met": 534 }
+    }
+  },
+  "isfTable": {
+    "None": { "Single": 1.0, "Double": 1.0, "Triple": 1.0, "Heat Mirror": 1.0 },
+    "Blinds": { "Single": 0.50, "Double": 0.55, "Triple": 0.57, "Heat Mirror": 0.60 },
+    "Reflective": { "Single": 0.35, "Double": 0.37, "Triple": 0.40, "Heat Mirror": 0.44 }
   }
 }

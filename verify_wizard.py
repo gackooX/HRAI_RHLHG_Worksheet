@@ -16,7 +16,7 @@ async def verify():
             await page.get_by_label("FRONT FACING").select_option("SE")
 
             # 2. Add a Room
-            await page.get_by_role("button", name="+ Add Room").click()
+            await page.get_by_role("button", name="+ Add New Room").click()
             await page.get_by_label("Room Name (Max 8 chars)").fill("MASTER")
             await page.get_by_label("Perimeter (PE) ft").fill("60")
             await page.get_by_label("Floor Area (AF) sq ft").fill("200")
