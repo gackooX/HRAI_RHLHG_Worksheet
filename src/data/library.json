@@ -1,0 +1,49 @@
+{
+  "assemblies": [
+    {
+      "id": "wall-1",
+      "type": "wall",
+      "description": "2x6 Wood Stud @ 16\" OC, R-22 Batt, 7/16\" OSB, Vinyl Siding",
+      "uFactor": 0.045
+    },
+    {
+      "id": "window-1",
+      "type": "window",
+      "description": "Double Glazed, Low-E, Argon, Vinyl Frame",
+      "uFactor": 0.28,
+      "shgc": 0.40
+    },
+    {
+      "id": "door-1",
+      "type": "door",
+      "description": "Insulated Steel, Wood Core",
+      "uFactor": 0.20
+    }
+  ],
+  "designConditions": {
+    "locations": [
+      {
+        "city": "Toronto",
+        "heating99": -18,
+        "cooling25": 30,
+        "coolingRange": 11
+      },
+      {
+        "city": "Ottawa",
+        "heating99": -25,
+        "cooling25": 30,
+        "coolingRange": 12
+      }
+    ]
+  },
+  "solarGainFactors": {
+    "North": 25,
+    "NorthEast": 45,
+    "East": 85,
+    "SouthEast": 105,
+    "South": 115,
+    "SouthWest": 105,
+    "West": 85,
+    "NorthWest": 45
+  }
+}

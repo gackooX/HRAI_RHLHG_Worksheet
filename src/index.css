@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f3f4f6;
+    color: #111827;
+  }
+}
+
+.print-page {
+  width: 8.5in;
+  min-height: 11in;
+  padding: 0.5in;
+  margin: 0.5in auto;
+  background: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.worksheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.worksheet-table th, .worksheet-table td {
+  border: 1px solid black;
+  padding: 4px;
+  font-size: 10px;
+}
+
+.loss-cell {
+  color: #dc2626;
+  font-weight: bold;
+  background-color: #fef2f2;
+}
+
+.gain-cell {
+  color: #2563eb;
+  font-weight: bold;
+  background-color: #eff6ff;
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0;
+  }
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-page {
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 8.5in !important;
+    height: 11in !important;
+    padding: 0.5in !important;
+    page-break-after: always;
+  }
+}
