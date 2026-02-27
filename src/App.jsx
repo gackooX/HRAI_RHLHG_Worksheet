@@ -1,207 +1,217 @@
-import React, { useState } from 'react'
-import Header from './components/Header'
-import WorksheetTable from './components/WorksheetTable'
-import SummaryPage from './components/SummaryPage'
-import TitlePage from './components/TitlePage'
-import GeneralDataInput from './components/GeneralDataInput'
-import { useWorksheet } from './hooks/useWorksheet'
-import { PlusCircle } from 'lucide-react'
+import React, { useState, useMemo } from 'react';
+import WizardContainer from './components/wizard/WizardContainer';
+import ReportGenerator from './components/ReportGenerator';
+import { initialState } from './state/projectState';
+import { calculateRoomMetrics } from './utils/calculations';
 
 function App() {
-  const {
-    projectData,
-    rooms,
-    summaryMetrics,
-    floorWiseSummary,
-    updateProjectData,
-    updateRoom,
-    addRoom,
-    removeRoom,
-    locations,
-    assemblies
-  } = useWorksheet();
+  const [state, setState] = useState(initialState);
+  const [activeRoomIndex, setActiveRoomIndex] = useState(null);
+  const [view, setView] = useState('wizard'); // 'wizard' or 'report'
 
-  const [view, setView] = useState('general');
+  const handleUpdateProject = (key, value) => {
+    setState(prev => ({
+      ...prev,
+      [key]: { ...prev[key], ...value }
+    }));
+  };
+
+  const handleUpdateRoom = (roomData) => {
+    setState(prev => {
+      const newRooms = [...prev.rooms];
+      newRooms[activeRoomIndex] = roomData;
+      return { ...prev, rooms: newRooms };
+    });
+  };
+
+  const addNewRoom = () => {
+    const newRoom = {
+      name: '',
+      level: 1,
+      perimeter: 0,
+      floorArea: 0,
+      height: 8,
+      windows: {},
+      wallType: 'AGW',
+      hasDuctLoss: false,
+      occupancy: 0
+    };
+    setState(prev => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
+    setActiveRoomIndex(state.rooms.length);
+  };
+
+  // Processed rooms with calculations injected
+  const processedRooms = useMemo(() => {
+    return state.rooms.map(room => calculateRoomMetrics(room, state));
+  }, [state]);
+
+  const processedState = { ...state, rooms: processedRooms };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-gray-50 flex gap-4">
-      {/* Sidebar Converter (No-Print) */}
-      <div className="no-print w-64 bg-white p-4 border rounded shadow-sm h-fit sticky top-4 space-y-4">
-        <h3 className="font-bold border-b pb-1 text-sm uppercase">Quick Converter</h3>
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase text-gray-500">Global Display Unit</label>
-          <select
-            className="w-full border p-2 rounded font-bold bg-blue-50"
-            value={projectData.displayUnits}
-            onChange={(e) => updateProjectData('displayUnits', e.target.value)}
-          >
-            <option value="IMPERIAL">Imperial (Btuh, ft, F)</option>
-            <option value="METRIC">Metric (W, m, C)</option>
-          </select>
-        </div>
-        <div className="text-[10px] text-gray-400 italic">
-          Logic consistently processes data in Imperial. Converter affects display labels and scaling.
-        </div>
-
-        <button
-          onClick={addRoom}
-          className="w-full bg-blue-600 text-white p-2 rounded flex items-center justify-center gap-2 font-bold hover:bg-blue-700 transition"
-        >
-          <PlusCircle size={16} /> Add New Room
-        </button>
-      </div>
-
-      <div className="flex-1 max-w-5xl space-y-8">
-        <div className="no-print flex gap-4 justify-center mb-4 sticky top-4 z-50">
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+      {/* Navigation / Header */}
+      <div className="no-print mb-8 flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+        <div className="flex gap-4">
           <button
-            onClick={() => setView('title')}
-            className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'title' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
+            onClick={() => setView('wizard')}
+            className={`px-4 py-2 rounded font-bold ${view === 'wizard' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
           >
-            Title Page (1)
+            Input Wizard
           </button>
           <button
-            onClick={() => setView('general')}
-            className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'general' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
+            onClick={() => setView('report')}
+            className={`px-4 py-2 rounded font-bold ${view === 'report' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
           >
-            General Data (2)
-          </button>
-          <button
-            onClick={() => setView('summary')}
-            className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'summary' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
-          >
-            Summary Page (3)
-          </button>
-          <button
-            onClick={() => setView('worksheet')}
-            className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'worksheet' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
-          >
-            Worksheets (4+)
+            Report Generator
           </button>
         </div>
 
-        {view === 'title' && (
-          <TitlePage projectData={projectData} />
-        )}
-
-        {view === 'general' && (
-          <GeneralDataInput
-            projectData={projectData}
-            updateProjectData={updateProjectData}
-            floorWiseSummary={floorWiseSummary}
-            summaryMetrics={summaryMetrics}
-          />
-        )}
-
-        {view === 'worksheet' && (
-          <div className="bg-white shadow-lg p-8 print-page">
-            <h1 className="text-2xl font-bold text-center border-b-2 border-black pb-2 mb-4 uppercase">
-              Room Heat Loss & Heat Gain Worksheet
-            </h1>
-
-            <Header
-              projectData={projectData}
-              updateProjectData={updateProjectData}
-              designConditions={{ heating99: projectData.odtHeating, cooling25: projectData.odtCooling, coolingRange: projectData.summerRange }}
-              locations={locations}
-            />
-
-            {rooms.length === 0 ? (
-              <div className="text-center py-20 border-2 border-dashed rounded text-gray-400">
-                No rooms added yet. Click "Add New Room" in the sidebar.
-              </div>
-            ) : (
-              rooms.map((room, idx) => (
-                <WorksheetTable
-                  key={room.id}
-                  room={room}
-                  roomIndex={idx}
-                  totalRooms={rooms.length}
-                  projectData={projectData}
-                  assemblies={assemblies}
-                  updateRoom={updateRoom}
-                  removeRoom={removeRoom}
-                />
-              ))
-            )}
+        <div className="flex items-center gap-4">
+          <div className="text-sm font-bold">
+            Units:
+            <select
+              className="ml-2 border rounded p-1"
+              value={state.displayUnits}
+              onChange={(e) => setState(prev => ({ ...prev, displayUnits: e.target.value }))}
+            >
+              <option value="IMPERIAL">Imperial</option>
+              <option value="METRIC">Metric</option>
+            </select>
           </div>
-        )}
-
-        {view === 'summary' && (
-          <SummaryPage
-            projectData={projectData}
-            updateProjectData={updateProjectData}
-            rooms={rooms}
-            summaryMetrics={summaryMetrics}
-          />
-        )}
-
-        {/* Combined View for Printing */}
-        <div className="hidden print:block space-y-0">
-          <TitlePage projectData={projectData} />
-          <div className="page-break" />
-
-          <GeneralDataInput
-            projectData={projectData}
-            updateProjectData={updateProjectData}
-            floorWiseSummary={floorWiseSummary}
-            summaryMetrics={summaryMetrics}
-          />
-          <div className="page-break" />
-
-          <SummaryPage
-            projectData={projectData}
-            updateProjectData={updateProjectData}
-            rooms={rooms}
-            summaryMetrics={summaryMetrics}
-          />
-          <div className="page-break" />
-
-          {rooms.map((room, idx) => (
-            <React.Fragment key={room.id}>
-              <div className="print-page bg-white p-8">
-                <div className="flex justify-between items-start mb-2 border-b-2 border-black pb-1">
-                  <h1 className="text-xl font-bold">HRAI Residential Room Heat Loss/Gain</h1>
-                  <div className="text-sm flex gap-2">
-                    <span>Page</span>
-                    <span className="border-b border-black px-4 font-bold">{idx + 4}</span>
-                    <span>of</span>
-                    <span className="border-b border-black px-4 font-bold">{rooms.length + 3}</span>
-                  </div>
-                </div>
-
-                <Header
-                  projectData={projectData}
-                  updateProjectData={updateProjectData}
-                  designConditions={{ heating99: projectData.odtHeating, cooling25: projectData.odtCooling, coolingRange: projectData.summerRange }}
-                  locations={locations}
-                />
-
-                <WorksheetTable
-                  room={room}
-                  roomIndex={idx}
-                  totalRooms={rooms.length}
-                  projectData={projectData}
-                  assemblies={assemblies}
-                  updateRoom={updateRoom}
-                  removeRoom={removeRoom}
-                />
-              </div>
-              {idx < rooms.length - 1 && <div className="page-break" />}
-            </React.Fragment>
-          ))}
-        </div>
-
-        <div className="mt-8 no-print flex justify-end">
           <button
             onClick={() => window.print()}
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition font-bold"
+            className="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700"
           >
-            Generate Complete PDF Report
+            Print Report
           </button>
         </div>
       </div>
+
+      {view === 'wizard' && (
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Global Project Header Settings */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-black mb-4 border-b pb-2">Project Settings (The Brain)</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="col-span-2">
+                <label htmlFor="project-address" className="block text-xs font-bold uppercase">Address</label>
+                <input
+                  id="project-address"
+                  className="w-full border p-2 rounded"
+                  value={state.header.address}
+                  onChange={(e) => handleUpdateProject('header', { address: e.target.value })}
+                />
+              </div>
+              <div>
+                <label htmlFor="facing-direction" className="block text-xs font-bold uppercase">Front Facing</label>
+                <select
+                  id="facing-direction"
+                  className="w-full border p-2 rounded"
+                  value={state.header.front_facing_direction}
+                  onChange={(e) => handleUpdateProject('header', { front_facing_direction: e.target.value })}
+                >
+                  {['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'].map(d => <option key={d}>{d}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="num-storeys" className="block text-xs font-bold uppercase">Num Storeys</label>
+                <input
+                  id="num-storeys"
+                  type="number"
+                  max={3}
+                  className="w-full border p-2 rounded"
+                  value={state.foundation.numStoreys}
+                  onChange={(e) => handleUpdateProject('foundation', { numStoreys: parseInt(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label htmlFor="hl-delta-t" className="block text-xs font-bold uppercase text-red-600">HL ΔT</label>
+                <input
+                  id="hl-delta-t"
+                  type="number"
+                  className="w-full border p-2 rounded"
+                  value={state.designMultipliers.hl_delta_t}
+                  onChange={(e) => handleUpdateProject('designMultipliers', { hl_delta_t: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label htmlFor="hg-delta-t" className="block text-xs font-bold uppercase text-blue-600">HG ΔT</label>
+                <input
+                  id="hg-delta-t"
+                  type="number"
+                  className="w-full border p-2 rounded"
+                  value={state.designMultipliers.hg_delta_t}
+                  onChange={(e) => handleUpdateProject('designMultipliers', { hg_delta_t: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label htmlFor="lrairh" className="block text-xs font-bold uppercase">LRairh</label>
+                <input
+                  id="lrairh"
+                  type="number"
+                  step="0.001"
+                  className="w-full border p-2 rounded"
+                  value={state.externalValues.LRairh}
+                  onChange={(e) => handleUpdateProject('externalValues', { LRairh: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label htmlFor="lrairc" className="block text-xs font-bold uppercase">LRairc</label>
+                <input
+                  id="lrairc"
+                  type="number"
+                  step="0.001"
+                  className="w-full border p-2 rounded"
+                  value={state.externalValues.LRairc}
+                  onChange={(e) => handleUpdateProject('externalValues', { LRairc: parseFloat(e.target.value) })}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Room List / Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {processedRooms.map((r, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveRoomIndex(i)}
+                className={`p-4 rounded-lg border-2 text-left transition-all ${activeRoomIndex === i ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+              >
+                <div className="font-black">{r.name || `Room ${i+1}`}</div>
+                <div className="text-xs text-gray-500">Lvl {r.level} • {r.totalRoomLoss} Btuh / {r.totalRoomGain} Btuh</div>
+              </button>
+            ))}
+            <button
+              onClick={addNewRoom}
+              className="p-4 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 font-bold hover:border-gray-400 hover:text-gray-500"
+            >
+              + Add Room
+            </button>
+          </div>
+
+          {activeRoomIndex !== null && (
+            <WizardContainer
+              room={state.rooms[activeRoomIndex]}
+              onUpdate={handleUpdateRoom}
+              onComplete={() => setActiveRoomIndex(null)}
+              onCancel={() => setActiveRoomIndex(null)}
+            />
+          )}
+        </div>
+      )}
+
+      {view === 'report' && (
+        <div className="flex justify-center">
+          <ReportGenerator state={processedState} />
+        </div>
+      )}
+
+      {/* Print Only View */}
+      <div className="hidden print:block">
+        <ReportGenerator state={processedState} />
+      </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

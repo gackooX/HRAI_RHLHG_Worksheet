@@ -7,3 +7,17 @@
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+9:09:34 PM [vite] (client) hmr update /src/index.css, /src/App.jsx
+9:11:42 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+9:15:15 PM [vite] (client) page reload src/utils/calculations.js
+9:15:26 PM [vite] (client) hmr update /src/index.css, /src/components/ReportGenerator.jsx
+9:15:44 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+9:17:39 PM [vite] (client) hmr update /src/index.css, /src/components/wizard/WizardStep1.jsx
+9:17:47 PM [vite] (client) hmr update /src/index.css, /src/components/wizard/WizardStep2.jsx
+9:18:07 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+9:19:47 PM [vite] (client) hmr update /src/components/GeneralDataInput.jsx, /src/index.css
+9:19:47 PM [vite] (client) hmr update /src/components/Header.jsx, /src/index.css
+9:19:47 PM [vite] (client) hmr update /src/components/SummaryPage.jsx, /src/index.css
+9:19:47 PM [vite] (client) hmr update /src/components/TitlePage.jsx, /src/index.css
+9:19:47 PM [vite] (client) hmr update /src/components/WorksheetTable.jsx, /src/index.css
+9:19:47 PM [vite] (client) hmr update /src/index.css, /src/components/AssemblySelector.jsx
