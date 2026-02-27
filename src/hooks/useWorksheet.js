@@ -11,13 +11,13 @@ export const useWorksheet = () => {
     date: new Date().toISOString().split('T')[0],
 
     // Section B Design Conditions
-    odtHeating: -6, // °F
+    odtHeating: -2, // °F (Fixed from -6 based on library default for Toronto)
     idtHeating: 72, // °F
     meanSoilTemp: 50, // °F
-    odtCooling: 88, // °F
+    odtCooling: 86, // °F (Fixed from 88)
     idtCooling: 75, // °F
     northLatitude: 44,
-    summerRange: 20, // °F
+    summerRange: 18, // °F
 
     // Building Info
     foundationType: 'BASEMENT', // 'BASEMENT' or 'SLAB ON GRADE'
@@ -27,17 +27,18 @@ export const useWorksheet = () => {
     displayUnits: 'IMPERIAL', // 'IMPERIAL' or 'METRIC'
 
     hrvEffectiveness: 0.6,
+    ventilationCFM: 150,
     ventilationSystem: 'Case #3'
   });
 
   const [rooms, setRooms] = useState([
     {
       id: 1,
-      levelIndex: 1, // Logic handled level below
+      levelIndex: 1,
       name: 'REC RM',
       dimensions: { perimeter: 40, height: 8, floorArea: 500 },
       assemblies: [
-        { id: 'r1a1', type: 'wall', libraryId: 'wall-1', area: 320, orientation: 'North' },
+        { id: 'r1a1', type: 'wall', libraryId: 'wall-1', area: 0, orientation: 'North' },
         { id: 'r1a2', type: 'window', libraryId: 'window-1', area: 40, orientation: 'North' }
       ],
       otherLoads: {
@@ -78,6 +79,31 @@ export const useWorksheet = () => {
     setRooms(prev => prev.map(room => room.id === roomId ? { ...room, ...updates } : room));
   }, []);
 
+  const addRoom = useCallback(() => {
+    const newId = Date.now();
+    setRooms(prev => [
+      ...prev,
+      {
+        id: newId,
+        levelIndex: 1,
+        name: `New Room`,
+        dimensions: { perimeter: 0, height: 8, floorArea: 0 },
+        assemblies: [
+          { id: `${newId}a1`, type: 'wall', libraryId: 'wall-1', area: 0, orientation: 'North' }
+        ],
+        otherLoads: {
+          internalGain: 0,
+          ductLoss: 0,
+          ductGain: 0
+        }
+      }
+    ]);
+  }, []);
+
+  const removeRoom = useCallback((id) => {
+    setRooms(prev => prev.filter(r => r.id !== id));
+  }, []);
+
   const calculateRoomMetrics = useCallback((room) => {
     const deltaT_Loss = projectData.idtHeating - projectData.odtHeating;
     const deltaT_Gain = projectData.odtCooling - projectData.idtCooling;
@@ -95,6 +121,7 @@ export const useWorksheet = () => {
     const processedAssemblies = room.assemblies.map(asm => {
       const libAsm = library.assemblies.find(l => l.id === asm.libraryId);
       const uFactor = libAsm?.uFactor || 0;
+      const shgc = libAsm?.shgc || 0;
       const effectiveArea = asm.type === 'wall' ? netWallArea : asm.area;
 
       let loss = calculateHeatLoss(uFactor, effectiveArea, deltaT_Loss);
@@ -102,7 +129,7 @@ export const useWorksheet = () => {
 
       if (asm.type === 'window') {
         const sgf = library.solarGainFactors[asm.orientation] || 50;
-        gain = calculateWindowGain(uFactor, libAsm.shgc || 0, effectiveArea, deltaT_Gain, sgf);
+        gain = calculateWindowGain(uFactor, shgc, effectiveArea, deltaT_Gain, sgf);
       } else {
         gain = calculateHeatLoss(uFactor, effectiveArea, deltaT_Gain);
       }
@@ -110,15 +137,23 @@ export const useWorksheet = () => {
       totalConductiveLoss += loss;
       totalConductiveGain += gain;
 
-      return { ...asm, effectiveArea, loss, gain, description: libAsm?.description };
+      return {
+        ...asm,
+        effectiveArea,
+        loss,
+        gain,
+        description: libAsm?.description,
+        uFactor,
+        shgc,
+        rValue: uFactor > 0 ? (1 / uFactor).toFixed(2) : '0'
+      };
     });
 
     // Section 11: Air Leakage
     const airLeakageLoss = Math.round(totalConductiveLoss * projectData.lrAirHeating);
     const airLeakageGain = Math.round(totalConductiveGain * projectData.lrAirCooling);
 
-    // Section 14: Net Loads = 10 (Conductive) + 11 (Air Leakage) + 12 (Ventilation) + 13 (Internal)
-    // Simplified for this version
+    // Section 14: Net Loads
     const netLoadsLoss = totalConductiveLoss + airLeakageLoss;
     const netLoadsGain = totalConductiveGain + airLeakageGain + (room.otherLoads?.internalGain || 0);
 
@@ -156,8 +191,12 @@ export const useWorksheet = () => {
     const subTotalLoss = calculatedRooms.reduce((sum, r) => sum + r.totalRoomLoss, 0);
     const subTotalGain = calculatedRooms.reduce((sum, r) => sum + r.totalRoomGain, 0);
 
-    const ventilationLoss = Math.round(subTotalLoss * 0.1); // Placeholder
-    const ventilationGain = Math.round(subTotalGain * 0.1); // Placeholder
+    // HRAI F280-12 Ventilation Calculation: 1.08 * CFM * ΔT * (1 - Efficiency)
+    const deltaT_Loss = projectData.idtHeating - projectData.odtHeating;
+    const deltaT_Gain = projectData.odtCooling - projectData.idtCooling;
+
+    const ventilationLoss = Math.round(1.08 * projectData.ventilationCFM * deltaT_Loss * (1 - projectData.hrvEffectiveness));
+    const ventilationGain = Math.round(1.08 * projectData.ventilationCFM * deltaT_Gain); // Typically no HRV credit for sensible cooling in basic models
 
     return {
       subTotalLoss,
@@ -168,7 +207,7 @@ export const useWorksheet = () => {
       totalGain: subTotalGain + ventilationGain,
       buildingVolume
     };
-  }, [calculatedRooms, buildingVolume]);
+  }, [calculatedRooms, buildingVolume, projectData]);
 
   const floorWiseSummary = useMemo(() => {
     const summary = {};
@@ -188,6 +227,8 @@ export const useWorksheet = () => {
     floorWiseSummary,
     updateProjectData,
     updateRoom,
+    addRoom,
+    removeRoom,
     locations: library.designConditions.locations,
     assemblies: library.assemblies,
     getLevelName

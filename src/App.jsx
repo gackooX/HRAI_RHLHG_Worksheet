@@ -5,7 +5,7 @@ import SummaryPage from './components/SummaryPage'
 import TitlePage from './components/TitlePage'
 import GeneralDataInput from './components/GeneralDataInput'
 import { useWorksheet } from './hooks/useWorksheet'
-import * as uc from './utils/unitConverter'
+import { PlusCircle } from 'lucide-react'
 
 function App() {
   const {
@@ -15,6 +15,8 @@ function App() {
     floorWiseSummary,
     updateProjectData,
     updateRoom,
+    addRoom,
+    removeRoom,
     locations,
     assemblies
   } = useWorksheet();
@@ -38,8 +40,15 @@ function App() {
           </select>
         </div>
         <div className="text-[10px] text-gray-400 italic">
-          Logic consistently processes data in Imperial. Converter affects display labels and scaling in future updates.
+          Logic consistently processes data in Imperial. Converter affects display labels and scaling.
         </div>
+
+        <button
+          onClick={addRoom}
+          className="w-full bg-blue-600 text-white p-2 rounded flex items-center justify-center gap-2 font-bold hover:bg-blue-700 transition"
+        >
+          <PlusCircle size={16} /> Add New Room
+        </button>
       </div>
 
       <div className="flex-1 max-w-5xl space-y-8">
@@ -48,25 +57,25 @@ function App() {
             onClick={() => setView('title')}
             className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'title' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
           >
-            Title Page (Page 1)
-          </button>
-          <button
-            onClick={() => setView('summary')}
-            className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'summary' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
-          >
-            Summary Page (Page 2)
+            Title Page (1)
           </button>
           <button
             onClick={() => setView('general')}
             className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'general' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
           >
-            General Data (Global)
+            General Data (2)
+          </button>
+          <button
+            onClick={() => setView('summary')}
+            className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'summary' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
+          >
+            Summary Page (3)
           </button>
           <button
             onClick={() => setView('worksheet')}
             className={`px-4 py-2 rounded shadow-sm font-bold ${view === 'worksheet' ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700'}`}
           >
-            Room Worksheets (Page 3+)
+            Worksheets (4+)
           </button>
         </div>
 
@@ -96,15 +105,24 @@ function App() {
               locations={locations}
             />
 
-            {rooms.map(room => (
-              <WorksheetTable
-                key={room.id}
-                room={room}
-                projectData={projectData}
-                assemblies={assemblies}
-                updateRoom={updateRoom}
-              />
-            ))}
+            {rooms.length === 0 ? (
+              <div className="text-center py-20 border-2 border-dashed rounded text-gray-400">
+                No rooms added yet. Click "Add New Room" in the sidebar.
+              </div>
+            ) : (
+              rooms.map((room, idx) => (
+                <WorksheetTable
+                  key={room.id}
+                  room={room}
+                  roomIndex={idx}
+                  totalRooms={rooms.length}
+                  projectData={projectData}
+                  assemblies={assemblies}
+                  updateRoom={updateRoom}
+                  removeRoom={removeRoom}
+                />
+              ))
+            )}
           </div>
         )}
 
@@ -160,9 +178,12 @@ function App() {
 
                 <WorksheetTable
                   room={room}
+                  roomIndex={idx}
+                  totalRooms={rooms.length}
                   projectData={projectData}
                   assemblies={assemblies}
                   updateRoom={updateRoom}
+                  removeRoom={removeRoom}
                 />
               </div>
               {idx < rooms.length - 1 && <div className="page-break" />}

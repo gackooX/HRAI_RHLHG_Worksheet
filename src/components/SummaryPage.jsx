@@ -1,15 +1,22 @@
 import React from 'react';
+import { convertTemp, convertPower, convertVolume } from '../utils/unitConverter';
 
 const SummaryPage = ({ projectData, updateProjectData, rooms, summaryMetrics }) => {
+  const isMetric = projectData.displayUnits === 'METRIC';
+
+  const formatPower = (val) => isMetric ? Math.round(convertPower(val)).toLocaleString() : val.toLocaleString();
+  const formatTemp = (val) => isMetric ? `${Math.round(convertTemp(val))}°C` : `${val}°F`;
+  const formatVolume = (val) => isMetric ? convertVolume(val).toFixed(1) : val.toLocaleString();
+
   return (
     <div className="print-page bg-white p-8 border border-gray-200 shadow-md">
       <div className="flex justify-between items-start mb-2 border-b-2 border-black pb-1">
         <h1 className="text-xl font-bold">HRAI Residential Heat Loss and Heat Gain Calculations</h1>
-        <div className="text-sm flex gap-2">
+        <div className="text-sm flex gap-1">
           <span>Page</span>
-          <span className="border-b border-black px-4 font-bold">3</span>
+          <span className="border-b border-black px-4 font-bold text-center min-w-[30px]">3</span>
           <span>of</span>
-          <span className="border-b border-black px-4 font-bold">{rooms.length + 3}</span>
+          <span className="border-b border-black px-4 font-bold text-center min-w-[30px]">{rooms.length + 3}</span>
         </div>
       </div>
 
@@ -63,11 +70,11 @@ const SummaryPage = ({ projectData, updateProjectData, rooms, summaryMetrics }) 
             <div className="p-2 space-y-1">
               <div className="flex justify-between">
                 <span>Outdoor Design Temperature Heating (ODT)</span>
-                <span className="font-bold text-red-600">{projectData.odtHeating}°F</span>
+                <span className="font-bold text-red-600">{formatTemp(projectData.odtHeating)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Indoor Design Temperature (IDT)</span>
-                <span className="font-bold text-red-600">{projectData.idtHeating}°F</span>
+                <span className="font-bold text-red-600">{formatTemp(projectData.idtHeating)}</span>
               </div>
             </div>
           </div>
@@ -76,11 +83,11 @@ const SummaryPage = ({ projectData, updateProjectData, rooms, summaryMetrics }) 
             <div className="p-2 space-y-1">
               <div className="flex justify-between">
                 <span>Outdoor Design Temperature Cooling (ODT)</span>
-                <span className="font-bold text-blue-600">{projectData.odtCooling}°F</span>
+                <span className="font-bold text-blue-600">{formatTemp(projectData.odtCooling)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Indoor Design Temperature (IDT)</span>
-                <span className="font-bold text-blue-600">{projectData.idtCooling}°F</span>
+                <span className="font-bold text-blue-600">{formatTemp(projectData.idtCooling)}</span>
               </div>
             </div>
           </div>
@@ -98,17 +105,17 @@ const SummaryPage = ({ projectData, updateProjectData, rooms, summaryMetrics }) 
             <tr className="bg-gray-50 text-center uppercase">
               <th className="border border-black p-1">Level</th>
               <th className="border border-black p-1 text-left">Room Name</th>
-              <th className="border border-black p-1 text-red-600">Total Room Loss (Sec 16)</th>
-              <th className="border border-black p-1 text-blue-600">Total Room Gain (Sec 17)</th>
+              <th className="border border-black p-1 text-red-600">Total Room Loss ({isMetric ? 'W' : 'Btuh'})</th>
+              <th className="border border-black p-1 text-blue-600">Total Room Gain ({isMetric ? 'W' : 'Btuh'})</th>
             </tr>
           </thead>
           <tbody>
             {rooms.map(room => (
               <tr key={room.id} className="text-center h-6 font-bold">
-                <td className="border border-black p-1">{room.levelIndex}</td>
+                <td className="border border-black p-1">{room.level}</td>
                 <td className="border border-black p-1 text-left">{room.name}</td>
-                <td className="border border-black p-1 text-red-600">{room.totalRoomLoss.toLocaleString()}</td>
-                <td className="border border-black p-1 text-blue-600">{room.totalRoomGain.toLocaleString()}</td>
+                <td className="border border-black p-1 text-red-600">{formatPower(room.totalRoomLoss)}</td>
+                <td className="border border-black p-1 text-blue-600">{formatPower(room.totalRoomGain)}</td>
               </tr>
             ))}
             {[...Array(Math.max(0, 8 - rooms.length))].map((_, i) => (
@@ -129,17 +136,17 @@ const SummaryPage = ({ projectData, updateProjectData, rooms, summaryMetrics }) 
         <div className="border border-black">
           <div className="bg-[#d9e2d5] p-1 px-2 font-bold text-center border-b border-black text-xs uppercase">Building Heat Loss Summary</div>
           <div className="p-2 space-y-2 text-[10px]">
-            <div className="flex justify-between items-center border-b pb-1">
+            <div className="flex justify-between items-center border-b pb-1 gap-2">
               <span>18. Building Sub Total Heat Loss</span>
-              <span className="font-bold text-red-600">{summaryMetrics.subTotalLoss.toLocaleString()}</span>
+              <span className="font-bold text-red-600">{formatPower(summaryMetrics.subTotalLoss)}</span>
             </div>
-            <div className="flex justify-between items-center border-b pb-1">
+            <div className="flex justify-between items-center border-b pb-1 gap-2">
               <span>19. Forced Air Ventilation Heat Loss</span>
-              <span className="font-bold text-red-600">{summaryMetrics.ventilationLoss.toLocaleString()}</span>
+              <span className="font-bold text-red-600">{formatPower(summaryMetrics.ventilationLoss)}</span>
             </div>
-            <div className="flex justify-between items-center bg-red-50 p-1 font-bold text-sm">
+            <div className="flex justify-between items-center bg-red-50 p-1 font-bold text-sm gap-2">
               <span className="uppercase">20. Total Building Heat Loss</span>
-              <span className="text-red-700">{summaryMetrics.totalLoss.toLocaleString()} Btuh</span>
+              <span className="text-red-700">{formatPower(summaryMetrics.totalLoss)} {isMetric ? 'W' : 'Btuh'}</span>
             </div>
           </div>
         </div>
@@ -148,17 +155,17 @@ const SummaryPage = ({ projectData, updateProjectData, rooms, summaryMetrics }) 
         <div className="border border-black">
           <div className="bg-[#d9e2d5] p-1 px-2 font-bold text-center border-b border-black text-xs uppercase">Building Heat Gain Summary</div>
           <div className="p-2 space-y-2 text-[10px]">
-            <div className="flex justify-between items-center border-b pb-1">
+            <div className="flex justify-between items-center border-b pb-1 gap-2">
               <span>21. Building Sub Total Heat Gain</span>
-              <span className="font-bold text-blue-600">{summaryMetrics.subTotalGain.toLocaleString()}</span>
+              <span className="font-bold text-blue-600">{formatPower(summaryMetrics.subTotalGain)}</span>
             </div>
-            <div className="flex justify-between items-center border-b pb-1">
+            <div className="flex justify-between items-center border-b pb-1 gap-2">
               <span>22. Forced Air Ventilation Heat Gain</span>
-              <span className="font-bold text-blue-600">{summaryMetrics.ventilationGain.toLocaleString()}</span>
+              <span className="font-bold text-blue-600">{formatPower(summaryMetrics.ventilationGain)}</span>
             </div>
-            <div className="flex justify-between items-center bg-blue-50 p-1 font-bold text-sm">
+            <div className="flex justify-between items-center bg-blue-50 p-1 font-bold text-sm gap-2">
               <span className="uppercase">23. Total Building Heat Gain</span>
-              <span className="text-blue-700">{summaryMetrics.totalGain.toLocaleString()} Btuh</span>
+              <span className="text-blue-700">{formatPower(summaryMetrics.totalGain)} {isMetric ? 'W' : 'Btuh'}</span>
             </div>
           </div>
         </div>
@@ -166,7 +173,7 @@ const SummaryPage = ({ projectData, updateProjectData, rooms, summaryMetrics }) 
 
       <div className="mt-4 p-2 border border-black bg-gray-50 flex justify-between items-center font-bold text-xs uppercase">
         <span>Building Volume (Vb)</span>
-        <span className="text-sm">{summaryMetrics.buildingVolume.toLocaleString()} ft³</span>
+        <span className="text-sm">{formatVolume(summaryMetrics.buildingVolume)} {isMetric ? 'm³' : 'ft³'}</span>
       </div>
     </div>
   );
