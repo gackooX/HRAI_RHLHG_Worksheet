@@ -70,8 +70,8 @@ export const calculateRoomConductiveGain = (room, state) => {
 
   // Window Gain calculation using THGM
   const windowAssembly = library.assemblies.find(a => a.id === room.windowAssembly) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
-  const shadingType = room.shadingType || 'None';
-  const glazingType = windowAssembly.glazingType || 'Double';
+  const shadingType = room.shadingType || 'No shades';
+  const glazingType = room.glazingType || windowAssembly.glazingType || 'Double';
   const isf = getISFValue(shadingType, glazingType);
 
   let totalWindowGain = 0;

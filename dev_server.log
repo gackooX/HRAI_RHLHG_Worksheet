@@ -7,3 +7,9 @@
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+11:21:03 PM [vite] (client) hmr update /src/index.css, /src/App.jsx, /src/components/ReportGenerator.jsx, /src/components/wizard/WizardStep2.jsx
+11:21:56 PM [vite] (client) hmr update /src/index.css, /src/components/wizard/WizardStep2.jsx
+11:22:14 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+11:24:27 PM [vite] (client) hmr update /src/index.css, /src/App.jsx, /src/components/ReportGenerator.jsx, /src/components/wizard/WizardStep2.jsx
+11:24:31 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+11:28:54 PM [vite] (client) hmr update /src/index.css, /src/components/wizard/WizardStep2.jsx

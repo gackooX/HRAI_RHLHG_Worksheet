@@ -1,55 +1,48 @@
 import asyncio
 from playwright.async_api import async_playwright
 
-async def verify():
+async def run():
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        await page.set_viewport_size({"width": 1280, "height": 1400})
+        await page.goto('http://localhost:5173')
 
-        try:
-            await page.goto("http://localhost:5173", timeout=10000)
-            await page.wait_for_load_state("networkidle")
+        # Check if we are on the first page
+        print("Page title:", await page.title())
 
-            # 1. Title Page
-            await page.get_by_role("button", name="Title Page (1)").first.click()
-            await page.wait_for_selector("h1", timeout=5000)
-            await page.screenshot(path="/home/jules/verification/title_styled.png")
-            print("Captured title_styled.png")
+        # Fill out some global values
+        await page.fill('input[name="hl_odt"]', '-10')
+        await page.fill('input[name="hl_idt"]', '72')
+        await page.fill('input[name="north_latitude"]', '44')
 
-            # 2. General Data
-            await page.get_by_role("button", name="General Data (2)").first.click()
-            await page.wait_for_selector("text=GENERAL BUILDING DATA", timeout=5000)
-            await page.screenshot(path="/home/jules/verification/general_data_styled.png")
-            print("Captured general_data_styled.png")
+        # Go to Step 2
+        await page.click('button:has-text("Next: Room Details")')
+        await page.wait_for_selector('text=Room Name')
 
-            # 3. Worksheet & Level Selector
-            await page.get_by_role("button", name="Worksheets (4+)").first.click()
-            await page.wait_for_selector("text=GROSS EXPOSED WALLS", timeout=5000)
-            # Find the LVL selector and change it to Level 1 (if currently Basement)
-            await page.locator("select.text-blue-700").first.select_option("2")
-            await page.screenshot(path="/home/jules/verification/worksheet_lvl_change.png")
-            print("Captured worksheet_lvl_change.png")
+        # Add a room
+        await page.fill('input[placeholder="Room Name"]', 'Living Room')
+        await page.fill('input[placeholder="Perimeter"]', '40')
+        await page.fill('input[placeholder="Area"]', '100')
+        await page.fill('input[name="windows.S"]', '20')
 
-            # 4. Summary Page
-            await page.get_by_role("button", name="Summary Page (3)").first.click()
-            await page.wait_for_selector("text=ROOM HEAT LOSS / HEAT GAIN SUMMARY", timeout=5000)
-            await page.screenshot(path="/home/jules/verification/summary_styled.png")
-            print("Captured summary_styled.png")
+        # Select Shading and Glazing
+        await page.select_option('select:has-text("No shades")', label="Blinds/Curtains")
+        await page.select_option('select:has-text("Double")', label="Triple Low-E")
 
-            # 5. Metric Toggle
-            await page.locator("select").first.select_option("METRIC")
-            await asyncio.sleep(1) # wait for state update
-            await page.screenshot(path="/home/jules/verification/summary_metric_styled.png")
-            print("Captured summary_metric_styled.png")
+        # Go to Report
+        await page.click('button:has-text("Report Generator")')
+        await page.wait_for_selector('text=HRAI RESIDENTIAL')
 
-        except Exception as e:
-            print(f"Error during verification: {e}")
-            await page.screenshot(path="/home/jules/verification/error_retry.png")
-        finally:
-            await browser.close()
+        # Check report content
+        content = await page.content()
+        if 'Living Room' in content:
+            print("Room found in report")
+        if 'ISF: 0.53' in content:
+            print("ISF value found in report")
+        if 'SHGC: 0.35' in content:
+            print("Triple Low-E SHGC found in report")
 
-if __name__ == "__main__":
-    import os
-    os.makedirs("/home/jules/verification", exist_ok=True)
-    asyncio.run(verify())
+        await page.screenshot(path='/home/jules/verification/final_report_check.png', full_page=True)
+        await browser.close()
+
+asyncio.run(run())

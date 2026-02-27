@@ -128,16 +128,33 @@ const WizardStep2 = ({ room, updateRoom }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-3 bg-blue-50 border border-blue-100 rounded">
-          <label htmlFor="shading" className="block text-sm font-bold mb-1 uppercase text-blue-800">Interior Shading (ISF)</label>
-          <select
-            id="shading"
-            className="w-full border p-2 rounded text-sm bg-white font-bold"
-            value={room.shadingType || 'None'}
-            onChange={(e) => updateRoom({ shadingType: e.target.value })}
-          >
-            {shadingTypes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+        <div className="p-3 bg-blue-50 border border-blue-100 rounded space-y-4">
+          <div>
+            <label htmlFor="glazing" className="block text-sm font-bold mb-1 uppercase text-blue-800">Glazing System Override</label>
+            <select
+              id="glazing"
+              className="w-full border p-2 rounded text-sm bg-white font-bold"
+              value={room.glazingType || ''}
+              onChange={(e) => updateRoom({ glazingType: e.target.value })}
+            >
+              <option value="">Use Assembly Default</option>
+              <option value="Single">Single</option>
+              <option value="Double">Double</option>
+              <option value="Triple">Triple</option>
+              <option value="Heat Mirror">Heat Mirror</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="shading" className="block text-sm font-bold mb-1 uppercase text-blue-800">Interior Shading (ISF)</label>
+            <select
+              id="shading"
+              className="w-full border p-2 rounded text-sm bg-white font-bold"
+              value={room.shadingType || 'No shades'}
+              onChange={(e) => updateRoom({ shadingType: e.target.value })}
+            >
+              {shadingTypes.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
         </div>
 
         <div className="p-3 bg-gray-50 border rounded">

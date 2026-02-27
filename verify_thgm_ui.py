@@ -29,7 +29,7 @@ async def verify_thgm():
                 return int(parts[-1].strip())
 
             initial_gain = await get_gain()
-            print(f"Initial Gain (Lat 44, None): {initial_gain}")
+            print(f"Initial Gain (Lat 44, No shades): {initial_gain}")
 
             # Change Latitude to 48
             await page.get_by_label("North Latitude").fill("48")
