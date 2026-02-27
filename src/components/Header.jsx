@@ -36,7 +36,7 @@ const Header = ({ projectData, updateProjectData, designConditions, locations })
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div className="flex justify-between">
             <span>Outdoor Heating (99%):</span>
-            <span className="font-bold">{designConditions.heating99}°C</span>
+            <span className="font-bold">{designConditions.heating99}°F</span>
           </div>
           <div className="flex justify-between">
             <span>Indoor Heating:</span>
@@ -49,7 +49,7 @@ const Header = ({ projectData, updateProjectData, designConditions, locations })
           </div>
           <div className="flex justify-between">
             <span>Outdoor Cooling (2.5%):</span>
-            <span className="font-bold">{designConditions.cooling25}°C</span>
+            <span className="font-bold">{designConditions.cooling25}°F</span>
           </div>
           <div className="flex justify-between">
             <span>Indoor Cooling:</span>
@@ -62,7 +62,7 @@ const Header = ({ projectData, updateProjectData, designConditions, locations })
           </div>
           <div className="flex justify-between">
             <span>Daily Range:</span>
-            <span className="font-bold">{designConditions.coolingRange}°C</span>
+            <span className="font-bold">{designConditions.coolingRange}°F</span>
           </div>
         </div>
       </div>

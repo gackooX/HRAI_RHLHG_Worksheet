@@ -18,21 +18,62 @@
       "type": "door",
       "description": "Insulated Steel, Wood Core",
       "uFactor": 0.20
+    },
+    {
+      "id": "wall-2",
+      "type": "wall",
+      "description": "2x4 Wood Stud @ 16\" OC, R-12 Batt, 7/16\" OSB",
+      "uFactor": 0.081
+    },
+    {
+      "id": "wall-3",
+      "type": "wall",
+      "description": "ICF Wall, 2.5\" EPS, 6\" Concrete, R-22 Effective",
+      "uFactor": 0.040
+    },
+    {
+      "id": "window-2",
+      "type": "window",
+      "description": "Triple Glazed, Low-E, Krypton, Wood Frame",
+      "uFactor": 0.18,
+      "shgc": 0.32
+    },
+    {
+      "id": "window-3",
+      "type": "window",
+      "description": "Single Glazed, Wood Frame (Old)",
+      "uFactor": 1.10,
+      "shgc": 0.75
+    },
+    {
+      "id": "ceiling-1",
+      "type": "ceiling",
+      "description": "Attic, R-50 Blown Cellulose",
+      "uFactor": 0.020
     }
   ],
   "designConditions": {
     "locations": [
       {
         "city": "Toronto",
-        "heating99": -18,
-        "cooling25": 30,
-        "coolingRange": 11
+        "odtHeating": -2,
+        "odtCooling": 86,
+        "summerRange": 18,
+        "latitude": 44
       },
       {
         "city": "Ottawa",
-        "heating99": -25,
-        "cooling25": 30,
-        "coolingRange": 12
+        "odtHeating": -13,
+        "odtCooling": 86,
+        "summerRange": 22,
+        "latitude": 45
+      },
+      {
+        "city": "Vancouver",
+        "odtHeating": 14,
+        "odtCooling": 77,
+        "summerRange": 14,
+        "latitude": 49
       }
     ]
   },

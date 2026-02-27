@@ -59,8 +59,11 @@
     margin: 0 !important;
     box-shadow: none !important;
     width: 8.5in !important;
-    height: 11in !important;
+    min-height: 11in !important;
     padding: 0.5in !important;
+    overflow: visible !important;
+  }
+  .page-break {
     page-break-after: always;
   }
 }
