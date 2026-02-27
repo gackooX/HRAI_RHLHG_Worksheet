@@ -17,14 +17,18 @@ const WizardStep1 = ({ room, updateRoom }) => {
           />
         </div>
         <div>
-          <label htmlFor="level" className="block text-sm font-medium">Level (1-4)</label>
+          <label htmlFor="level" className="block text-sm font-medium">Building Level</label>
           <select
             id="level"
-            className="w-full border p-2 rounded"
-            value={room.level || 1}
-            onChange={(e) => updateRoom({ level: parseInt(e.target.value) })}
+            className="w-full border p-2 rounded bg-white"
+            value={room.level || '1'}
+            onChange={(e) => updateRoom({ level: e.target.value })}
           >
-            {[1, 2, 3, 4].map(l => <option key={l} value={l}>Level {l}</option>)}
+            <option value="Basement">Basement</option>
+            <option value="Level 1">Level 1 (Ground)</option>
+            <option value="Level 2">Level 2</option>
+            <option value="Level 3">Level 3</option>
+            <option value="Level 4">Level 4</option>
           </select>
         </div>
         <div>

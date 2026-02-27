@@ -21,3 +21,16 @@
 9:19:47 PM [vite] (client) hmr update /src/components/TitlePage.jsx, /src/index.css
 9:19:47 PM [vite] (client) hmr update /src/components/WorksheetTable.jsx, /src/index.css
 9:19:47 PM [vite] (client) hmr update /src/index.css, /src/components/AssemblySelector.jsx
+9:49:13 PM [vite] (client) hmr update /src/index.css, /src/App.jsx
+9:49:36 PM [vite] (client) hmr update /src/index.css, /src/App.jsx
+9:50:12 PM [vite] (client) page reload src/utils/calculations.js
+9:51:33 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+10:00:28 PM [vite] (client) page reload src/hooks/useWorksheet.js
+10:03:22 PM [vite] (client) hmr update /src/index.css, /src/components/wizard/WizardStep2.jsx
+10:04:45 PM [vite] (client) hmr update /src/index.css, /src/App.jsx
+10:05:23 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+10:07:13 PM [vite] (client) hmr update /src/index.css, /src/components/ReportGenerator.jsx
+10:07:40 PM [vite] (client) hmr update /src/index.css, /src/components/wizard/WizardStep1.jsx
+10:08:03 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+10:10:42 PM [vite] (client) hmr update /src/index.css, /src/components/TempInput.jsx
+10:10:50 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
