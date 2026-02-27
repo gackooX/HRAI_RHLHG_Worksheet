@@ -1,109 +1,139 @@
 import React from 'react';
 import AssemblySelector from './AssemblySelector';
 
-const WorksheetTable = ({ room, designConditions, assemblies, updateRoom }) => {
-  const handleAssemblyChange = (index, libraryId) => {
-    const newAssemblies = [...room.assemblies];
-    const selectedLibAsm = assemblies.find(a => a.id === libraryId);
-    newAssemblies[index] = {
-      ...newAssemblies[index],
-      libraryId,
-      type: selectedLibAsm?.type || 'wall'
-    };
-    updateRoom(room.id, { assemblies: newAssemblies });
-  };
-
-  const handleAreaChange = (index, area) => {
-    const newAssemblies = [...room.assemblies];
-    newAssemblies[index] = { ...newAssemblies[index], area: parseFloat(area) || 0 };
-    updateRoom(room.id, { assemblies: newAssemblies });
-  };
-
+const WorksheetTable = ({ room, projectData, assemblies, updateRoom }) => {
   const handleDimensionChange = (key, value) => {
     const newDimensions = { ...room.dimensions, [key]: parseFloat(value) || 0 };
     updateRoom(room.id, { dimensions: newDimensions });
   };
 
+  const handleOtherLoadChange = (key, value) => {
+    const newOtherLoads = { ...room.otherLoads, [key]: parseFloat(value) || 0 };
+    updateRoom(room.id, { otherLoads: newOtherLoads });
+  };
+
   return (
-    <div className="mb-8 border border-black">
-      <div className="bg-gray-800 text-white p-1 px-2 font-bold flex justify-between items-center">
-        <span>ROOM: {room.name.toUpperCase()}</span>
-        <div className="flex gap-4 text-[10px]">
-          <span>
-            Perimeter:
-            <input
-              type="number"
-              className="w-10 bg-transparent border-b border-white ml-1 text-center outline-none"
-              value={room.dimensions.perimeter}
-              onChange={(e) => handleDimensionChange('perimeter', e.target.value)}
-            />'
-          </span>
-          <span>
-            Height:
-            <input
-              type="number"
-              className="w-10 bg-transparent border-b border-white ml-1 text-center outline-none"
-              value={room.dimensions.height}
-              onChange={(e) => handleDimensionChange('height', e.target.value)}
-            />'
-          </span>
-          <span className="font-bold">Gross Wall: {room.dimensions.perimeter * room.dimensions.height} sq.ft</span>
+    <div className="border border-black mb-8 text-[10px]">
+      {/* Header Info Block */}
+      <div className="grid grid-cols-6 border-b border-black font-bold uppercase">
+        <div className="col-span-3 p-1 flex justify-between bg-gray-100">
+          <span>HL ΔT = {projectData.idtHeating - projectData.odtHeating}</span>
+          <span>HG ΔT = {projectData.odtCooling - projectData.idtCooling}</span>
+        </div>
+        <div className="p-1 border-x border-black flex flex-col items-center">
+          <span>LVL</span>
+          <span className="text-blue-700">{room.levelIndex}</span>
+        </div>
+        <div className="p-1 border-r border-black flex flex-col items-center">
+          <span>RM</span>
+          <span className="text-blue-700">{room.name}</span>
+        </div>
+        <div className="p-1 flex flex-col items-center bg-gray-50">
+          <span>PAGE</span>
+          <span>3 of 8</span>
         </div>
       </div>
 
-      <table className="w-full worksheet-table">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="w-1/12">Type</th>
-            <th className="w-4/12">Assembly Description</th>
-            <th className="w-1/12">Orientation</th>
-            <th className="w-1/12">Area (sq.ft)</th>
-            <th className="w-1/12">U-Factor</th>
-            <th className="w-2/12 text-red-700">Heat Loss (BTU/h)</th>
-            <th className="w-2/12 text-blue-700">Heat Gain (BTU/h)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {room.assemblies.map((asm, index) => {
-            const libAsm = assemblies.find(a => a.id === asm.libraryId);
-            return (
-              <tr key={asm.id}>
-                <td className="text-center capitalize">{asm.type}</td>
-                <td>
-                  <AssemblySelector
-                    currentId={asm.libraryId}
-                    assemblies={assemblies.filter(a => a.type === asm.type || !asm.type)}
-                    onSelect={(id) => handleAssemblyChange(index, id)}
-                  />
-                </td>
-                <td className="text-center">{asm.orientation || '-'}</td>
-                <td>
-                  {asm.type === 'wall' ? (
-                    <span className="block text-center bg-gray-50 italic">{asm.effectiveArea} (net)</span>
-                  ) : (
-                    <input
-                      type="number"
-                      className="w-full text-center bg-transparent outline-none border-b border-gray-200"
-                      value={asm.area}
-                      onChange={(e) => handleAreaChange(index, e.target.value)}
-                    />
-                  )}
-                </td>
-                <td className="text-center">{libAsm?.uFactor || '0.000'}</td>
-                <td className="text-right loss-cell">{asm.loss}</td>
-                <td className="text-right gain-cell">{asm.gain}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-        <tfoot>
-          <tr className="font-bold bg-gray-50">
-            <td colSpan="5" className="text-right uppercase px-2">Total Room Load:</td>
-            <td className="text-right loss-cell text-sm">{room.totalLoss}</td>
-            <td className="text-right gain-cell text-sm">{room.totalGain}</td>
-          </tr>
-        </tfoot>
-      </table>
+      <div className="grid grid-cols-10 border-b border-black font-bold text-center bg-gray-50">
+        <div className="col-span-3 border-r border-black p-1">COMPONENTS</div>
+        <div className="border-r border-black p-1">EFFECTIVE R-VALUE</div>
+        <div className="border-r border-black p-1">U-FACTOR</div>
+        <div className="border-r border-black p-1">SC / SHGC</div>
+        <div className="border-r border-black p-1">AREA (AF/AW)</div>
+        <div className="border-r border-black p-1 text-red-600">HEAT LOSS</div>
+        <div className="col-span-2 p-1 text-blue-600">HEAT GAIN</div>
+      </div>
+
+      {/* Simplified Sections for Display Fidelity */}
+      <div className="bg-gray-100 p-1 font-bold border-b border-black">1. GROSS EXPOSED WALLS</div>
+      <div className="grid grid-cols-10 border-b border-black h-6 items-center">
+        <div className="col-span-3 px-1 border-r border-black flex justify-between">
+          <span>Gross Wall Area</span>
+          <span>AGW</span>
+        </div>
+        <div className="border-r border-black h-full"></div>
+        <div className="border-r border-black h-full"></div>
+        <div className="border-r border-black h-full"></div>
+        <div className="border-r border-black h-full text-center">{room.grossWallArea}</div>
+        <div className="border-r border-black h-full"></div>
+        <div className="col-span-2 h-full"></div>
+      </div>
+
+      <div className="bg-gray-100 p-1 font-bold border-b border-black uppercase">2. Windows, Glass Doors and Skylights</div>
+      {room.assemblies.filter(a => a.type === 'window').map(asm => (
+        <div key={asm.id} className="grid grid-cols-10 border-b border-black h-6 items-center">
+          <div className="col-span-3 px-1 border-r border-black italic">{asm.description} ({asm.orientation})</div>
+          <div className="border-r border-black h-full text-center">{(1/0.28).toFixed(2)}</div>
+          <div className="border-r border-black h-full text-center">0.280</div>
+          <div className="border-r border-black h-full text-center">0.40</div>
+          <div className="border-r border-black h-full text-center">{asm.area}</div>
+          <div className="border-r border-black h-full text-center text-red-600">{asm.loss}</div>
+          <div className="col-span-2 h-full text-center text-blue-600">{asm.gain}</div>
+        </div>
+      ))}
+
+      <div className="bg-gray-100 p-1 font-bold border-b border-black uppercase">4. Net Exposed Walls</div>
+      <div className="grid grid-cols-10 border-b border-black h-6 items-center">
+        <div className="col-span-3 px-1 border-r border-black">NET WALL AREA (AGW)</div>
+        <div className="border-r border-black h-full text-center">22.2</div>
+        <div className="border-r border-black h-full text-center">0.045</div>
+        <div className="border-r border-black h-full"></div>
+        <div className="border-r border-black h-full text-center font-bold">{room.netWallArea}</div>
+        <div className="border-r border-black h-full text-center text-red-600">{room.assemblies.find(a => a.type === 'wall')?.loss || 0}</div>
+        <div className="col-span-2 h-full text-center text-blue-600">{room.assemblies.find(a => a.type === 'wall')?.gain || 0}</div>
+      </div>
+
+      {/* Room Calculation Blocks */}
+      <div className="grid grid-cols-10 border-b border-black font-bold uppercase">
+        <div className="col-span-6 border-r border-black p-1 text-right">10. Total Conductive</div>
+        <div className="border-r border-black p-1 text-center bg-gray-50">AF: {room.dimensions.floorArea}</div>
+        <div className="border-r border-black p-1 text-center text-red-600">{room.totalConductiveLoss}</div>
+        <div className="col-span-2 p-1 text-center text-blue-600">{room.totalConductiveGain}</div>
+      </div>
+
+      <div className="grid grid-cols-10 border-b border-black font-bold uppercase">
+        <div className="col-span-6 border-r border-black p-1 text-right">11. Air Leakage (Multiplier Loss: {projectData.lrAirHeating})</div>
+        <div className="border-r border-black p-1 text-center bg-gray-50">H: {room.dimensions.height}</div>
+        <div className="border-r border-black p-1 text-center text-red-600">{room.airLeakageLoss}</div>
+        <div className="col-span-2 p-1 text-center text-blue-600">{room.airLeakageGain}</div>
+      </div>
+
+      <div className="grid grid-cols-10 border-b border-black font-bold uppercase">
+        <div className="col-span-6 border-r border-black p-1 text-right">13. Internal Heat Gain</div>
+        <div className="border-r border-black h-full"></div>
+        <div className="border-r border-black h-full"></div>
+        <div className="col-span-2 p-1 text-center text-blue-600">{room.otherLoads?.internalGain}</div>
+      </div>
+
+      <div className="grid grid-cols-10 border-b border-black font-bold uppercase bg-gray-200">
+        <div className="col-span-8 border-r border-black p-1 text-right">14. Net Loads (10+11+12+13)</div>
+        <div className="border-r border-black p-1 text-center text-red-600">{room.netLoadsLoss}</div>
+        <div className="col-span-2 p-1 text-center text-blue-600">{room.netLoadsGain}</div>
+      </div>
+
+      <div className="grid grid-cols-10 font-black uppercase text-xs h-8 items-center bg-gray-300">
+        <div className="col-span-8 border-r border-black p-1 text-right">16/17. Total Room Load (Btuh)</div>
+        <div className="border-r border-black p-1 text-center text-red-800 text-sm">{room.totalRoomLoss}</div>
+        <div className="col-span-2 p-1 text-center text-blue-800 text-sm">{room.totalRoomGain}</div>
+      </div>
+
+      {/* Dynamic Controls (No-Print) */}
+      <div className="no-print p-4 bg-gray-50 space-y-2 border-t border-black">
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-[8px] font-bold">Floor Area (AF)</label>
+            <input type="number" className="w-full border p-1" value={room.dimensions.floorArea} onChange={e => handleDimensionChange('floorArea', e.target.value)}/>
+          </div>
+          <div>
+            <label className="block text-[8px] font-bold">Room Height (H)</label>
+            <input type="number" className="w-full border p-1" value={room.dimensions.height} onChange={e => handleDimensionChange('height', e.target.value)}/>
+          </div>
+          <div>
+            <label className="block text-[8px] font-bold">Internal Gain (Sec 13)</label>
+            <input type="number" className="w-full border p-1" value={room.otherLoads.internalGain} onChange={e => handleOtherLoadChange('internalGain', e.target.value)}/>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

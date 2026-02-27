@@ -19,39 +19,48 @@ export const useWorksheet = () => {
     northLatitude: 44,
     summerRange: 20, // °F
 
-    buildingVolume: 5200, // ft3
-    conditionedArea: 975, // ft2
+    // Building Info
+    foundationType: 'BASEMENT', // 'BASEMENT' or 'SLAB ON GRADE'
+    basementHeight: 8,
+    lrAirHeating: 0.873, // LRairh
+    lrAirCooling: 0.030, // LRairc
+    displayUnits: 'IMPERIAL', // 'IMPERIAL' or 'METRIC'
+
     hrvEffectiveness: 0.6,
-    ventilationSystem: 'Case #3' // Default
+    ventilationSystem: 'Case #3'
   });
 
   const [rooms, setRooms] = useState([
     {
       id: 1,
-      level: '1',
+      levelIndex: 1, // Logic handled level below
       name: 'REC RM',
-      dimensions: { perimeter: 40, height: 8 },
+      dimensions: { perimeter: 40, height: 8, floorArea: 500 },
       assemblies: [
         { id: 'r1a1', type: 'wall', libraryId: 'wall-1', area: 320, orientation: 'North' },
         { id: 'r1a2', type: 'window', libraryId: 'window-1', area: 40, orientation: 'North' }
-      ]
-    },
-    {
-      id: 2,
-      level: '2',
-      name: 'BED. RM 1',
-      dimensions: { perimeter: 30, height: 8 },
-      assemblies: [
-        { id: 'r2a1', type: 'wall', libraryId: 'wall-1', area: 240, orientation: 'East' }
-      ]
+      ],
+      otherLoads: {
+        internalGain: 1434,
+        ductLoss: 0,
+        ductGain: 0
+      }
     }
   ]);
+
+  // Derived: Dynamic Level Naming
+  const getLevelName = useCallback((index) => {
+    if (projectData.foundationType === 'BASEMENT') {
+      if (index === 1) return 'Basement';
+      return `Level ${index - 1}`;
+    } else {
+      return `Level ${index}`;
+    }
+  }, [projectData.foundationType]);
 
   const updateProjectData = useCallback((key, value) => {
     setProjectData(prev => {
       const newData = { ...prev, [key]: value };
-
-      // Relational Logic: Update design conditions if city changes
       if (key === 'city') {
         const location = library.designConditions.locations.find(l => l.city === value);
         if (location) {
@@ -61,7 +70,6 @@ export const useWorksheet = () => {
           newData.northLatitude = location.latitude;
         }
       }
-
       return newData;
     });
   }, []);
@@ -71,7 +79,6 @@ export const useWorksheet = () => {
   }, []);
 
   const calculateRoomMetrics = useCallback((room) => {
-    // Note: Using projectData values instead of designConditions from library for reactive inputs
     const deltaT_Loss = projectData.idtHeating - projectData.odtHeating;
     const deltaT_Gain = projectData.odtCooling - projectData.idtCooling;
 
@@ -82,13 +89,12 @@ export const useWorksheet = () => {
     const grossWallArea = room.dimensions.perimeter * room.dimensions.height;
     const netWallArea = Math.max(0, grossWallArea - openingsArea);
 
-    let totalLoss = 0;
-    let totalGain = 0;
+    let totalConductiveLoss = 0;
+    let totalConductiveGain = 0;
 
     const processedAssemblies = room.assemblies.map(asm => {
       const libAsm = library.assemblies.find(l => l.id === asm.libraryId);
       const uFactor = libAsm?.uFactor || 0;
-
       const effectiveArea = asm.type === 'wall' ? netWallArea : asm.area;
 
       let loss = calculateHeatLoss(uFactor, effectiveArea, deltaT_Loss);
@@ -101,34 +107,57 @@ export const useWorksheet = () => {
         gain = calculateHeatLoss(uFactor, effectiveArea, deltaT_Gain);
       }
 
-      totalLoss += loss;
-      totalGain += gain;
+      totalConductiveLoss += loss;
+      totalConductiveGain += gain;
 
       return { ...asm, effectiveArea, loss, gain, description: libAsm?.description };
     });
 
+    // Section 11: Air Leakage
+    const airLeakageLoss = Math.round(totalConductiveLoss * projectData.lrAirHeating);
+    const airLeakageGain = Math.round(totalConductiveGain * projectData.lrAirCooling);
+
+    // Section 14: Net Loads = 10 (Conductive) + 11 (Air Leakage) + 12 (Ventilation) + 13 (Internal)
+    // Simplified for this version
+    const netLoadsLoss = totalConductiveLoss + airLeakageLoss;
+    const netLoadsGain = totalConductiveGain + airLeakageGain + (room.otherLoads?.internalGain || 0);
+
+    // Section 16/17
+    const totalRoomLoss = netLoadsLoss + (room.otherLoads?.ductLoss || 0);
+    const totalRoomGain = Math.round((netLoadsGain + (room.otherLoads?.ductGain || 0)) * 1.3);
+
     return {
       ...room,
+      level: getLevelName(room.levelIndex),
       assemblies: processedAssemblies,
-      totalLoss,
-      totalGain,
+      totalConductiveLoss,
+      totalConductiveGain,
+      airLeakageLoss,
+      airLeakageGain,
+      netLoadsLoss,
+      netLoadsGain,
+      totalRoomLoss,
+      totalRoomGain,
       grossWallArea,
-      netWallArea
+      netWallArea,
+      volume: (room.dimensions.floorArea || 0) * (room.dimensions.height || 0)
     };
-  }, [projectData.odtHeating, projectData.idtHeating, projectData.odtCooling, projectData.idtCooling]);
+  }, [projectData, getLevelName]);
 
   const calculatedRooms = useMemo(() => {
     return rooms.map(calculateRoomMetrics);
   }, [rooms, calculateRoomMetrics]);
 
-  const summaryMetrics = useMemo(() => {
-    const subTotalLoss = calculatedRooms.reduce((sum, r) => sum + r.totalLoss, 0);
-    const subTotalGain = calculatedRooms.reduce((sum, r) => sum + r.totalGain, 0);
+  const buildingVolume = useMemo(() => {
+    return calculatedRooms.reduce((sum, r) => sum + r.volume, 0);
+  }, [calculatedRooms]);
 
-    // Dummy ventilation calculation for demo, based on volume and effectiveness
-    // In real HRAI, this depends on ACH or prescribed CFM
-    const ventilationLoss = Math.round(subTotalLoss * 0.3 * (1 - projectData.hrvEffectiveness));
-    const ventilationGain = Math.round(subTotalGain * 0.1 * (1 - projectData.hrvEffectiveness));
+  const summaryMetrics = useMemo(() => {
+    const subTotalLoss = calculatedRooms.reduce((sum, r) => sum + r.totalRoomLoss, 0);
+    const subTotalGain = calculatedRooms.reduce((sum, r) => sum + r.totalRoomGain, 0);
+
+    const ventilationLoss = Math.round(subTotalLoss * 0.1); // Placeholder
+    const ventilationGain = Math.round(subTotalGain * 0.1); // Placeholder
 
     return {
       subTotalLoss,
@@ -136,17 +165,31 @@ export const useWorksheet = () => {
       ventilationLoss,
       ventilationGain,
       totalLoss: subTotalLoss + ventilationLoss,
-      totalGain: subTotalGain + ventilationGain
+      totalGain: subTotalGain + ventilationGain,
+      buildingVolume
     };
-  }, [calculatedRooms, projectData.hrvEffectiveness]);
+  }, [calculatedRooms, buildingVolume]);
+
+  const floorWiseSummary = useMemo(() => {
+    const summary = {};
+    calculatedRooms.forEach(room => {
+      const lvl = room.level;
+      if (!summary[lvl]) summary[lvl] = { loss: 0, gain: 0 };
+      summary[lvl].loss += room.totalRoomLoss;
+      summary[lvl].gain += room.totalRoomGain;
+    });
+    return summary;
+  }, [calculatedRooms]);
 
   return {
     projectData,
     rooms: calculatedRooms,
     summaryMetrics,
+    floorWiseSummary,
     updateProjectData,
     updateRoom,
     locations: library.designConditions.locations,
-    assemblies: library.assemblies
+    assemblies: library.assemblies,
+    getLevelName
   };
 };
