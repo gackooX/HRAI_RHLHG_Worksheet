@@ -11,6 +11,7 @@ const WizardStep2 = ({ room, updateRoom }) => {
   const windowAssemblies = library.assemblies.filter(a => a.type === 'window');
   const ceilingAssemblies = library.assemblies.filter(a => a.type === 'ceiling');
   const doorAssemblies = library.assemblies.filter(a => a.type === 'door');
+  const shadingTypes = Object.keys(library.isfTable || {});
 
   return (
     <div className="space-y-6">
@@ -77,9 +78,12 @@ const WizardStep2 = ({ room, updateRoom }) => {
       </div>
 
       <div className="space-y-2 pt-4 border-t">
-        <h4 className="font-semibold text-sm">Windows/Glass Area (Directional)</h4>
+        <div className="flex justify-between items-end">
+          <h4 className="font-semibold text-sm">Windows/Glass Area (Directional)</h4>
+          <div className="text-[10px] font-bold text-gray-400 uppercase">Input Net Area Per Exposure</div>
+        </div>
         <div className="grid grid-cols-3 gap-2">
-          {['N_S', 'S', 'E_W', 'NE_W', 'SE_W', 'H'].map(dir => (
+          {['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].map(dir => (
             <div key={dir}>
               <label htmlFor={`win-${dir}`} className="block text-[10px] font-black uppercase text-gray-400">{dir.replace('_', '/')}</label>
               <input
@@ -123,17 +127,31 @@ const WizardStep2 = ({ room, updateRoom }) => {
         </div>
       </div>
 
-      <div className="p-3 bg-blue-50 border border-blue-100 rounded">
-        <label htmlFor="occupancy" className="block text-sm font-bold mb-1 uppercase text-blue-800">Occupancy (Gain Section 13)</label>
-        <div className="flex items-center gap-2">
-          <input
-            id="occupancy"
-            type="number"
-            className="w-20 border p-2 rounded font-bold"
-            value={room.occupancy || 0}
-            onChange={(e) => updateRoom({ occupancy: parseInt(e.target.value) || 0 })}
-          />
-          <span className="text-xs text-blue-800 font-bold">People (× 239 BTU/h)</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-3 bg-blue-50 border border-blue-100 rounded">
+          <label htmlFor="shading" className="block text-sm font-bold mb-1 uppercase text-blue-800">Interior Shading (ISF)</label>
+          <select
+            id="shading"
+            className="w-full border p-2 rounded text-sm bg-white font-bold"
+            value={room.shadingType || 'None'}
+            onChange={(e) => updateRoom({ shadingType: e.target.value })}
+          >
+            {shadingTypes.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+
+        <div className="p-3 bg-gray-50 border rounded">
+          <label htmlFor="occupancy" className="block text-sm font-bold mb-1 uppercase text-gray-600">Occupancy (Gain Section 13)</label>
+          <div className="flex items-center gap-2">
+            <input
+              id="occupancy"
+              type="number"
+              className="w-20 border p-2 rounded font-bold"
+              value={room.occupancy || 0}
+              onChange={(e) => updateRoom({ occupancy: parseInt(e.target.value) || 0 })}
+            />
+            <span className="text-xs text-gray-600 font-bold">People (× 239 BTU/h)</span>
+          </div>
         </div>
       </div>
     </div>

@@ -151,11 +151,14 @@ const ReportGenerator = ({ state }) => {
                </div>
 
                <div className="grid grid-cols-10 border-b border-gray-300 h-8 items-center bg-gray-50">
-                  <div className="col-span-4 px-2 border-r border-gray-300">Windows (Directional Sum)</div>
+                  <div className="col-span-4 px-2 border-r border-gray-300 flex justify-between">
+                    <span>Windows (HRAI THGM Calc)</span>
+                    <span className="text-[7px] text-blue-800 font-bold px-2 italic">SHGC: {library.assemblies.find(a => a.id === room.windowAssembly)?.shgc || 0.4} | ISF: {room.shadingType || 'None'}</span>
+                  </div>
                   <div className="text-center border-r border-gray-300 font-bold">{Object.values(room.windows || {}).reduce((a, b) => a + b, 0)}</div>
                   <div className="text-center border-r border-gray-300">{getU(room.windowAssembly)}</div>
-                  <div className="col-span-2 text-center border-r border-gray-300">---</div>
-                  <div className="col-span-2 text-center">---</div>
+                  <div className="col-span-2 text-center border-r border-gray-300 text-red-500 italic">Included in Wall</div>
+                  <div className="col-span-2 text-center text-blue-700 font-black">Calculated</div>
                </div>
 
                <div className="grid grid-cols-10 border-b border-black h-8 items-center">
