@@ -1,6 +1,23 @@
 import React from 'react';
 
-const WizardStep1 = ({ room, updateRoom }) => {
+const WizardStep1 = ({ room, projectState, updateRoom }) => {
+  const { foundationType, numStoreys } = projectState.foundation;
+
+  const getLevelOptions = () => {
+    const options = [];
+    if (foundationType === 'Basement') {
+      options.push('Basement');
+      if (numStoreys >= 1) options.push('Level 1 (Ground)');
+      if (numStoreys >= 2) options.push('Level 2');
+      if (numStoreys >= 3) options.push('Level 3');
+    } else {
+      if (numStoreys >= 1) options.push('Level 1 (Ground)');
+      if (numStoreys >= 2) options.push('Level 2');
+      if (numStoreys >= 3) options.push('Level 3');
+    }
+    return options;
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-bold">Step 1: Room Dimensions</h3>
@@ -21,14 +38,12 @@ const WizardStep1 = ({ room, updateRoom }) => {
           <select
             id="level"
             className="w-full border p-2 rounded bg-white"
-            value={room.level || '1'}
+            value={room.level || (foundationType === 'Basement' ? 'Basement' : 'Level 1 (Ground)')}
             onChange={(e) => updateRoom({ level: e.target.value })}
           >
-            <option value="Basement">Basement</option>
-            <option value="Level 1">Level 1 (Ground)</option>
-            <option value="Level 2">Level 2</option>
-            <option value="Level 3">Level 3</option>
-            <option value="Level 4">Level 4</option>
+            {getLevelOptions().map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
           </select>
         </div>
         <div>

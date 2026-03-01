@@ -55,6 +55,14 @@
       "uFactor": 0.020
     }
   ],
+  "foundationMultipliers": {
+    "Slab on Grade": {
+      "F-Factor": 0.52
+    },
+    "Basement": {
+      "C-Factor": 0.03
+    }
+  },
   "designConditions": {
     "locations": [
       {

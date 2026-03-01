@@ -34,8 +34,7 @@ export const calculateOccupancyGain = (count) => {
   return count * 239;
 };
 
-export const calculateRoomConductiveLoss = (room, hl_delta_t) => {
-  const wallU = getUFactor(room.wallAssembly, room.wallType === 'BGW' ? 0.03 : 0.05);
+export const calculateRoomConductiveLoss = (room, hl_delta_t, state) => {
   const windowU = getUFactor(room.windowAssembly, 0.32);
   const ceilingU = getUFactor(room.ceilingAssembly, 0.02);
   const doorU = getUFactor(room.doorAssembly, 0.20);
@@ -47,10 +46,23 @@ export const calculateRoomConductiveLoss = (room, hl_delta_t) => {
   const grossWallArea = room.perimeter * room.height;
   const netWallArea = Math.max(0, grossWallArea - windowArea - doorArea);
 
-  const loss = (netWallArea * wallU * hl_delta_t) +
-               (windowArea * windowU * hl_delta_t) +
-               (ceilingArea * ceilingU * hl_delta_t) +
-               (doorArea * doorU * hl_delta_t);
+  let loss = (windowArea * windowU * hl_delta_t) +
+             (ceilingArea * ceilingU * hl_delta_t) +
+             (doorArea * doorU * hl_delta_t);
+
+  // Foundation Logic
+  if (room.level === 'Basement' || (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade')) {
+    if (state.foundation.foundationType === 'Slab on Grade') {
+      const fFactor = library.foundationMultipliers['Slab on Grade']['F-Factor'];
+      loss += (room.perimeter * fFactor * hl_delta_t);
+    } else {
+      const cFactor = library.foundationMultipliers['Basement']['C-Factor'];
+      loss += (netWallArea * cFactor * hl_delta_t);
+    }
+  } else {
+    const wallU = getUFactor(room.wallAssembly, 0.05);
+    loss += (netWallArea * wallU * hl_delta_t);
+  }
 
   return Math.round(loss);
 };
@@ -106,7 +118,7 @@ export const calculateRoomMetrics = (room, state) => {
   const hl_delta_t = state.environmental.hl_idt - state.environmental.hl_odt;
   const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
 
-  const conductiveLoss = calculateRoomConductiveLoss(room, hl_delta_t);
+  const conductiveLoss = calculateRoomConductiveLoss(room, hl_delta_t, state);
   const conductiveGain = calculateRoomConductiveGain(room, state);
 
   const airLeakageLoss = Math.round(conductiveLoss * state.externalValues.LRairh);
