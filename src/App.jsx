@@ -27,9 +27,10 @@ function App() {
   };
 
   const addNewRoom = () => {
+    const defaultLevel = state.foundation.foundationType === 'Basement' ? 'Basement' : 'Level 1';
     const newRoom = {
       name: '',
-      level: 'Level 1',
+      level: defaultLevel,
       perimeter: 0,
       floorArea: 0,
       height: 8,
@@ -91,11 +92,10 @@ function App() {
 
       {view === 'wizard' && (
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Project Header Settings */}
+          {/* Building Info */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-black mb-4 border-b pb-2">Project Settings (The Brain)</h2>
+            <h2 className="text-xl font-black mb-4 border-b pb-2 text-gray-800">Building Info</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {/* Row 1: Basic Info */}
               <div className="col-span-2">
                 <label htmlFor="project-address" className="block text-xs font-bold uppercase text-gray-500">Address</label>
                 <input
@@ -117,47 +117,125 @@ function App() {
                 </select>
               </div>
               <div>
-                <label htmlFor="num-storeys" className="block text-xs font-bold uppercase text-gray-500">Num Storeys</label>
+                <label htmlFor="num-storeys" className="block text-xs font-bold uppercase text-gray-500">Number of Storeys (Max 3)</label>
                 <input
                   id="num-storeys"
                   type="number"
+                  min={1}
                   max={3}
                   className="w-full border p-2 rounded font-bold"
                   value={state.foundation.numStoreys}
-                  onChange={(e) => handleUpdateProject('foundation', { numStoreys: parseInt(e.target.value) })}
+                  onChange={(e) => {
+                    let val = parseInt(e.target.value) || 1;
+                    if (val > 3) val = 3;
+                    if (val < 1) val = 1;
+                    handleUpdateProject('foundation', { numStoreys: val });
+                  }}
                 />
               </div>
-
-              <div className="flex items-center gap-2 h-full pt-4">
-                <input
-                  id="has-basement"
-                  type="checkbox"
-                  className="w-4 h-4"
-                  checked={state.foundation.hasBasement}
-                  onChange={(e) => handleUpdateProject('foundation', { hasBasement: e.target.checked })}
-                />
-                <label htmlFor="has-basement" className="text-xs font-bold uppercase text-gray-500">Includes Basement</label>
+              <div>
+                <label htmlFor="foundation-type" className="block text-xs font-bold uppercase text-gray-500">Foundation Type</label>
+                <select
+                  id="foundation-type"
+                  className="w-full border p-2 rounded font-bold"
+                  value={state.foundation.foundationType}
+                  onChange={(e) => handleUpdateProject('foundation', { foundationType: e.target.value })}
+                >
+                  <option value="Basement">Basement</option>
+                  <option value="Slab on Grade">Slab on Grade</option>
+                </select>
               </div>
+              <div>
+                <label htmlFor="latitude" className="block text-[10px] font-bold uppercase text-gray-500">North Latitude</label>
+                <div className="flex items-center gap-1">
+                  <input
+                    id="latitude" type="number" className="w-full border p-2 rounded font-bold"
+                    value={state.environmental.north_latitude}
+                    onChange={(e) => handleUpdateProject('environmental', { north_latitude: parseInt(e.target.value) || 0 })}
+                  />
+                  <span className="text-sm font-bold w-8">°N</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              {/* Row 2: Design Temps */}
+          {/* Heat Loss Section */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-black mb-4 border-b pb-2 text-red-700">Heat Loss</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <TempInput
-                id="hl-odt" label="Heat Loss ODT" isMetric={isMetric}
+                id="hl-odt" label="Outdoor Design Temperature Heating (ODTH)" isMetric={isMetric}
                 value={state.environmental.hl_odt} onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
               />
               <TempInput
-                id="hl-idt" label="Heat Loss IDT" isMetric={isMetric}
+                id="hl-idt" label="Indoor Design Temperature Heating (IDTH)" isMetric={isMetric}
                 value={state.environmental.hl_idt} onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
               />
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500">Building Air Leakage Heat Loss (LRairh)</label>
+                <input
+                  type="number" step="0.001" className="w-full border p-2 rounded font-bold"
+                  value={state.externalValues.LRairh}
+                  onChange={(e) => handleUpdateProject('externalValues', { LRairh: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div className="flex items-center justify-center p-2 bg-red-50 rounded border border-red-100">
+                <span className="text-red-600 font-black text-sm">
+                  HL ΔT: {isMetric
+                    ? Math.round(convertTempDelta(state.environmental.hl_idt - state.environmental.hl_odt) * 10) / 10
+                    : state.environmental.hl_idt - state.environmental.hl_odt}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <label className="block text-xs font-black uppercase text-gray-700 mb-3">Ventilation System Case Selection</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { id: 'Case #1', label: 'Case #1: Exhaust Only System' },
+                  { id: 'Case #2', label: 'Case #2: Direct Ducted System' },
+                  { id: 'Case #3', label: 'Case #3: Central Forced Air System' }
+                ].map(c => (
+                  <label key={c.id} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded transition border border-transparent hover:border-gray-200">
+                    <input
+                      type="radio" name="system_case" className="w-4 h-4"
+                      checked={state.system.system_case === c.id}
+                      onChange={() => handleUpdateProject('system', { system_case: c.id })}
+                    />
+                    <span className="text-sm font-bold text-gray-900">{c.label}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center gap-4">
+                <div>
+                  <label htmlFor="hrv" className="block text-xs font-bold uppercase text-gray-500 mb-1">HRV Sensible Effectiveness</label>
+                  <input
+                    id="hrv" type="number" step="0.1" max="1.0" min="0"
+                    className="w-24 border p-2 rounded font-bold"
+                    value={state.system.hrv_effectiveness}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      if (val > 1.0) return;
+                      handleUpdateProject('system', { hrv_effectiveness: val || 0 });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Heat Gain Section */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-black mb-4 border-b pb-2 text-blue-700">Heat Gain</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <TempInput
-                id="hg-odt" label="Heat Gain ODT" isMetric={isMetric}
+                id="hg-odt" label="Outdoor Design Temperature Cooling" isMetric={isMetric}
                 value={state.environmental.hg_odt} onChange={(v) => handleUpdateProject('environmental', { hg_odt: v })}
               />
               <TempInput
-                id="hg-idt" label="Heat Gain IDT" isMetric={isMetric}
+                id="hg-idt" label="Indoor Design Temperature Cooling" isMetric={isMetric}
                 value={state.environmental.hg_idt} onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
               />
-
-              {/* Row 3: Soil, Range, Lat */}
               <TempInput
                 id="soil-temp" label="Mean Soil Temp" isMetric={isMetric}
                 value={state.environmental.mean_soil_temp} onChange={(v) => handleUpdateProject('environmental', { mean_soil_temp: v })}
@@ -178,89 +256,22 @@ function App() {
                 </div>
               </div>
               <div>
-                <label htmlFor="latitude" className="block text-[10px] font-bold uppercase text-gray-500">North Latitude</label>
-                <div className="flex items-center gap-1">
-                  <input
-                    id="latitude" type="number" className="w-full border p-2 rounded font-bold"
-                    value={state.environmental.north_latitude}
-                    onChange={(e) => handleUpdateProject('environmental', { north_latitude: parseInt(e.target.value) || 0 })}
-                  />
-                  <span className="text-sm font-bold w-8">°N</span>
-                </div>
+                <label className="block text-[10px] font-bold uppercase text-gray-500">Air Leakage Factor (LRairc)</label>
+                <input
+                  type="number" step="0.001" className="w-full border p-2 rounded font-bold"
+                  value={state.externalValues.LRairc}
+                  onChange={(e) => handleUpdateProject('externalValues', { LRairc: parseFloat(e.target.value) })}
+                />
               </div>
-
-              <div className="bg-gray-50 p-2 rounded border border-gray-100 flex flex-col justify-center">
-                <div className="flex justify-between text-[10px] font-black">
-                   <span className="text-red-600">
-                     HL ΔT: {isMetric
-                       ? Math.round(convertTempDelta(state.environmental.hl_idt - state.environmental.hl_odt) * 10) / 10
-                       : state.environmental.hl_idt - state.environmental.hl_odt}
-                   </span>
-                   <span className="text-blue-600">
-                     HG ΔT: {isMetric
-                       ? Math.round(convertTempDelta(state.environmental.hg_odt - state.environmental.hg_idt) * 10) / 10
-                       : state.environmental.hg_odt - state.environmental.hg_idt}
-                   </span>
-                </div>
+              <div className="flex items-center justify-center p-2 bg-blue-50 rounded border border-blue-100">
+                <span className="text-blue-600 font-black text-sm">
+                  HG ΔT: {isMetric
+                    ? Math.round(convertTempDelta(state.environmental.hg_odt - state.environmental.hg_idt) * 10) / 10
+                    : state.environmental.hg_odt - state.environmental.hg_idt}
+                </span>
               </div>
-
-              {/* Row 4: System Parameters */}
-              <div className="col-span-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <label className="block text-xs font-black uppercase text-blue-800 mb-3">Ventilation System Case Selection</label>
-                <div className="grid grid-cols-1 gap-2">
-                  {[
-                    { id: 'Case #1', label: 'Case #1: Exhaust Only System' },
-                    { id: 'Case #2', label: 'Case #2: Direct Ducted System' },
-                    { id: 'Case #3', label: 'Case #3: Central Forced Air System' }
-                  ].map(c => (
-                    <label key={c.id} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded transition border border-transparent hover:border-blue-200">
-                      <input
-                        type="radio" name="system_case" className="w-4 h-4"
-                        checked={state.system.system_case === c.id}
-                        onChange={() => handleUpdateProject('system', { system_case: c.id })}
-                      />
-                      <span className="text-sm font-bold text-blue-900">{c.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="col-span-2">
-                <label htmlFor="hrv" className="block text-xs font-bold uppercase text-gray-500 mb-2">HRV Apparent Sensible Effectiveness</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    id="hrv" type="number" step="0.1" max="1.0" min="0"
-                    className="w-24 border p-2 rounded font-bold text-lg"
-                    value={state.system.hrv_effectiveness}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      if (val > 1.0) return;
-                      handleUpdateProject('system', { hrv_effectiveness: val || 0 });
-                    }}
-                  />
-                  <div className="text-[10px] text-gray-400 italic">
-                    Determines heat recovery efficiency.<br/>Must be between 0.0 and 1.0.
-                  </div>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-gray-500">LRairh</label>
-                    <input
-                      type="number" step="0.001" className="w-full border p-2 rounded font-bold"
-                      value={state.externalValues.LRairh}
-                      onChange={(e) => handleUpdateProject('externalValues', { LRairh: parseFloat(e.target.value) })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-gray-500">LRairc</label>
-                    <input
-                      type="number" step="0.001" className="w-full border p-2 rounded font-bold"
-                      value={state.externalValues.LRairc}
-                      onChange={(e) => handleUpdateProject('externalValues', { LRairc: parseFloat(e.target.value) })}
-                    />
-                  </div>
-                </div>
+              <div className="col-span-2 p-2 bg-blue-50 rounded border border-blue-100 flex items-center">
+                 <span className="text-blue-800 text-[10px] font-bold uppercase">Note: Transparent Assembly Heat Gain Multiplier (THGM) is calculated per window orientation.</span>
               </div>
             </div>
           </div>
@@ -274,7 +285,7 @@ function App() {
                 className={`p-4 rounded-lg border-2 text-left transition-all ${activeRoomIndex === i ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
               >
                 <div className="font-black text-blue-900">{r.name || `Room ${i+1}`}</div>
-                <div className="text-[10px] text-gray-500 font-bold uppercase">Lvl {r.level} • {r.totalRoomLoss} / {r.totalRoomGain}</div>
+                <div className="text-[10px] text-gray-500 font-bold uppercase">{r.level} • {r.totalRoomLoss} / {r.totalRoomGain}</div>
               </button>
             ))}
             <button
@@ -288,6 +299,7 @@ function App() {
           {activeRoomIndex !== null && (
             <WizardContainer
               room={state.rooms[activeRoomIndex]}
+              projectState={state}
               onUpdate={handleUpdateRoom}
               onComplete={() => setActiveRoomIndex(null)}
               onCancel={() => setActiveRoomIndex(null)}

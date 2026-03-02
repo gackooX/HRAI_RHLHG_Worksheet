@@ -1,8 +1,30 @@
 import React from 'react';
 import library from '../data/library.json';
+import {
+  convertTemp,
+  convertTempDelta,
+  convertPower,
+  convertArea,
+  convertVolume,
+  convertLength
+} from '../utils/unitConverter';
 
 const ReportGenerator = ({ state }) => {
   const isMetric = state.displayUnits === 'METRIC';
+
+  const fmtT = (val) => isMetric ? Math.round(convertTemp(val, true)) : Math.round(val);
+  const fmtD = (val) => isMetric ? Math.round(convertTempDelta(val, true)) : Math.round(val);
+  const fmtP = (val) => isMetric ? Math.round(convertPower(val, true)) : Math.round(val);
+  const fmtA = (val) => isMetric ? (convertArea(val, true)).toFixed(1) : Math.round(val);
+  const fmtV = (val) => isMetric ? (convertVolume(val, true)).toFixed(1) : Math.round(val);
+  const fmtL = (val) => isMetric ? (convertLength(val, true)).toFixed(1) : Math.round(val);
+
+  const unitT = isMetric ? '°C' : '°F';
+  const unitP = isMetric ? 'W' : 'BTU/h';
+  const unitA = isMetric ? 'm²' : 'ft²';
+  const unitV = isMetric ? 'm³' : 'ft³';
+  const unitL = isMetric ? 'm' : 'ft';
+
   const getU = (id) => library.assemblies.find(a => a.id === id)?.uFactor || '---';
 
   const totalBuildingLoss = state.rooms.reduce((acc, r) => acc + (r.totalRoomLoss || 0), 0);
@@ -19,30 +41,41 @@ const ReportGenerator = ({ state }) => {
 
           <div className="grid grid-cols-2 gap-8 text-left mt-12">
             <div className="space-y-4">
-              <h3 className="font-black border-b border-black">PROJECT INFORMATION</h3>
+              <h3 className="font-black border-b border-black uppercase">Building Info</h3>
               <p><span className="font-bold">Address:</span> {state.header.address || 'N/A'}</p>
               <p><span className="font-bold">Front Orientation:</span> {state.header.front_facing_direction}</p>
               <p><span className="font-bold">Number of Storeys:</span> {state.foundation.numStoreys}</p>
+              <p><span className="font-bold">Foundation Type:</span> {state.foundation.foundationType}</p>
             </div>
             <div className="space-y-4">
-              <h3 className="font-black border-b border-black">DESIGN CONDITIONS</h3>
-              <p><span className="font-bold text-red-700">Heating ODT:</span> {state.environmental.hl_odt}°F / IDT: {state.environmental.hl_idt}°F</p>
-              <p><span className="font-bold text-blue-700">Cooling ODT:</span> {state.environmental.hg_odt}°F / IDT: {state.environmental.hg_idt}°F</p>
-              <p><span className="font-bold">Mean Soil Temp:</span> {state.environmental.mean_soil_temp}°F</p>
-              <p><span className="font-bold">Daily Range:</span> {state.environmental.daily_range}°F</p>
+              <h3 className="font-black border-b border-black uppercase">Design Conditions</h3>
+              <div className="space-y-2">
+                <p className="font-bold text-red-700 underline uppercase">Heat Loss</p>
+                <p>Outdoor Design Temperature Heating (ODTH): {fmtT(state.environmental.hl_odt)}{unitT}</p>
+                <p>Indoor Design Temperature Heating (IDTH): {fmtT(state.environmental.hl_idt)}{unitT}</p>
+
+                <p className="font-bold text-blue-700 underline mt-4 uppercase">Heat Gain</p>
+                <p>Outdoor Design Temperature Cooling: {fmtT(state.environmental.hg_odt)}{unitT}</p>
+                <p>Indoor Design Temperature Cooling: {fmtT(state.environmental.hg_idt)}{unitT}</p>
+
+                <p className="font-bold mt-4 uppercase underline">Global Parameters</p>
+                <p>Mean Soil Temp: {fmtT(state.environmental.mean_soil_temp)}{unitT}</p>
+                <p>Daily Range: {fmtD(state.environmental.daily_range)}{unitT}</p>
+                <p>North Latitude: {state.environmental.north_latitude}°N</p>
+              </div>
             </div>
           </div>
 
-          <div className="mt-20 p-8 border-4 border-black inline-block">
+          <div className="mt-16 p-8 border-4 border-black inline-block">
             <div className="text-sm font-black uppercase">Total Estimated Design Loads</div>
             <div className="grid grid-cols-2 gap-8 mt-4">
               <div>
-                <div className="text-xs font-bold text-red-700">TOTAL HEAT LOSS</div>
-                <div className="text-3xl font-black">{totalBuildingLoss} BTU/h</div>
+                <div className="text-xs font-bold text-red-700 uppercase">Total Heat Loss</div>
+                <div className="text-3xl font-black">{fmtP(totalBuildingLoss)} {unitP}</div>
               </div>
               <div>
-                <div className="text-xs font-bold text-blue-700">TOTAL HEAT GAIN</div>
-                <div className="text-3xl font-black">{totalBuildingGain} BTU/h</div>
+                <div className="text-xs font-bold text-blue-700 uppercase">Total Heat Gain</div>
+                <div className="text-3xl font-black">{fmtP(totalBuildingGain)} {unitP}</div>
               </div>
             </div>
           </div>
@@ -62,39 +95,40 @@ const ReportGenerator = ({ state }) => {
             <tr className="bg-gray-200 border-b-2 border-black uppercase text-[8px]">
               <th className="border-r border-black p-1 text-left">Room Name</th>
               <th className="border-r border-black p-1">Level</th>
-              <th className="border-r border-black p-1 text-red-700 text-right px-4">Heat Loss (BTU/h)</th>
-              <th className="p-1 text-blue-700 text-right px-4">Heat Gain (BTU/h)</th>
+              <th className="border-r border-black p-1 text-red-700 text-right px-4 uppercase">Heat Loss ({unitP})</th>
+              <th className="p-1 text-blue-700 text-right px-4 uppercase">Heat Gain ({unitP})</th>
             </tr>
           </thead>
           <tbody>
             {state.rooms.map((room, i) => (
               <tr key={i} className="border-b border-black">
                 <td className="border-r border-black p-2 font-bold">{room.name}</td>
-                <td className="border-r border-black p-2 text-center">{room.level}</td>
-                <td className="border-r border-black p-2 text-right px-4 font-black text-red-900">{room.totalRoomLoss}</td>
-                <td className="p-2 text-right px-4 font-black text-blue-900">{room.totalRoomGain}</td>
+                <td className="border-r border-black p-2 text-center uppercase">{room.level}</td>
+                <td className="border-r border-black p-2 text-right px-4 font-black text-red-900">{fmtP(room.totalRoomLoss)}</td>
+                <td className="p-2 text-right px-4 font-black text-blue-900">{fmtP(room.totalRoomGain)}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="bg-gray-100 font-black border-t-2 border-black uppercase">
               <td colSpan="2" className="border-r border-black p-2 text-right">Building Totals</td>
-              <td className="border-r border-black p-2 text-right px-4 text-red-700 text-lg">{totalBuildingLoss}</td>
-              <td className="p-2 text-right px-4 text-blue-700 text-lg">{totalBuildingGain}</td>
+              <td className="border-r border-black p-2 text-right px-4 text-red-700 text-lg">{fmtP(totalBuildingLoss)}</td>
+              <td className="p-2 text-right px-4 text-blue-700 text-lg">{fmtP(totalBuildingGain)}</td>
             </tr>
           </tfoot>
         </table>
 
         <div className="grid grid-cols-2 gap-4">
            <div className="border-2 border-black p-2">
-              <h4 className="font-black border-b border-black mb-2 uppercase">Ventilation Parameters</h4>
+              <h4 className="font-black border-b border-black mb-2 uppercase">Heat Loss Parameters</h4>
               <p>System Case: {state.system.system_case}</p>
-              <p>HRV Effectiveness: {state.system.hrv_effectiveness * 100}%</p>
+              <p>HRV Sensible Effectiveness: {state.system.hrv_effectiveness * 100}%</p>
+              <p>Building Air Leakage Heat Loss (LRairh): {state.externalValues.LRairh}</p>
            </div>
            <div className="border-2 border-black p-2">
-              <h4 className="font-black border-b border-black mb-2 uppercase">System Leakage Factors</h4>
-              <p>Heating Leakage (LRairh): {state.externalValues.LRairh}</p>
-              <p>Cooling Leakage (LRairc): {state.externalValues.LRairc}</p>
+              <h4 className="font-black border-b border-black mb-2 uppercase">Heat Gain Parameters</h4>
+              <p>Air Leakage Factor (LRairc): {state.externalValues.LRairc}</p>
+              <p className="italic text-[8px] mt-2">Note: Window gains use Transparent Assembly Heat Gain Multiplier (THGM) per orientation.</p>
            </div>
         </div>
       </div>
@@ -120,81 +154,93 @@ const ReportGenerator = ({ state }) => {
               </div>
               <div className="border-r border-black p-1 text-center">
                 <div className="font-bold uppercase text-[7px] text-gray-500">Building Level</div>
-                <div className="font-bold">Level {room.level}</div>
+                <div className="font-bold uppercase">{room.level}</div>
               </div>
               <div className="border-r border-black p-1 text-center">
                 <div className="font-bold uppercase text-[7px] text-gray-500">Volume (Vb)</div>
-                <div className="font-bold">{room.volume} ft³</div>
+                <div className="font-bold">{fmtV(room.volume)} {unitV}</div>
               </div>
               <div className="p-1 text-center">
                 <div className="font-bold uppercase text-[7px] text-gray-500">Floor Area (Af)</div>
-                <div className="font-bold">{room.floorArea} ft²</div>
+                <div className="font-bold">{fmtA(room.floorArea)} {unitA}</div>
               </div>
             </div>
 
             <div className="border-2 border-black">
                <div className="grid grid-cols-10 bg-gray-200 border-b-2 border-black font-black text-center text-[8px] uppercase h-6 items-center">
                   <div className="col-span-4 border-r border-black">Assembly / Component Description</div>
-                  <div className="border-r border-black">Area (ft²)</div>
-                  <div className="border-r border-black">U-Factor</div>
-                  <div className="col-span-2 border-r border-black text-red-700">Heating Load</div>
-                  <div className="col-span-2 text-blue-700">Cooling Load</div>
+                  <div className="border-r border-black">Area / {unitL}</div>
+                  <div className="border-r border-black">U/F/C</div>
+                  <div className="col-span-2 border-r border-black text-red-700 uppercase">Heat Loss</div>
+                  <div className="col-span-2 text-blue-700 uppercase">Heat Gain</div>
                </div>
 
                {/* Assembly Rows */}
                <div className="grid grid-cols-10 border-b border-gray-300 h-8 items-center">
-                  <div className="col-span-4 px-2 border-r border-gray-300 truncate">Wall: {library.assemblies.find(a => a.id === room.wallAssembly)?.description || 'Standard Wall'}</div>
-                  <div className="text-center border-r border-gray-300">{room.perimeter * room.height} (gross)</div>
-                  <div className="text-center border-r border-gray-300">{getU(room.wallAssembly)}</div>
-                  <div className="col-span-2 text-center border-r border-gray-300">...</div>
-                  <div className="col-span-2 text-center">...</div>
+                  <div className="col-span-4 px-2 border-r border-gray-300 truncate font-bold uppercase">
+                    {(room.level === 'Basement' || (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade'))
+                      ? `Foundation (${state.foundation.foundationType})`
+                      : `Wall: ${library.assemblies.find(a => a.id === room.wallAssembly)?.description || 'Standard Wall'}`}
+                  </div>
+                  <div className="text-center border-r border-gray-300">
+                    {(room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade')
+                      ? `${fmtL(room.perimeter)}`
+                      : `${fmtA(room.perimeter * room.height)}`}
+                  </div>
+                  <div className="text-center border-r border-gray-300">
+                    {(room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade')
+                      ? library.foundationMultipliers['Slab on Grade']['F-Factor']
+                      : (room.level === 'Basement' ? library.foundationMultipliers['Basement']['C-Factor'] : getU(room.wallAssembly))}
+                  </div>
+                  <div className="col-span-2 text-center border-r border-gray-300 font-bold text-red-600 italic">CALC</div>
+                  <div className="col-span-2 text-center font-bold text-blue-600">CALC</div>
                </div>
 
                <div className="grid grid-cols-10 border-b border-gray-300 h-8 items-center bg-gray-50">
                   <div className="col-span-4 px-2 border-r border-gray-300 flex justify-between">
                     <span>Windows (HRAI THGM Calc)</span>
-                    <span className="text-[7px] text-blue-800 font-bold px-2 italic">SHGC: {library.assemblies.find(a => a.id === room.windowAssembly)?.shgc || 0.4} | ISF: {room.shadingType || 'None'}</span>
+                    <span className="text-[7px] text-blue-800 font-bold px-2 italic uppercase">SHGC: {library.assemblies.find(a => a.id === room.windowAssembly)?.shgc || 0.4} | ISF: {room.shadingType || 'None'}</span>
                   </div>
-                  <div className="text-center border-r border-gray-300 font-bold">{Object.values(room.windows || {}).reduce((a, b) => a + b, 0)}</div>
+                  <div className="text-center border-r border-gray-300 font-bold">{fmtA(Object.values(room.windows || {}).reduce((a, b) => a + b, 0))}</div>
                   <div className="text-center border-r border-gray-300">{getU(room.windowAssembly)}</div>
-                  <div className="col-span-2 text-center border-r border-gray-300 text-red-500 italic">Included in Wall</div>
-                  <div className="col-span-2 text-center text-blue-700 font-black">Calculated</div>
+                  <div className="col-span-2 text-center border-r border-gray-300 text-red-500 italic">INCLUDED IN WALL</div>
+                  <div className="col-span-2 text-center text-blue-700 font-black uppercase">THGM CALC</div>
                </div>
 
                <div className="grid grid-cols-10 border-b border-black h-8 items-center">
-                  <div className="col-span-4 px-2 border-r border-black">Ceiling / Roof Assembly</div>
-                  <div className="text-center border-r border-black">{room.floorArea}</div>
+                  <div className="col-span-4 px-2 border-r border-black uppercase">Ceiling / Roof Assembly</div>
+                  <div className="text-center border-r border-black">{fmtA(room.floorArea)}</div>
                   <div className="text-center border-r border-black">{getU(room.ceilingAssembly)}</div>
                   <div className="col-span-2 text-center border-r border-black">---</div>
                   <div className="col-span-2 text-center">---</div>
                </div>
 
                <div className="grid grid-cols-10 border-b-2 border-black h-8 items-center bg-gray-100">
-                  <div className="col-span-8 px-2 font-black border-r border-black text-right uppercase">Conductive Loads Sub-Total</div>
-                  <div className="border-r border-black text-center text-red-600 font-black">{room.conductiveLoss}</div>
-                  <div className="text-center text-blue-600 font-black">{room.conductiveGain}</div>
+                  <div className="col-span-8 px-2 font-black border-r border-black text-right uppercase">Conductive Loads Sub-Total ({unitP})</div>
+                  <div className="border-r border-black text-center text-red-600 font-black">{fmtP(room.conductiveLoss)}</div>
+                  <div className="text-center text-blue-600 font-black">{fmtP(room.conductiveGain)}</div>
                </div>
 
                <div className="grid grid-cols-10 border-b border-black h-8 items-center italic">
-                  <div className="col-span-8 px-2 border-r border-black text-right uppercase text-[8px]">Section 12: Air Leakage Loss/Gain</div>
-                  <div className="border-r border-black text-center text-red-600">{room.airLeakageLoss}</div>
-                  <div className="text-center text-blue-600">{room.airLeakageGain}</div>
+                  <div className="col-span-8 px-2 border-r border-black text-right uppercase text-[8px]">Section 12: Building Air Leakage Load</div>
+                  <div className="border-r border-black text-center text-red-600">{fmtP(room.airLeakageLoss)}</div>
+                  <div className="text-center text-blue-600">{fmtP(room.airLeakageGain)}</div>
                </div>
 
                <div className="grid grid-cols-10 border-b-2 border-black h-8 items-center bg-blue-50">
                   <div className="col-span-8 px-2 font-bold border-r border-black text-right uppercase">Section 13: Internal Gains (Occupancy)</div>
-                  <div className="col-span-2 text-center text-blue-800 font-black">{room.occupancyGain}</div>
+                  <div className="col-span-2 text-center text-blue-800 font-black">{fmtP(room.occupancyGain)}</div>
                </div>
 
                <div className="grid grid-cols-10 h-12 items-center bg-black text-white">
-                  <div className="col-span-8 px-4 font-black border-r border-white text-right text-sm uppercase">Section 17: TOTAL ROOM DESIGN LOAD (BTU/h)</div>
-                  <div className="border-r border-white text-center text-xl font-black">{room.totalRoomLoss}</div>
-                  <div className="text-center text-xl font-black">{room.totalRoomGain}</div>
+                  <div className="col-span-8 px-4 font-black border-r border-white text-right text-sm uppercase">Section 17: TOTAL ROOM DESIGN LOAD ({unitP})</div>
+                  <div className="border-r border-white text-center text-xl font-black">{fmtP(room.totalRoomLoss)}</div>
+                  <div className="text-center text-xl font-black">{fmtP(room.totalRoomGain)}</div>
                </div>
             </div>
 
             <div className="mt-8 border border-black p-2 text-[7px] uppercase font-bold text-gray-400">
-               Design Parameters: ΔTh={room.hl_delta_t} | ΔTc={room.hg_delta_t} | LRairh={state.externalValues.LRairh} | LRairc={state.externalValues.LRairc} | HeaderHt={state.designMultipliers.header_height}ft
+               Design Parameters: ΔTh={fmtD(room.hl_delta_t)}{unitT} | ΔTc={fmtD(room.hg_delta_t)}{unitT} | LRairh={state.externalValues.LRairh} | LRairc={state.externalValues.LRairc} | HeaderHt={fmtL(state.designMultipliers.header_height)}{unitL}
             </div>
           </div>
         );

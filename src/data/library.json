@@ -55,6 +55,14 @@
       "uFactor": 0.020
     }
   ],
+  "foundationMultipliers": {
+    "Slab on Grade": {
+      "F-Factor": 0.52
+    },
+    "Basement": {
+      "C-Factor": 0.03
+    }
+  },
   "designConditions": {
     "locations": [
       {
@@ -155,8 +163,8 @@
     }
   },
   "isfTable": {
-    "None": { "Single": 1.0, "Double": 1.0, "Triple": 1.0, "Heat Mirror": 1.0 },
-    "Blinds": { "Single": 0.50, "Double": 0.55, "Triple": 0.57, "Heat Mirror": 0.60 },
+    "No shades": { "Single": 1.0, "Double": 1.0, "Triple": 1.0, "Heat Mirror": 1.0 },
+    "Blinds/Curtains": { "Single": 0.50, "Double": 0.55, "Triple": 0.57, "Heat Mirror": 0.60 },
     "Reflective": { "Single": 0.35, "Double": 0.37, "Triple": 0.40, "Heat Mirror": 0.44 }
   }
 }

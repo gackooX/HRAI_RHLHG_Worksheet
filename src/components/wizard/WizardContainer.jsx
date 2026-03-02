@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import WizardStep1 from './WizardStep1';
 import WizardStep2 from './WizardStep2';
 
-const WizardContainer = ({ room, onUpdate, onComplete, onCancel }) => {
+const WizardContainer = ({ room, projectState, onUpdate, onComplete, onCancel }) => {
   const [step, setStep] = useState(1);
 
   const handleUpdate = (updates) => {
@@ -20,7 +20,7 @@ const WizardContainer = ({ room, onUpdate, onComplete, onCancel }) => {
       </div>
 
       {step === 1 ? (
-        <WizardStep1 room={room} updateRoom={handleUpdate} />
+        <WizardStep1 room={room} projectState={projectState} updateRoom={handleUpdate} />
       ) : (
         <WizardStep2 room={room} updateRoom={handleUpdate} />
       )}
