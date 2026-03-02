@@ -14,10 +14,19 @@ function App() {
   const [view, setView] = useState('wizard'); // 'wizard' or 'report'
 
   const handleUpdateProject = (key, value) => {
-    setState(prev => ({
-      ...prev,
-      [key]: { ...prev[key], ...value }
-    }));
+    setState(prev => {
+      const newState = {
+        ...prev,
+        [key]: { ...prev[key], ...value }
+      };
+
+      // If compliance package changes, reset manualHLFactors
+      if (key === 'compliance' && value.selectedPackage && value.selectedPackage !== prev.compliance.selectedPackage) {
+        newState.compliance.manualHLFactors = {};
+      }
+
+      return newState;
+    });
   };
 
   const handleUpdateRoom = (roomData) => {
@@ -30,12 +39,13 @@ function App() {
 
   const addNewRoom = () => {
     const defaultLevel = state.foundation.foundationType === 'Basement' ? 'Basement' : 'Level 1';
+    const defaultHeight = state.foundation.floorHeights[defaultLevel] || 8;
     const newRoom = {
       name: '',
       level: defaultLevel,
       perimeter: 0,
       floorArea: 0,
-      height: 8,
+      height: defaultHeight,
       windows: {},
       wallType: 'AGW',
       hasDuctLoss: false,
@@ -191,6 +201,29 @@ function App() {
                   }}
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+               <div className="col-span-4 text-[10px] font-black uppercase text-gray-400 mb-2">Floor Heights</div>
+               {['Basement', 'Level 1', 'Level 2', 'Level 3'].map(lvl => (
+                 <div key={lvl}>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500">{lvl} Height</label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number" className="w-full border p-2 rounded font-bold"
+                        value={state.foundation.floorHeights[lvl]}
+                        onChange={(e) => {
+                          const floorHeights = { ...state.foundation.floorHeights, [lvl]: parseFloat(e.target.value) || 0 };
+                          handleUpdateProject('foundation', { floorHeights });
+                        }}
+                      />
+                      <span className="text-xs font-bold text-gray-400">ft</span>
+                    </div>
+                 </div>
+               ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div>
                 <label className="block text-xs font-bold uppercase text-gray-500">Foundation Type</label>
                 <select

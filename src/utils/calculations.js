@@ -132,51 +132,56 @@ export const calculateComponentFactors = (state) => {
   const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
   const latitude = state.environmental.hg_north_latitude;
 
-  const getHLFactor = (r) => r > 0 ? hl_delta_t / r : 0;
+  const getHLFactor = (key, r) => {
+    if (state.compliance.manualHLFactors && state.compliance.manualHLFactors[key] !== undefined) {
+      return state.compliance.manualHLFactors[key];
+    }
+    return r > 0 ? hl_delta_t / r : 0;
+  };
   const getHGFactor = (r, sc = 0) => r > 0 ? (hg_delta_t + sc) / r : 0;
 
   const factors = {
     windows: {
       rEff: state.compliance.windowREff,
-      hlFactor: getHLFactor(state.compliance.windowREff),
+      hlFactor: getHLFactor('windows', state.compliance.windowREff),
       sc: {}, // Directional
       hgFactor: {}, // Will use THGM logic or (HGDT+SC)/R
     },
     doors: {
       rEff: state.compliance.doorREff,
-      hlFactor: getHLFactor(state.compliance.doorREff),
+      hlFactor: getHLFactor('doors', state.compliance.doorREff),
       sc: 0,
       hgFactor: getHGFactor(state.compliance.doorREff, 0),
     },
     bgw: {
       rEff: pkg.basementWalls.effectiveR,
-      hlFactor: getHLFactor(pkg.basementWalls.effectiveR),
+      hlFactor: getHLFactor('bgw', pkg.basementWalls.effectiveR),
       sc: 0,
       hgFactor: getHGFactor(pkg.basementWalls.effectiveR, 0),
     },
     agw: {
       rEff: pkg.wallsAboveGrade.effectiveR,
-      hlFactor: getHLFactor(pkg.wallsAboveGrade.effectiveR),
+      hlFactor: getHLFactor('agw', pkg.wallsAboveGrade.effectiveR),
       sc: 0,
       hgFactor: getHGFactor(pkg.wallsAboveGrade.effectiveR, 0),
     },
     header: {
       rEff: pkg.wallsAboveGrade.effectiveR,
-      hlFactor: getHLFactor(pkg.wallsAboveGrade.effectiveR),
+      hlFactor: getHLFactor('header', pkg.wallsAboveGrade.effectiveR),
       sc: 0,
       hgFactor: getHGFactor(pkg.wallsAboveGrade.effectiveR, 0),
     },
     ceiling: {
       rEff: pkg.ceilingWithoutAttic.effectiveR,
-      hlFactor: getHLFactor(pkg.ceilingWithoutAttic.effectiveR),
+      hlFactor: getHLFactor('ceiling', pkg.ceilingWithoutAttic.effectiveR),
       sc: 27,
       hgFactor: getHGFactor(pkg.ceilingWithoutAttic.effectiveR, 27),
     },
     floor: {
       rEff: pkg.exposedFloor.effectiveR,
-      hlFactor: getHLFactor(pkg.exposedFloor.effectiveR),
-      sc: 0,
-      hgFactor: getHGFactor(pkg.exposedFloor.effectiveR, 0),
+      hlFactor: getHLFactor('floor', pkg.exposedFloor.effectiveR),
+      sc: -6,
+      hgFactor: getHGFactor(pkg.exposedFloor.effectiveR, -6),
     }
   };
 
