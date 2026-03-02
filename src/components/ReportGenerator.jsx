@@ -1,5 +1,6 @@
 import React from 'react';
 import library from '../data/library.json';
+import ComponentTable from './ComponentTable';
 import {
   convertTemp,
   convertTempDelta,
@@ -117,6 +118,11 @@ const ReportGenerator = ({ state }) => {
             </tr>
           </tfoot>
         </table>
+
+        <div className="mb-4">
+           <h3 className="text-xs font-black uppercase mb-2 border-b border-black">HRAI Standard Component Factors</h3>
+           <ComponentTable state={state} onUpdate={() => {}} />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
            <div className="border-2 border-black p-2">
