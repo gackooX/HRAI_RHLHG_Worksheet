@@ -11,6 +11,13 @@ export const initialState = {
   foundation: {
     foundationType: 'Basement', // 'Basement' or 'Slab on Grade'
     numStoreys: 1, // Max 3
+    floorHeights: {
+      'Basement': 8,
+      'Level 1': 8,
+      'Level 2': 8,
+      'Level 3': 8
+    },
+    basementBelowGradeHeight: 7, // ft
   },
   environmental: {
     hl_odt: -6,
@@ -28,9 +35,22 @@ export const initialState = {
     selectedPackage: 'A1',
     windowREff: 3.57,
     doorREff: 4.00,
+    manualHLFactors: {}, // { componentKey: value }
+    solarCorrection: {
+      windows: 0,
+      doors: 0,
+      bgw: 0,
+      agw: 0,
+      header: 0,
+      ceiling: 27,
+      floor: -6
+    },
   },
   designMultipliers: {
     header_height: 0.75, // ft
+    includeDuctLoss: true,
+    ductLossPercentage: 10,
+    includeExposedFloor: false,
   },
   externalValues: {
     LRairh: 0.873, // Heating leakage default
