@@ -461,6 +461,7 @@ function App() {
               onUpdate={handleUpdateRoom}
               onComplete={() => setActiveRoomIndex(null)}
               onCancel={() => setActiveRoomIndex(null)}
+              onUpdateProject={handleUpdateProject}
             />
           )}
         </div>

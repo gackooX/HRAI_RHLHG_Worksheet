@@ -11,6 +11,11 @@ const ComponentTable = ({ state, onUpdate }) => {
     onUpdate('compliance', { manualHLFactors });
   };
 
+  const handleSCChange = (key, value) => {
+    const solarCorrection = { ...state.compliance.solarCorrection, [key]: parseFloat(value) || 0 };
+    onUpdate('compliance', { solarCorrection });
+  };
+
   const renderRow = (label, structure, rEff, hlFactor, sc, hgFactor, key, isREffEditable = false, rEffKey = '') => {
     return (
       <tr className="border-b text-[10px]">
@@ -36,7 +41,14 @@ const ComponentTable = ({ state, onUpdate }) => {
               onChange={(e) => handleManualHLFactorChange(key, e.target.value)}
             />
         </td>
-        <td className="p-2 border text-center font-bold text-gray-500">{sc}</td>
+        <td className="p-2 border text-center">
+            <input
+              type="number" step="0.1"
+              className="w-12 border rounded p-1 font-bold text-center text-gray-700"
+              value={sc}
+              onChange={(e) => handleSCChange(key, e.target.value)}
+            />
+        </td>
         <td className="p-2 border text-center font-bold text-blue-600">
           {typeof hgFactor === 'number' ? hgFactor.toFixed(2) : hgFactor}
         </td>
@@ -118,8 +130,17 @@ const ComponentTable = ({ state, onUpdate }) => {
                   <span className="font-bold text-red-600 opacity-30">{factors.windows.hlFactor.toFixed(2)}</span>
                 )}
               </td>
-              <td className="p-2 border bg-gray-100 text-center font-bold text-gray-500">
-                {dir === 'H' ? '21.85' : '21.85'} {/* Default SC for windows in example */}
+              <td className="p-2 border text-center">
+                {i === 0 ? (
+                    <input
+                        type="number" step="0.1"
+                        className="w-12 border rounded p-1 font-bold text-center text-gray-700"
+                        value={factors.windows.sc}
+                        onChange={(e) => handleSCChange('windows', e.target.value)}
+                    />
+                ) : (
+                    <span className="font-bold text-gray-400 opacity-30">{factors.windows.sc}</span>
+                )}
               </td>
               <td className="p-2 border text-center font-bold text-blue-600 bg-blue-50">
                 <span className="text-[8px] mr-1 opacity-50">THGM</span> {hgf.toFixed(2)}
@@ -142,7 +163,14 @@ const ComponentTable = ({ state, onUpdate }) => {
                   onChange={(e) => handleManualHLFactorChange('bgw', e.target.value)}
                 />
             </td>
-            <td className="p-2 border text-center font-bold text-gray-500">0</td>
+            <td className="p-2 border text-center">
+                <input
+                  type="number" step="0.1"
+                  className="w-12 border rounded p-1 font-bold text-center text-gray-700"
+                  value={factors.bgw.sc}
+                  onChange={(e) => handleSCChange('bgw', e.target.value)}
+                />
+            </td>
             <td className="p-2 border text-center font-bold text-blue-600">{factors.bgw.hgFactor.toFixed(2)}</td>
           </tr>
           <tr className="border-b text-[10px]">
@@ -156,7 +184,14 @@ const ComponentTable = ({ state, onUpdate }) => {
                   onChange={(e) => handleManualHLFactorChange('agw', e.target.value)}
                 />
             </td>
-            <td className="p-2 border text-center font-bold text-gray-500">0</td>
+            <td className="p-2 border text-center">
+                <input
+                  type="number" step="0.1"
+                  className="w-12 border rounded p-1 font-bold text-center text-gray-700"
+                  value={factors.agw.sc}
+                  onChange={(e) => handleSCChange('agw', e.target.value)}
+                />
+            </td>
             <td className="p-2 border text-center font-bold text-blue-600">{factors.agw.hgFactor.toFixed(2)}</td>
           </tr>
 

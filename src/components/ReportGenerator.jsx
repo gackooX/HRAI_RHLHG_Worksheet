@@ -9,6 +9,7 @@ import {
   convertVolume,
   convertLength
 } from '../utils/unitConverter';
+import { calculateDetailedAreas, calculateComponentFactors } from '../utils/calculations';
 
 const ReportGenerator = ({ state }) => {
   const isMetric = state.displayUnits === 'METRIC';
@@ -142,6 +143,21 @@ const ReportGenerator = ({ state }) => {
 
       {/* ROOM WORKSHEETS */}
       {state.rooms.map((room, idx) => {
+        const areas = calculateDetailedAreas(room, state);
+        const factors = calculateComponentFactors(state);
+
+        const Row = ({ label, struct, area, factorHL, factorHG, loss, gain, isSubhead = false }) => (
+            <div className={`grid grid-cols-10 border-b border-gray-300 h-6 items-center ${isSubhead ? 'bg-gray-100 font-black text-[7px]' : 'text-[8px]'}`}>
+                <div className="col-span-3 px-2 border-r border-gray-300 truncate">{label}</div>
+                <div className="text-center border-r border-gray-300">{struct}</div>
+                <div className="text-right px-2 border-r border-gray-300 font-mono">{area}</div>
+                <div className="text-right px-2 border-r border-gray-300 italic opacity-50">{factorHL}</div>
+                <div className="text-right px-2 border-r border-gray-300 italic opacity-50">{factorHG}</div>
+                <div className="col-span-2 text-right px-2 border-r border-gray-300 font-bold text-red-700">{loss}</div>
+                <div className="text-right px-2 font-bold text-blue-700">{gain}</div>
+            </div>
+        );
+
         return (
           <div key={idx} className="print-page border-[2px] border-black p-4 relative bg-white overflow-hidden page-break mx-auto" style={{ width: '8.5in', height: '11in' }}>
             <div className="grid grid-cols-12 border-b-2 border-black mb-2">
@@ -154,121 +170,142 @@ const ReportGenerator = ({ state }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-0 border border-black mb-4 bg-gray-50">
-              <div className="border-r border-black p-1 text-center">
-                <div className="font-bold uppercase text-[7px] text-gray-500">Room Identification</div>
-                <div className="text-sm font-black text-blue-900 uppercase">{room.name || `Room ${idx+1}`}</div>
+            <div className="grid grid-cols-5 gap-0 border border-black mb-2 bg-gray-50 h-10 items-center text-center">
+              <div className="border-r border-black px-1">
+                <div className="font-bold uppercase text-[6px] text-gray-500">Room Name</div>
+                <div className="text-[10px] font-black uppercase">{room.name || `Room ${idx+1}`}</div>
               </div>
-              <div className="border-r border-black p-1 text-center">
-                <div className="font-bold uppercase text-[7px] text-gray-500">Building Level</div>
-                <div className="font-bold uppercase">{room.level}</div>
+              <div className="border-r border-black px-1">
+                <div className="font-bold uppercase text-[6px] text-gray-500">Level</div>
+                <div className="text-[10px] font-bold uppercase">{room.level}</div>
               </div>
-              <div className="border-r border-black p-1 text-center">
-                <div className="font-bold uppercase text-[7px] text-gray-500">Volume (Vb)</div>
-                <div className="font-bold">{fmtV(room.volume)} {unitV}</div>
+              <div className="border-r border-black px-1">
+                <div className="font-bold uppercase text-[6px] text-gray-500">P / H</div>
+                <div className="text-[10px] font-bold">{fmtL(room.perimeter)} / {fmtL(room.height)}</div>
               </div>
-              <div className="p-1 text-center">
-                <div className="font-bold uppercase text-[7px] text-gray-500">Floor Area (Af)</div>
-                <div className="font-bold">{fmtA(room.floorArea)} {unitA}</div>
+              <div className="border-r border-black px-1">
+                <div className="font-bold uppercase text-[6px] text-gray-500">Floor Area (Af)</div>
+                <div className="text-[10px] font-bold">{fmtA(room.floorArea)} {unitA}</div>
+              </div>
+              <div className="px-1">
+                <div className="font-bold uppercase text-[6px] text-gray-500">Volume (Vb)</div>
+                <div className="text-[10px] font-bold">{fmtV(room.volume)} {unitV}</div>
               </div>
             </div>
 
             <div className="border-2 border-black">
-               <div className="grid grid-cols-10 bg-gray-200 border-b-2 border-black font-black text-center text-[8px] uppercase h-6 items-center">
-                  <div className="col-span-4 border-r border-black">Assembly / Component Description</div>
-                  <div className="border-r border-black">Area / {unitL}</div>
-                  <div className="border-r border-black">U/F/C</div>
-                  <div className="col-span-2 border-r border-black text-red-700 uppercase">Heat Loss</div>
-                  <div className="col-span-2 text-blue-700 uppercase">Heat Gain</div>
+               <div className="grid grid-cols-10 bg-gray-800 text-white font-black text-center text-[7px] uppercase h-6 items-center">
+                  <div className="col-span-3 border-r border-white">Components</div>
+                  <div className="border-r border-white">Struct</div>
+                  <div className="border-r border-white">Area</div>
+                  <div className="border-r border-white">HL Fac</div>
+                  <div className="border-r border-white">HG Fac</div>
+                  <div className="col-span-2 border-r border-white">Heat Loss</div>
+                  <div>Heat Gain</div>
                </div>
 
-               {/* Assembly Rows */}
-               {/* Wall/Foundation Row */}
-               <div className="grid grid-cols-10 border-b border-gray-300 h-8 items-center">
-                  <div className="col-span-4 px-2 border-r border-gray-300 truncate font-bold uppercase">
-                    {(room.level === 'Basement' || (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade'))
-                      ? `Foundation (${state.foundation.foundationType})`
-                      : `Wall: ${library.assemblies.find(a => a.id === room.wallAssembly)?.description || 'Standard Wall'}`}
-                  </div>
-                  <div className="text-center border-r border-gray-300">
-                    {(room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade')
-                      ? `${fmtL(room.perimeter)}`
-                      : `${fmtA(room.perimeter * room.height)}`}
-                  </div>
-                  <div className="text-center border-r border-gray-300">
-                    {(room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade')
-                      ? library.foundationMultipliers['Slab on Grade']['F-Factor']
-                      : (room.level === 'Basement' ? library.foundationMultipliers['Basement']['C-Factor'] : getU(room.wallAssembly))}
-                  </div>
-                  <div className="col-span-2 text-center border-r border-gray-300 font-bold text-red-600">
-                    {fmtP(room.conductiveLoss -
-                      (room.floorArea * getU(room.ceilingAssembly) * room.hl_delta_t) -
-                      ((room.doorArea || 0) * getU(room.doorAssembly) * room.hl_delta_t) -
-                      ((Object.values(room.windows || {}).reduce((a,b)=>a+b,0)) * getU(room.windowAssembly) * room.hl_delta_t)
-                    )}
-                  </div>
-                  <div className="col-span-2 text-center font-bold text-blue-600">
-                    {fmtP(room.conductiveGain -
-                      (room.floorArea * getU(room.ceilingAssembly) * (state.environmental.hg_odt - state.environmental.hg_idt)) -
-                      ((room.doorArea || 0) * getU(room.doorAssembly) * (state.environmental.hg_odt - state.environmental.hg_idt)) -
-                      (room.totalWindowGain || 0)
-                    )}
-                  </div>
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">1. Gross Exposed Walls</div>
+               <Row label="Above Grade Wall" struct="AGW" area={fmtA(areas.grossAGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
+               {room.level === 'Basement' && (
+                 <Row label="Below Grade Wall" struct="BGW" area={fmtA(areas.grossBGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
+               )}
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">2. Windows & Glass</div>
+               {['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].map(dir => {
+                  const data = room.windows[dir];
+                  const area = typeof data === 'object' ? data.area : (data || 0);
+                  if (area <= 0) return null;
+
+                  const assemblyId = (typeof data === 'object' && data.assemblyId) ? data.assemblyId : room.windowAssembly;
+                  const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
+                  const windowAssembly = library.assemblies.find(a => a.id === assemblyId) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
+
+                  // Recalculate precise THGM for report
+                  const hg_dt = state.environmental.hg_odt - state.environmental.hg_idt;
+                  const solarVal = library.solarTable[Math.min(Math.max(Math.round(state.environmental.hg_north_latitude), 40), 48).toString()][dir]?.imp || 0;
+                  const isf = library.isfTable[shadingType]?.[windowAssembly.glazingType || 'Double'] || 1.0;
+                  const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (windowAssembly.shgc * solarVal * isf);
+
+                  return (
+                    <Row
+                       key={dir} label={`Exposure: ${dir}`} struct={dir} area={fmtA(area)}
+                       factorHL={factors.windows.hlFactor.toFixed(3)} factorHG={preciseThgm.toFixed(3)}
+                       loss={fmtP(area * factors.windows.hlFactor)}
+                       gain={fmtP(area * preciseThgm)}
+                    />
+                  );
+               })}
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">3. Exposed Doors</div>
+               <Row
+                  label="Exterior Doors" struct="D" area={fmtA(areas.doorArea)}
+                  factorHL={factors.doors.hlFactor.toFixed(3)} factorHG={factors.doors.hgFactor.toFixed(3)}
+                  loss={fmtP(areas.doorArea * factors.doors.hlFactor)} gain={fmtP(areas.doorArea * factors.doors.hgFactor)}
+               />
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">4. Net Exposed Walls</div>
+               <Row
+                  label="Net AGW" struct="AGW" area={fmtA(areas.netAGW)}
+                  factorHL={factors.agw.hlFactor.toFixed(3)} factorHG={factors.agw.hgFactor.toFixed(3)}
+                  loss={fmtP(areas.netAGW * factors.agw.hlFactor)} gain={fmtP(areas.netAGW * factors.agw.hgFactor)}
+               />
+               {room.level === 'Basement' && (
+                 <Row
+                   label="Net BGW" struct="BGW" area={fmtA(areas.netBGW)}
+                   factorHL={factors.bgw.hlFactor.toFixed(3)} factorHG={factors.bgw.hgFactor.toFixed(3)}
+                   loss={fmtP(areas.netBGW * factors.bgw.hlFactor)} gain={fmtP(areas.netBGW * factors.bgw.hgFactor)}
+                 />
+               )}
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">5. Header Areas</div>
+               <Row
+                  label="Rim Joists" struct="H" area={fmtA(areas.headerArea)}
+                  factorHL={factors.header.hlFactor.toFixed(3)} factorHG={factors.header.hgFactor.toFixed(3)}
+                  loss={fmtP(areas.headerArea * factors.header.hlFactor)} gain={fmtP(areas.headerArea * factors.header.hgFactor)}
+               />
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">6. Exposed Ceiling & 7. Floors</div>
+               <Row
+                  label="Ceiling Assembly" struct="C" area={fmtA(areas.floorArea)}
+                  factorHL={factors.ceiling.hlFactor.toFixed(3)} factorHG={factors.ceiling.hgFactor.toFixed(3)}
+                  loss={fmtP(areas.floorArea * factors.ceiling.hlFactor)} gain={fmtP(areas.floorArea * factors.ceiling.hgFactor)}
+               />
+               {state.designMultipliers.includeExposedFloor && (
+                 <Row
+                    label="Exposed Floor" struct="EXF" area={fmtA(areas.floorArea)}
+                    factorHL={factors.floor.hlFactor.toFixed(3)} factorHG={factors.floor.hgFactor.toFixed(3)}
+                    loss={fmtP(areas.floorArea * factors.floor.hlFactor)} gain={fmtP(areas.floorArea * factors.floor.hgFactor)}
+                 />
+               )}
+
+               <div className="grid grid-cols-10 border-t-2 border-black h-8 items-center bg-gray-100">
+                  <div className="col-span-7 px-2 font-black border-r border-black text-right uppercase text-[8px]">Conductive Sub-Total</div>
+                  <div className="col-span-2 border-r border-black text-right px-2 text-red-600 font-black">{fmtP(room.conductiveLoss)}</div>
+                  <div className="text-right px-2 text-blue-600 font-black">{fmtP(room.conductiveGain)}</div>
                </div>
 
-               <div className="grid grid-cols-10 border-b border-gray-300 h-8 items-center bg-gray-50">
-                  <div className="col-span-4 px-2 border-r border-gray-300 flex justify-between">
-                    <span>Windows (HRAI THGM Calc)</span>
-                    <span className="text-[7px] text-blue-800 font-bold px-2 italic uppercase">SHGC: {library.assemblies.find(a => a.id === room.windowAssembly)?.shgc || 0.4} | ISF: {room.shadingType || 'None'}</span>
-                  </div>
-                  <div className="text-center border-r border-gray-300 font-bold">{fmtA(Object.values(room.windows || {}).reduce((a, b) => a + b, 0))}</div>
-                  <div className="text-center border-r border-gray-300">{getU(room.windowAssembly)}</div>
-                  <div className="col-span-2 text-center border-r border-gray-300 text-red-700 font-bold">
-                    {fmtP(Object.values(room.windows || {}).reduce((a, b) => a + b, 0) * getU(room.windowAssembly) * room.hl_delta_t)}
-                  </div>
-                  <div className="col-span-2 text-center text-blue-700 font-black">
-                    {fmtP(room.totalWindowGain || 0)}
-                  </div>
+               <div className="grid grid-cols-10 border-t border-black h-6 items-center italic">
+                  <div className="col-span-7 px-2 border-r border-black text-right uppercase text-[7px]">Sec 12: Air Leakage</div>
+                  <div className="col-span-2 border-r border-black text-right px-2 text-red-600">{fmtP(room.airLeakageLoss)}</div>
+                  <div className="text-right px-2 text-blue-600">{fmtP(room.airLeakageGain)}</div>
                </div>
 
-               <div className="grid grid-cols-10 border-b border-black h-8 items-center">
-                  <div className="col-span-4 px-2 border-r border-black uppercase">Ceiling / Roof Assembly</div>
-                  <div className="text-center border-r border-black">{fmtA(room.floorArea)}</div>
-                  <div className="text-center border-r border-black">{getU(room.ceilingAssembly)}</div>
-                  <div className="col-span-2 text-center border-r border-black text-red-700 font-bold">
-                    {fmtP(room.floorArea * getU(room.ceilingAssembly) * room.hl_delta_t)}
-                  </div>
-                  <div className="col-span-2 text-center text-blue-700 font-bold">
-                    {fmtP(room.floorArea * getU(room.ceilingAssembly) * (state.environmental.hg_odt - state.environmental.hg_idt))}
-                  </div>
+               <div className="grid grid-cols-10 border-t border-black h-6 items-center bg-blue-50">
+                  <div className="col-span-7 px-2 font-bold border-r border-black text-right uppercase text-[7px]">Sec 13: Occupancy</div>
+                  <div className="col-span-3 text-right px-2 text-blue-800 font-black">{fmtP(room.occupancyGain)}</div>
                </div>
 
-               <div className="grid grid-cols-10 border-b-2 border-black h-8 items-center bg-gray-100">
-                  <div className="col-span-8 px-2 font-black border-r border-black text-right uppercase">Conductive Loads Sub-Total ({unitP})</div>
-                  <div className="border-r border-black text-center text-red-600 font-black">{fmtP(room.conductiveLoss)}</div>
-                  <div className="text-center text-blue-600 font-black">{fmtP(room.conductiveGain)}</div>
-               </div>
-
-               <div className="grid grid-cols-10 border-b border-black h-8 items-center italic">
-                  <div className="col-span-8 px-2 border-r border-black text-right uppercase text-[8px]">Section 12: Building Air Leakage Load</div>
-                  <div className="border-r border-black text-center text-red-600">{fmtP(room.airLeakageLoss)}</div>
-                  <div className="text-center text-blue-600">{fmtP(room.airLeakageGain)}</div>
-               </div>
-
-               <div className="grid grid-cols-10 border-b-2 border-black h-8 items-center bg-blue-50">
-                  <div className="col-span-8 px-2 font-bold border-r border-black text-right uppercase">Section 13: Internal Gains (Occupancy)</div>
-                  <div className="col-span-2 text-center text-blue-800 font-black">{fmtP(room.occupancyGain)}</div>
-               </div>
-
-               <div className="grid grid-cols-10 h-12 items-center bg-black text-white">
-                  <div className="col-span-8 px-4 font-black border-r border-white text-right text-sm uppercase">Section 17: TOTAL ROOM DESIGN LOAD ({unitP})</div>
-                  <div className="border-r border-white text-center text-xl font-black">{fmtP(room.totalRoomLoss)}</div>
-                  <div className="text-center text-xl font-black">{fmtP(room.totalRoomGain)}</div>
+               <div className="grid grid-cols-10 h-10 items-center bg-black text-white">
+                  <div className="col-span-7 px-4 font-black border-r border-white text-right text-[10px] uppercase">TOTAL ROOM DESIGN LOAD ({unitP})</div>
+                  <div className="col-span-2 border-r border-white text-right px-2 text-lg font-black">{fmtP(room.totalRoomLoss)}</div>
+                  <div className="text-right px-2 text-lg font-black">{fmtP(room.totalRoomGain)}</div>
                </div>
             </div>
 
-            <div className="mt-8 border border-black p-2 text-[7px] uppercase font-bold text-gray-400">
-               Design Parameters: ΔTh={fmtD(room.hl_delta_t)}{unitT} | ΔTc={fmtD(room.hg_delta_t)}{unitT} | LRairh={state.externalValues.LRairh} | LRairc={state.externalValues.LRairc} | HeaderHt={fmtL(state.designMultipliers.header_height)}{unitL}
+            <div className="mt-4 border border-black p-1 text-[6px] uppercase font-bold text-gray-400 grid grid-cols-3 gap-2">
+               <div>ΔTh={fmtD(room.hl_delta_t)}{unitT} | ΔTc={fmtD(room.hg_delta_t)}{unitT}</div>
+               <div>LRairh={state.externalValues.LRairh} | LRairc={state.externalValues.LRairc}</div>
+               <div className="text-right">HdrHt={fmtL(state.designMultipliers.header_height)} | BsmtBG={fmtL(state.foundation.basementBelowGradeHeight)}</div>
             </div>
           </div>
         );
