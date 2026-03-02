@@ -5,6 +5,7 @@ import TempInput from './components/TempInput';
 import { initialState } from './state/projectState';
 import { calculateRoomMetrics } from './utils/calculations';
 import { convertTemp, convertTempDelta } from './utils/unitConverter';
+import { complianceData } from './data/complianceData';
 
 function App() {
   const [state, setState] = useState(initialState);
@@ -46,6 +47,14 @@ function App() {
   const processedRooms = useMemo(() => {
     return state.rooms.map(room => calculateRoomMetrics(room, state));
   }, [state]);
+
+  const totalArea = useMemo(() => {
+    return processedRooms.reduce((sum, r) => sum + (r.floorArea || 0), 0);
+  }, [processedRooms]);
+
+  const totalVolume = useMemo(() => {
+    return processedRooms.reduce((sum, r) => sum + (r.volume || 0), 0);
+  }, [processedRooms]);
 
   const processedState = { ...state, rooms: processedRooms };
   const isMetric = state.displayUnits === 'METRIC';
@@ -92,23 +101,74 @@ function App() {
 
       {view === 'wizard' && (
         <div className="max-w-6xl mx-auto space-y-8">
+          {/* Dashboard Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-blue-900 text-white p-4 rounded-lg shadow-md flex justify-between items-center">
+              <div>
+                <div className="text-xs font-bold uppercase opacity-70">Building Conditioned Area</div>
+                <div className="text-2xl font-black">{totalArea.toLocaleString()} <span className="text-sm font-normal">{isMetric ? 'm²' : 'sq ft'}</span></div>
+              </div>
+              <div className="text-4xl opacity-20">🏠</div>
+            </div>
+            <div className="bg-indigo-900 text-white p-4 rounded-lg shadow-md flex justify-between items-center">
+              <div>
+                <div className="text-xs font-bold uppercase opacity-70">Total Building Volume (Vb)</div>
+                <div className="text-2xl font-black">{totalVolume.toLocaleString()} <span className="text-sm font-normal">{isMetric ? 'm³' : 'ft³'}</span></div>
+              </div>
+              <div className="text-4xl opacity-20">📦</div>
+            </div>
+          </div>
+
           {/* Building Info */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-black mb-4 border-b pb-2 text-gray-800">Building Info</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="col-span-2">
-                <label htmlFor="project-address" className="block text-xs font-bold uppercase text-gray-500">Address</label>
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div className="md:col-span-1">
+                <label className="block text-[10px] font-bold uppercase text-gray-500">Street #</label>
                 <input
-                  id="project-address"
                   className="w-full border p-2 rounded font-bold"
-                  value={state.header.address}
-                  onChange={(e) => handleUpdateProject('header', { address: e.target.value })}
+                  value={state.header.streetNumber}
+                  onChange={(e) => handleUpdateProject('header', { streetNumber: e.target.value })}
                 />
               </div>
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-bold uppercase text-gray-500">Street Address</label>
+                <input
+                  className="w-full border p-2 rounded font-bold"
+                  value={state.header.streetAddress}
+                  onChange={(e) => handleUpdateProject('header', { streetAddress: e.target.value })}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-[10px] font-bold uppercase text-gray-500">City</label>
+                <input
+                  className="w-full border p-2 rounded font-bold"
+                  value={state.header.city}
+                  onChange={(e) => handleUpdateProject('header', { city: e.target.value })}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-[10px] font-bold uppercase text-gray-500">Province</label>
+                <input
+                  className="w-full border p-2 rounded font-bold"
+                  value={state.header.province}
+                  onChange={(e) => handleUpdateProject('header', { province: e.target.value })}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-[10px] font-bold uppercase text-gray-500">Postal Code</label>
+                <input
+                  className="w-full border p-2 rounded font-bold"
+                  value={state.header.postalCode}
+                  onChange={(e) => handleUpdateProject('header', { postalCode: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
               <div>
-                <label htmlFor="facing-direction" className="block text-xs font-bold uppercase text-gray-500">Front Facing</label>
+                <label className="block text-xs font-bold uppercase text-gray-500">Front Facing</label>
                 <select
-                  id="facing-direction"
                   className="w-full border p-2 rounded font-bold"
                   value={state.header.front_facing_direction}
                   onChange={(e) => handleUpdateProject('header', { front_facing_direction: e.target.value })}
@@ -117,12 +177,9 @@ function App() {
                 </select>
               </div>
               <div>
-                <label htmlFor="num-storeys" className="block text-xs font-bold uppercase text-gray-500">Number of Storeys (Max 3)</label>
+                <label className="block text-xs font-bold uppercase text-gray-500">Number of Storeys (Max 3)</label>
                 <input
-                  id="num-storeys"
-                  type="number"
-                  min={1}
-                  max={3}
+                  type="number" min={1} max={3}
                   className="w-full border p-2 rounded font-bold"
                   value={state.foundation.numStoreys}
                   onChange={(e) => {
@@ -134,9 +191,8 @@ function App() {
                 />
               </div>
               <div>
-                <label htmlFor="foundation-type" className="block text-xs font-bold uppercase text-gray-500">Foundation Type</label>
+                <label className="block text-xs font-bold uppercase text-gray-500">Foundation Type</label>
                 <select
-                  id="foundation-type"
                   className="w-full border p-2 rounded font-bold"
                   value={state.foundation.foundationType}
                   onChange={(e) => handleUpdateProject('foundation', { foundationType: e.target.value })}
@@ -145,16 +201,25 @@ function App() {
                   <option value="Slab on Grade">Slab on Grade</option>
                 </select>
               </div>
-              <div>
-                <label htmlFor="latitude" className="block text-[10px] font-bold uppercase text-gray-500">North Latitude</label>
-                <div className="flex items-center gap-1">
-                  <input
-                    id="latitude" type="number" className="w-full border p-2 rounded font-bold"
-                    value={state.environmental.north_latitude}
-                    onChange={(e) => handleUpdateProject('environmental', { north_latitude: parseInt(e.target.value) || 0 })}
-                  />
-                  <span className="text-sm font-bold w-8">°N</span>
-                </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <label className="block text-xs font-black uppercase text-gray-700 mb-3">Ventilation System Case Selection</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { id: 'Case #1', label: 'Case #1: Exhaust Only System' },
+                  { id: 'Case #2', label: 'Case #2: Direct Ducted System' },
+                  { id: 'Case #3', label: 'Case #3: Central Forced Air System' }
+                ].map(c => (
+                  <label key={c.id} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded transition border border-transparent hover:border-gray-200">
+                    <input
+                      type="radio" name="system_case" className="w-4 h-4"
+                      checked={state.header.system_case === c.id}
+                      onChange={() => handleUpdateProject('header', { system_case: c.id })}
+                    />
+                    <span className="text-sm font-bold text-gray-900">{c.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
@@ -171,6 +236,10 @@ function App() {
                 id="hl-idt" label="Indoor Design Temperature Heating (IDTH)" isMetric={isMetric}
                 value={state.environmental.hl_idt} onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
               />
+              <TempInput
+                id="soil-temp" label="Mean Soil Temp" isMetric={isMetric}
+                value={state.environmental.hl_mean_soil_temp} onChange={(v) => handleUpdateProject('environmental', { hl_mean_soil_temp: v })}
+              />
               <div>
                 <label className="block text-[10px] font-bold uppercase text-gray-500">Building Air Leakage Heat Loss (LRairh)</label>
                 <input
@@ -186,40 +255,18 @@ function App() {
                     : state.environmental.hl_idt - state.environmental.hl_odt}
                 </span>
               </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <label className="block text-xs font-black uppercase text-gray-700 mb-3">Ventilation System Case Selection</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { id: 'Case #1', label: 'Case #1: Exhaust Only System' },
-                  { id: 'Case #2', label: 'Case #2: Direct Ducted System' },
-                  { id: 'Case #3', label: 'Case #3: Central Forced Air System' }
-                ].map(c => (
-                  <label key={c.id} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded transition border border-transparent hover:border-gray-200">
-                    <input
-                      type="radio" name="system_case" className="w-4 h-4"
-                      checked={state.system.system_case === c.id}
-                      onChange={() => handleUpdateProject('system', { system_case: c.id })}
-                    />
-                    <span className="text-sm font-bold text-gray-900">{c.label}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="mt-4 flex items-center gap-4">
-                <div>
-                  <label htmlFor="hrv" className="block text-xs font-bold uppercase text-gray-500 mb-1">HRV Sensible Effectiveness</label>
-                  <input
-                    id="hrv" type="number" step="0.1" max="1.0" min="0"
-                    className="w-24 border p-2 rounded font-bold"
-                    value={state.system.hrv_effectiveness}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      if (val > 1.0) return;
-                      handleUpdateProject('system', { hrv_effectiveness: val || 0 });
-                    }}
-                  />
-                </div>
+              <div>
+                <label htmlFor="hrv" className="block text-xs font-bold uppercase text-gray-500 mb-1">HRV Sensible Effectiveness</label>
+                <input
+                  id="hrv" type="number" step="0.1" max="1.0" min="0"
+                  className="w-full border p-2 rounded font-bold"
+                  value={state.system.hrv_effectiveness}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (val > 1.0) return;
+                    handleUpdateProject('system', { hrv_effectiveness: val || 0 });
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -236,23 +283,30 @@ function App() {
                 id="hg-idt" label="Indoor Design Temperature Cooling" isMetric={isMetric}
                 value={state.environmental.hg_idt} onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
               />
-              <TempInput
-                id="soil-temp" label="Mean Soil Temp" isMetric={isMetric}
-                value={state.environmental.mean_soil_temp} onChange={(v) => handleUpdateProject('environmental', { mean_soil_temp: v })}
-              />
               <div>
                 <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Daily Range (ΔT)</label>
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
                     className="w-full border p-2 rounded font-bold"
-                    value={isMetric ? Math.round(convertTempDelta(state.environmental.daily_range) * 10) / 10 : state.environmental.daily_range}
+                    value={isMetric ? Math.round(convertTempDelta(state.environmental.hg_daily_range) * 10) / 10 : state.environmental.hg_daily_range}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value);
-                      handleUpdateProject('environmental', { daily_range: isMetric ? convertTempDelta(val, false) : val });
+                      handleUpdateProject('environmental', { hg_daily_range: isMetric ? convertTempDelta(val, false) : val });
                     }}
                   />
                   <span className="text-sm font-bold w-8">{isMetric ? '°C' : '°F'}</span>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="latitude" className="block text-[10px] font-bold uppercase text-gray-500">North Latitude</label>
+                <div className="flex items-center gap-1">
+                  <input
+                    id="latitude" type="number" className="w-full border p-2 rounded font-bold"
+                    value={state.environmental.hg_north_latitude}
+                    onChange={(e) => handleUpdateProject('environmental', { hg_north_latitude: parseInt(e.target.value) || 0 })}
+                  />
+                  <span className="text-sm font-bold w-8">°N</span>
                 </div>
               </div>
               <div>
@@ -273,6 +327,72 @@ function App() {
               <div className="col-span-2 p-2 bg-blue-50 rounded border border-blue-100 flex items-center">
                  <span className="text-blue-800 text-[10px] font-bold uppercase">Note: Transparent Assembly Heat Gain Multiplier (THGM) is calculated per window orientation.</span>
               </div>
+            </div>
+          </div>
+
+          {/* Building Components (Compliance) */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-black mb-4 border-b pb-2 text-gray-800">Building Components (Compliance Package)</h2>
+            <div className="mb-6">
+              <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Select Compliance Package (Table 3.1.1.2.A)</label>
+              <select
+                className="w-full md:w-64 border p-2 rounded font-bold bg-blue-50 border-blue-200"
+                value={state.compliance.selectedPackage}
+                onChange={(e) => handleUpdateProject('compliance', { selectedPackage: e.target.value })}
+              >
+                {Object.keys(complianceData).map(pkg => <option key={pkg} value={pkg}>{pkg}</option>)}
+              </select>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="p-2 border">Component</th>
+                    <th className="p-2 border">Min. Nominal R</th>
+                    <th className="p-2 border">Max. U</th>
+                    <th className="p-2 border">Min. Effective R</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: 'Ceiling with Attic Space', key: 'ceilingWithAttic' },
+                    { label: 'Ceiling Without Attic Space', key: 'ceilingWithoutAttic' },
+                    { label: 'Exposed Floor', key: 'exposedFloor' },
+                    { label: 'Walls Above Grade', key: 'wallsAboveGrade' },
+                    { label: 'Basement Walls', key: 'basementWalls' },
+                    { label: 'Below Grade Slab', key: 'belowGradeSlab' },
+                    { label: 'Heated Slab', key: 'heatedSlab' }
+                  ].map(item => {
+                    const data = complianceData[state.compliance.selectedPackage][item.key];
+                    return (
+                      <tr key={item.key}>
+                        <td className="p-2 border font-bold">{item.label}</td>
+                        <td className="p-2 border">{data.nominalR}</td>
+                        <td className="p-2 border">{data.maxU}</td>
+                        <td className="p-2 border">{data.effectiveR}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+               <div className="p-3 bg-gray-50 rounded border">
+                  <div className="text-[10px] font-bold text-gray-500 uppercase">Windows & Doors</div>
+                  <div className="text-sm">Max U: <strong>{complianceData[state.compliance.selectedPackage].windows.maxU}</strong></div>
+                  <div className="text-sm">Energy Rating: <strong>{complianceData[state.compliance.selectedPackage].windows.energyRating}</strong></div>
+               </div>
+               <div className="p-3 bg-gray-50 rounded border">
+                  <div className="text-[10px] font-bold text-gray-500 uppercase">Space Heating Equipment</div>
+                  <div className="text-sm">Min AFUE: <strong>{complianceData[state.compliance.selectedPackage].heating.minAFUE}</strong></div>
+               </div>
+               <div className="p-3 bg-gray-50 rounded border">
+                  <div className="text-[10px] font-bold text-gray-500 uppercase">HRV / Domestic Water</div>
+                  <div className="text-sm">HRV SRE: <strong>{complianceData[state.compliance.selectedPackage].hrv.minSRE}</strong></div>
+                  <div className="text-sm">DWH EF: <strong>{complianceData[state.compliance.selectedPackage].dwh.minEF}</strong></div>
+               </div>
             </div>
           </div>
 

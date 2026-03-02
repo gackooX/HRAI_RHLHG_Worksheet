@@ -22,7 +22,7 @@ const WizardContainer = ({ room, projectState, onUpdate, onComplete, onCancel })
       {step === 1 ? (
         <WizardStep1 room={room} projectState={projectState} updateRoom={handleUpdate} />
       ) : (
-        <WizardStep2 room={room} updateRoom={handleUpdate} />
+        <WizardStep2 room={room} updateRoom={handleUpdate} projectState={projectState} />
       )}
 
       <div className="mt-8 flex justify-between border-t pt-4">

@@ -42,7 +42,7 @@ const ReportGenerator = ({ state }) => {
           <div className="grid grid-cols-2 gap-8 text-left mt-12">
             <div className="space-y-4">
               <h3 className="font-black border-b border-black uppercase">Building Info</h3>
-              <p><span className="font-bold">Address:</span> {state.header.address || 'N/A'}</p>
+              <p><span className="font-bold">Address:</span> {`${state.header.streetNumber} ${state.header.streetAddress}, ${state.header.city}, ${state.header.province}, ${state.header.postalCode}` || 'N/A'}</p>
               <p><span className="font-bold">Front Orientation:</span> {state.header.front_facing_direction}</p>
               <p><span className="font-bold">Number of Storeys:</span> {state.foundation.numStoreys}</p>
               <p><span className="font-bold">Foundation Type:</span> {state.foundation.foundationType}</p>
@@ -59,9 +59,9 @@ const ReportGenerator = ({ state }) => {
                 <p>Indoor Design Temperature Cooling: {fmtT(state.environmental.hg_idt)}{unitT}</p>
 
                 <p className="font-bold mt-4 uppercase underline">Global Parameters</p>
-                <p>Mean Soil Temp: {fmtT(state.environmental.mean_soil_temp)}{unitT}</p>
-                <p>Daily Range: {fmtD(state.environmental.daily_range)}{unitT}</p>
-                <p>North Latitude: {state.environmental.north_latitude}°N</p>
+                <p>Mean Soil Temp: {fmtT(state.environmental.hl_mean_soil_temp)}{unitT}</p>
+                <p>Daily Range: {fmtD(state.environmental.hg_daily_range)}{unitT}</p>
+                <p>North Latitude: {state.environmental.hg_north_latitude}°N</p>
               </div>
             </div>
           </div>
@@ -121,9 +121,10 @@ const ReportGenerator = ({ state }) => {
         <div className="grid grid-cols-2 gap-4">
            <div className="border-2 border-black p-2">
               <h4 className="font-black border-b border-black mb-2 uppercase">Heat Loss Parameters</h4>
-              <p>System Case: {state.system.system_case}</p>
+              <p>System Case: {state.header.system_case}</p>
               <p>HRV Sensible Effectiveness: {state.system.hrv_effectiveness * 100}%</p>
               <p>Building Air Leakage Heat Loss (LRairh): {state.externalValues.LRairh}</p>
+              <p>Compliance Package: {state.compliance.selectedPackage}</p>
            </div>
            <div className="border-2 border-black p-2">
               <h4 className="font-black border-b border-black mb-2 uppercase">Heat Gain Parameters</h4>
@@ -176,6 +177,7 @@ const ReportGenerator = ({ state }) => {
                </div>
 
                {/* Assembly Rows */}
+               {/* Wall/Foundation Row */}
                <div className="grid grid-cols-10 border-b border-gray-300 h-8 items-center">
                   <div className="col-span-4 px-2 border-r border-gray-300 truncate font-bold uppercase">
                     {(room.level === 'Basement' || (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade'))
@@ -192,8 +194,20 @@ const ReportGenerator = ({ state }) => {
                       ? library.foundationMultipliers['Slab on Grade']['F-Factor']
                       : (room.level === 'Basement' ? library.foundationMultipliers['Basement']['C-Factor'] : getU(room.wallAssembly))}
                   </div>
-                  <div className="col-span-2 text-center border-r border-gray-300 font-bold text-red-600 italic">CALC</div>
-                  <div className="col-span-2 text-center font-bold text-blue-600">CALC</div>
+                  <div className="col-span-2 text-center border-r border-gray-300 font-bold text-red-600">
+                    {fmtP(room.conductiveLoss -
+                      (room.floorArea * getU(room.ceilingAssembly) * room.hl_delta_t) -
+                      ((room.doorArea || 0) * getU(room.doorAssembly) * room.hl_delta_t) -
+                      ((Object.values(room.windows || {}).reduce((a,b)=>a+b,0)) * getU(room.windowAssembly) * room.hl_delta_t)
+                    )}
+                  </div>
+                  <div className="col-span-2 text-center font-bold text-blue-600">
+                    {fmtP(room.conductiveGain -
+                      (room.floorArea * getU(room.ceilingAssembly) * (state.environmental.hg_odt - state.environmental.hg_idt)) -
+                      ((room.doorArea || 0) * getU(room.doorAssembly) * (state.environmental.hg_odt - state.environmental.hg_idt)) -
+                      (room.totalWindowGain || 0)
+                    )}
+                  </div>
                </div>
 
                <div className="grid grid-cols-10 border-b border-gray-300 h-8 items-center bg-gray-50">
@@ -203,16 +217,24 @@ const ReportGenerator = ({ state }) => {
                   </div>
                   <div className="text-center border-r border-gray-300 font-bold">{fmtA(Object.values(room.windows || {}).reduce((a, b) => a + b, 0))}</div>
                   <div className="text-center border-r border-gray-300">{getU(room.windowAssembly)}</div>
-                  <div className="col-span-2 text-center border-r border-gray-300 text-red-500 italic">INCLUDED IN WALL</div>
-                  <div className="col-span-2 text-center text-blue-700 font-black uppercase">THGM CALC</div>
+                  <div className="col-span-2 text-center border-r border-gray-300 text-red-700 font-bold">
+                    {fmtP(Object.values(room.windows || {}).reduce((a, b) => a + b, 0) * getU(room.windowAssembly) * room.hl_delta_t)}
+                  </div>
+                  <div className="col-span-2 text-center text-blue-700 font-black">
+                    {fmtP(room.totalWindowGain || 0)}
+                  </div>
                </div>
 
                <div className="grid grid-cols-10 border-b border-black h-8 items-center">
                   <div className="col-span-4 px-2 border-r border-black uppercase">Ceiling / Roof Assembly</div>
                   <div className="text-center border-r border-black">{fmtA(room.floorArea)}</div>
                   <div className="text-center border-r border-black">{getU(room.ceilingAssembly)}</div>
-                  <div className="col-span-2 text-center border-r border-black">---</div>
-                  <div className="col-span-2 text-center">---</div>
+                  <div className="col-span-2 text-center border-r border-black text-red-700 font-bold">
+                    {fmtP(room.floorArea * getU(room.ceilingAssembly) * room.hl_delta_t)}
+                  </div>
+                  <div className="col-span-2 text-center text-blue-700 font-bold">
+                    {fmtP(room.floorArea * getU(room.ceilingAssembly) * (state.environmental.hg_odt - state.environmental.hg_idt))}
+                  </div>
                </div>
 
                <div className="grid grid-cols-10 border-b-2 border-black h-8 items-center bg-gray-100">

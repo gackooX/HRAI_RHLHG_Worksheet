@@ -1,4 +1,5 @@
 import React from 'react';
+import DimensionInput from '../DimensionInput';
 
 const WizardStep1 = ({ room, projectState, updateRoom }) => {
   const { foundationType, numStoreys } = projectState.foundation;
@@ -17,6 +18,8 @@ const WizardStep1 = ({ room, projectState, updateRoom }) => {
     }
     return options;
   };
+
+  const isMetric = projectState.displayUnits === 'METRIC';
 
   return (
     <div className="space-y-4">
@@ -46,36 +49,18 @@ const WizardStep1 = ({ room, projectState, updateRoom }) => {
             ))}
           </select>
         </div>
-        <div>
-          <label htmlFor="perimeter" className="block text-sm font-medium">Perimeter (PE) ft</label>
-          <input
-            id="perimeter"
-            type="number"
-            className="w-full border p-2 rounded"
-            value={room.perimeter || 0}
-            onChange={(e) => updateRoom({ perimeter: parseFloat(e.target.value) || 0 })}
-          />
-        </div>
-        <div>
-          <label htmlFor="floor-area" className="block text-sm font-medium">Floor Area (AF) sq ft</label>
-          <input
-            id="floor-area"
-            type="number"
-            className="w-full border p-2 rounded"
-            value={room.floorArea || 0}
-            onChange={(e) => updateRoom({ floorArea: parseFloat(e.target.value) || 0 })}
-          />
-        </div>
-        <div>
-          <label htmlFor="height" className="block text-sm font-medium">Height (H) ft</label>
-          <input
-            id="height"
-            type="number"
-            className="w-full border p-2 rounded"
-            value={room.height || 0}
-            onChange={(e) => updateRoom({ height: parseFloat(e.target.value) || 0 })}
-          />
-        </div>
+        <DimensionInput
+          id="perimeter" label="Perimeter (PE)" type="length" isMetric={isMetric}
+          value={room.perimeter || 0} onChange={(v) => updateRoom({ perimeter: v })}
+        />
+        <DimensionInput
+          id="floor-area" label="Floor Area (AF)" type="area" isMetric={isMetric}
+          value={room.floorArea || 0} onChange={(v) => updateRoom({ floorArea: v })}
+        />
+        <DimensionInput
+          id="height" label="Height (H)" type="length" isMetric={isMetric}
+          value={room.height || 0} onChange={(v) => updateRoom({ height: v })}
+        />
       </div>
     </div>
   );

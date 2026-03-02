@@ -1,7 +1,8 @@
 import React from 'react';
 import library from '../../data/library.json';
+import DimensionInput from '../DimensionInput';
 
-const WizardStep2 = ({ room, updateRoom }) => {
+const WizardStep2 = ({ room, updateRoom, projectState }) => {
   const handleWindowChange = (dir, val) => {
     const windows = { ...room.windows, [dir]: parseFloat(val) || 0 };
     updateRoom({ windows });
@@ -12,6 +13,7 @@ const WizardStep2 = ({ room, updateRoom }) => {
   const ceilingAssemblies = library.assemblies.filter(a => a.type === 'ceiling');
   const doorAssemblies = library.assemblies.filter(a => a.type === 'door');
   const shadingTypes = Object.keys(library.isfTable || {});
+  const isMetric = projectState.displayUnits === 'METRIC';
 
   return (
     <div className="space-y-6">
@@ -66,13 +68,12 @@ const WizardStep2 = ({ room, updateRoom }) => {
               <option value="">Select Door...</option>
               {doorAssemblies.map(a => <option key={a.id} value={a.id}>{a.description} (U={a.uFactor})</option>)}
             </select>
-            <input
-              type="number"
-              placeholder="Area"
-              className="w-20 border p-2 rounded text-sm"
-              value={room.doorArea || 0}
-              onChange={(e) => updateRoom({ doorArea: parseFloat(e.target.value) || 0 })}
-            />
+            <div className="w-32">
+              <DimensionInput
+                id="door-area" label="Area" type="area" isMetric={isMetric}
+                value={room.doorArea || 0} onChange={(v) => updateRoom({ doorArea: v })}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -84,16 +85,11 @@ const WizardStep2 = ({ room, updateRoom }) => {
         </div>
         <div className="grid grid-cols-3 gap-2">
           {['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].map(dir => (
-            <div key={dir}>
-              <label htmlFor={`win-${dir}`} className="block text-[10px] font-black uppercase text-gray-400">{dir.replace('_', '/')}</label>
-              <input
-                id={`win-${dir}`}
-                type="number"
-                className="w-full border p-1 rounded"
-                value={room.windows?.[dir] || 0}
-                onChange={(e) => handleWindowChange(dir, e.target.value)}
-              />
-            </div>
+            <DimensionInput
+              key={dir}
+              id={`win-${dir}`} label={dir.replace('_', '/')} type="area" isMetric={isMetric}
+              value={room.windows?.[dir] || 0} onChange={(v) => handleWindowChange(dir, v)}
+            />
           ))}
         </div>
       </div>
