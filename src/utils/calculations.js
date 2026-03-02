@@ -2,16 +2,18 @@
  * Calculation utilities for HRAI Heat Loss & Heat Gain (Headless Model)
  */
 import library from '../data/library.json';
+import { convertTempDelta, convertArea, convertVolume, convertPower } from './unitConverter';
 
 const getUFactor = (id, defaultU) => {
   const assembly = library.assemblies.find(a => a.id === id);
   return assembly ? assembly.uFactor : defaultU;
 };
 
-const getSolarValue = (latitude, direction, isMetric) => {
+const getSolarValue = (latitude, direction) => {
   const latKey = Math.min(Math.max(Math.round(latitude), 40), 48).toString();
   const dirData = library.solarTable[latKey][direction] || { imp: 0, met: 0 };
-  return isMetric ? dirData.met : dirData.imp;
+  // Always return Imperial for internal consistent calculation
+  return dirData.imp;
 };
 
 const getISFValue = (shadingType, glazingType) => {
@@ -32,6 +34,12 @@ export const calculateRoomVolume = (area, height) => {
 
 export const calculateOccupancyGain = (count) => {
   return count * 239;
+};
+
+export const calculateAirLeakage = (volume, deltaT, lrFactor) => {
+  // Formula: Q = 0.018 * V * Factor * deltaT
+  // The lrFactor (LRairh/LRairc) from the state is used as the multiplier/ACH equivalent
+  return 0.018 * volume * lrFactor * deltaT;
 };
 
 export const calculateRoomConductiveLoss = (room, hl_delta_t, state) => {
@@ -64,13 +72,12 @@ export const calculateRoomConductiveLoss = (room, hl_delta_t, state) => {
     loss += (netWallArea * wallU * hl_delta_t);
   }
 
-  return Math.round(loss);
+  return loss;
 };
 
 export const calculateRoomConductiveGain = (room, state) => {
   const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
-  const isMetric = state.displayUnits === 'METRIC';
-  const latitude = state.environmental.north_latitude;
+  const latitude = state.environmental.hg_north_latitude;
 
   const wallU = getUFactor(room.wallAssembly, 0.05);
   const ceilingU = getUFactor(room.ceilingAssembly, 0.02);
@@ -92,7 +99,7 @@ export const calculateRoomConductiveGain = (room, state) => {
   if (room.windows) {
     Object.entries(room.windows).forEach(([dir, area]) => {
       if (area > 0) {
-        const solar = getSolarValue(latitude, dir, isMetric);
+        const solar = getSolarValue(latitude, dir);
         const thgm = calculateTHGM(windowAssembly.uFactor, hg_delta_t, (windowAssembly.shgc || 0.4), solar, isf);
         totalWindowGain += area * thgm;
         totalWindowArea += area;
@@ -107,22 +114,26 @@ export const calculateRoomConductiveGain = (room, state) => {
                (ceilingArea * ceilingU * hg_delta_t) +
                (doorArea * doorU * hg_delta_t);
 
-  return Math.round(gain);
+  return { totalGain: gain, totalWindowGain };
 };
 
 export const calculateSection17Gain = (netLoadGain, supplementalGain = 0) => {
-  return Math.round((netLoadGain + supplementalGain) * 1.3);
+  return (netLoadGain + supplementalGain) * 1.3;
 };
 
 export const calculateRoomMetrics = (room, state) => {
+  const isMetric = state.displayUnits === 'METRIC';
+
+  // All internal calculations done in IMPERIAL for consistency
   const hl_delta_t = state.environmental.hl_idt - state.environmental.hl_odt;
   const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
 
   const conductiveLoss = calculateRoomConductiveLoss(room, hl_delta_t, state);
-  const conductiveGain = calculateRoomConductiveGain(room, state);
+  const { totalGain: conductiveGain, totalWindowGain } = calculateRoomConductiveGain(room, state);
 
-  const airLeakageLoss = Math.round(conductiveLoss * state.externalValues.LRairh);
-  const airLeakageGain = Math.round(conductiveGain * state.externalValues.LRairc);
+  const volume = calculateRoomVolume(room.floorArea, room.height);
+  const airLeakageLoss = calculateAirLeakage(volume, hl_delta_t, state.externalValues.LRairh);
+  const airLeakageGain = calculateAirLeakage(volume, hg_delta_t, state.externalValues.LRairc);
 
   const occupancyGain = calculateOccupancyGain(room.occupancy || 0);
 
@@ -133,22 +144,23 @@ export const calculateRoomMetrics = (room, state) => {
   const ductGain = room.hasDuctLoss ? netGain * 0.1 : 0;
 
   const totalRoomLoss = Math.round(netLoss + ductLoss);
-  const totalRoomGain = calculateSection17Gain(netGain, ductGain);
+  const totalRoomGain = Math.round(calculateSection17Gain(netGain, ductGain));
 
   return {
     ...room,
-    conductiveLoss,
-    conductiveGain,
-    airLeakageLoss,
-    airLeakageGain,
+    conductiveLoss: Math.round(conductiveLoss),
+    conductiveGain: Math.round(conductiveGain),
+    airLeakageLoss: Math.round(airLeakageLoss),
+    airLeakageGain: Math.round(airLeakageGain),
     occupancyGain,
-    netLoss,
-    netGain,
+    netLoss: Math.round(netLoss),
+    netGain: Math.round(netGain),
     totalRoomLoss,
     totalRoomGain,
+    totalWindowGain,
     hl_delta_t,
     hg_delta_t,
     headerArea: calculateHeaderArea(room.perimeter, state.designMultipliers.header_height),
-    volume: calculateRoomVolume(room.floorArea, room.height)
+    volume
   };
 };

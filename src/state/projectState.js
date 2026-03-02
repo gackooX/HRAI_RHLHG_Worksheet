@@ -1,7 +1,12 @@
 export const initialState = {
   header: {
-    address: '',
+    streetNumber: '',
+    streetAddress: '',
+    city: '',
+    province: '',
+    postalCode: '',
     front_facing_direction: 'N', // N, NE, E, SE, S, SW, W, NW
+    system_case: 'Case #3', // Case #1, #2, #3
   },
   foundation: {
     foundationType: 'Basement', // 'Basement' or 'Slab on Grade'
@@ -10,15 +15,17 @@ export const initialState = {
   environmental: {
     hl_odt: -6,
     hl_idt: 72,
-    mean_soil_temp: 50,
-    hg_odt: -6,
+    hl_mean_soil_temp: 50,
+    hg_odt: 86,
     hg_idt: 72,
-    daily_range: 20,
-    north_latitude: 44,
+    hg_daily_range: 20,
+    hg_north_latitude: 44,
   },
   system: {
     hrv_effectiveness: 0.6,
-    system_case: 'Case #3', // Case #1, #2, #3
+  },
+  compliance: {
+    selectedPackage: 'A1',
   },
   designMultipliers: {
     header_height: 0.75, // ft
