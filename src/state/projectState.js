@@ -26,6 +26,8 @@ export const initialState = {
   },
   compliance: {
     selectedPackage: 'A1',
+    windowREff: 3.57,
+    doorREff: 4.00,
   },
   designMultipliers: {
     header_height: 0.75, // ft

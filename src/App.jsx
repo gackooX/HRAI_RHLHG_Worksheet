@@ -6,6 +6,7 @@ import { initialState } from './state/projectState';
 import { calculateRoomMetrics } from './utils/calculations';
 import { convertTemp, convertTempDelta } from './utils/unitConverter';
 import { complianceData } from './data/complianceData';
+import ComponentTable from './components/ComponentTable';
 
 function App() {
   const [state, setState] = useState(initialState);
@@ -333,52 +334,56 @@ function App() {
           {/* Building Components (Compliance) */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-black mb-4 border-b pb-2 text-gray-800">Building Components (Compliance Package)</h2>
-            <div className="mb-6">
-              <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Select Compliance Package (Table 3.1.1.2.A)</label>
-              <select
-                className="w-full md:w-64 border p-2 rounded font-bold bg-blue-50 border-blue-200"
-                value={state.compliance.selectedPackage}
-                onChange={(e) => handleUpdateProject('compliance', { selectedPackage: e.target.value })}
-              >
-                {Object.keys(complianceData).map(pkg => <option key={pkg} value={pkg}>{pkg}</option>)}
-              </select>
+            <div className="mb-6 flex flex-col md:flex-row gap-8">
+              <div className="flex-1">
+                <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Select Compliance Package (Table 3.1.1.2.A)</label>
+                <select
+                  className="w-full md:w-64 border p-2 rounded font-bold bg-blue-50 border-blue-200"
+                  value={state.compliance.selectedPackage}
+                  onChange={(e) => handleUpdateProject('compliance', { selectedPackage: e.target.value })}
+                >
+                  {Object.keys(complianceData).map(pkg => <option key={pkg} value={pkg}>{pkg}</option>)}
+                </select>
+              </div>
+              <div className="flex-1">
+                 <div className="text-[10px] font-bold text-gray-400 uppercase mb-2">Package Requirements Summary</div>
+                 <div className="overflow-x-auto">
+                    <table className="w-full text-left text-[10px] border-collapse">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="p-1 border">Component</th>
+                          <th className="p-1 border">Min. Nominal R</th>
+                          <th className="p-1 border">Min. Effective R</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { label: 'Ceiling (No Attic)', key: 'ceilingWithoutAttic' },
+                          { label: 'Exposed Floor', key: 'exposedFloor' },
+                          { label: 'Above Grade Wall', key: 'wallsAboveGrade' },
+                          { label: 'Basement Wall', key: 'basementWalls' },
+                        ].map(item => {
+                          const data = complianceData[state.compliance.selectedPackage][item.key];
+                          return (
+                            <tr key={item.key}>
+                              <td className="p-1 border font-bold">{item.label}</td>
+                              <td className="p-1 border">{data.nominalR}</td>
+                              <td className="p-1 border">{data.effectiveR}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+              </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="p-2 border">Component</th>
-                    <th className="p-2 border">Min. Nominal R</th>
-                    <th className="p-2 border">Max. U</th>
-                    <th className="p-2 border">Min. Effective R</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label: 'Ceiling with Attic Space', key: 'ceilingWithAttic' },
-                    { label: 'Ceiling Without Attic Space', key: 'ceilingWithoutAttic' },
-                    { label: 'Exposed Floor', key: 'exposedFloor' },
-                    { label: 'Walls Above Grade', key: 'wallsAboveGrade' },
-                    { label: 'Basement Walls', key: 'basementWalls' },
-                    { label: 'Below Grade Slab', key: 'belowGradeSlab' },
-                    { label: 'Heated Slab', key: 'heatedSlab' }
-                  ].map(item => {
-                    const data = complianceData[state.compliance.selectedPackage][item.key];
-                    return (
-                      <tr key={item.key}>
-                        <td className="p-2 border font-bold">{item.label}</td>
-                        <td className="p-2 border">{data.nominalR}</td>
-                        <td className="p-2 border">{data.maxU}</td>
-                        <td className="p-2 border">{data.effectiveR}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="mt-8 space-y-4">
+               <h3 className="text-sm font-black uppercase text-gray-700">Dynamic Component Lookup Engine</h3>
+               <ComponentTable state={state} onUpdate={handleUpdateProject} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                <div className="p-3 bg-gray-50 rounded border">
                   <div className="text-[10px] font-bold text-gray-500 uppercase">Windows & Doors</div>
                   <div className="text-sm">Max U: <strong>{complianceData[state.compliance.selectedPackage].windows.maxU}</strong></div>

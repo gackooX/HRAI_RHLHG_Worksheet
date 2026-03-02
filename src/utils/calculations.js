@@ -2,6 +2,7 @@
  * Calculation utilities for HRAI Heat Loss & Heat Gain (Headless Model)
  */
 import library from '../data/library.json';
+import { complianceData } from '../data/complianceData';
 import { convertTempDelta, convertArea, convertVolume, convertPower } from './unitConverter';
 
 const getUFactor = (id, defaultU) => {
@@ -42,52 +43,49 @@ export const calculateAirLeakage = (volume, deltaT, lrFactor) => {
   return 0.018 * volume * lrFactor * deltaT;
 };
 
-export const calculateRoomConductiveLoss = (room, hl_delta_t, state) => {
-  const windowU = getUFactor(room.windowAssembly, 0.32);
-  const ceilingU = getUFactor(room.ceilingAssembly, 0.02);
-  const doorU = getUFactor(room.doorAssembly, 0.20);
-
+export const calculateRoomConductiveLoss = (room, state, factors) => {
   const windowArea = Object.values(room.windows || {}).reduce((a, b) => a + b, 0);
   const doorArea = room.doorArea || 0;
   const ceilingArea = room.floorArea || 0;
 
   const grossWallArea = room.perimeter * room.height;
-  const netWallArea = Math.max(0, grossWallArea - windowArea - doorArea);
+  const headerArea = calculateHeaderArea(room.perimeter, state.designMultipliers.header_height);
+  const netWallArea = Math.max(0, grossWallArea - windowArea - doorArea - headerArea);
 
-  let loss = (windowArea * windowU * hl_delta_t) +
-             (ceilingArea * ceilingU * hl_delta_t) +
-             (doorArea * doorU * hl_delta_t);
+  let loss = (windowArea * factors.windows.hlFactor) +
+             (doorArea * factors.doors.hlFactor) +
+             (headerArea * factors.header.hlFactor);
 
-  // Foundation Logic
-  if (room.level === 'Basement' || (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade')) {
-    if (state.foundation.foundationType === 'Slab on Grade') {
-      const fFactor = library.foundationMultipliers['Slab on Grade']['F-Factor'];
-      loss += (room.perimeter * fFactor * hl_delta_t);
-    } else {
-      const cFactor = library.foundationMultipliers['Basement']['C-Factor'];
-      loss += (netWallArea * cFactor * hl_delta_t);
-    }
+  if (room.level === 'Basement') {
+     loss += (netWallArea * factors.bgw.hlFactor);
   } else {
-    const wallU = getUFactor(room.wallAssembly, 0.05);
-    loss += (netWallArea * wallU * hl_delta_t);
+     loss += (netWallArea * factors.agw.hlFactor);
+  }
+
+  // Ceilings and Floors
+  loss += (ceilingArea * factors.ceiling.hlFactor);
+
+  // Foundation special (Slab on Grade logic)
+  if (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade') {
+    const fFactor = library.foundationMultipliers['Slab on Grade']['F-Factor'];
+    const hl_delta_t = state.environmental.hl_idt - state.environmental.hl_odt;
+    loss += (room.perimeter * fFactor * hl_delta_t);
   }
 
   return loss;
 };
 
-export const calculateRoomConductiveGain = (room, state) => {
+export const calculateRoomConductiveGain = (room, state, factors) => {
   const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
   const latitude = state.environmental.hg_north_latitude;
 
-  const wallU = getUFactor(room.wallAssembly, 0.05);
-  const ceilingU = getUFactor(room.ceilingAssembly, 0.02);
-  const doorU = getUFactor(room.doorAssembly, 0.20);
-
+  const windowArea = Object.values(room.windows || {}).reduce((a, b) => a + b, 0);
   const doorArea = room.doorArea || 0;
   const ceilingArea = room.floorArea || 0;
   const grossWallArea = room.perimeter * room.height;
+  const headerArea = calculateHeaderArea(room.perimeter, state.designMultipliers.header_height);
 
-  // Window Gain calculation using THGM
+  // Window Gain calculation using THGM from factors if possible, or recalculated
   const windowAssembly = library.assemblies.find(a => a.id === room.windowAssembly) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
   const shadingType = room.shadingType || 'No shades';
   const glazingType = room.glazingType || windowAssembly.glazingType || 'Double';
@@ -100,25 +98,99 @@ export const calculateRoomConductiveGain = (room, state) => {
     Object.entries(room.windows).forEach(([dir, area]) => {
       if (area > 0) {
         const solar = getSolarValue(latitude, dir);
-        const thgm = calculateTHGM(windowAssembly.uFactor, hg_delta_t, (windowAssembly.shgc || 0.4), solar, isf);
+        // We use the central R-value from factors but apply specific assembly SHGC/ISF
+        const thgm = calculateTHGM(1/factors.windows.rEff, hg_delta_t, windowAssembly.shgc, solar, isf);
         totalWindowGain += area * thgm;
         totalWindowArea += area;
       }
     });
   }
 
-  const netWallArea = Math.max(0, grossWallArea - totalWindowArea - doorArea);
+  const netWallArea = Math.max(0, grossWallArea - totalWindowArea - doorArea - headerArea);
 
-  const gain = (netWallArea * wallU * hg_delta_t) +
-               totalWindowGain +
-               (ceilingArea * ceilingU * hg_delta_t) +
-               (doorArea * doorU * hg_delta_t);
+  let gain = totalWindowGain +
+             (doorArea * factors.doors.hgFactor) +
+             (headerArea * factors.header.hgFactor) +
+             (ceilingArea * factors.ceiling.hgFactor);
+
+  if (room.level === 'Basement') {
+    gain += (netWallArea * factors.bgw.hgFactor);
+  } else {
+    gain += (netWallArea * factors.agw.hgFactor);
+  }
 
   return { totalGain: gain, totalWindowGain };
 };
 
 export const calculateSection17Gain = (netLoadGain, supplementalGain = 0) => {
   return (netLoadGain + supplementalGain) * 1.3;
+};
+
+export const calculateComponentFactors = (state) => {
+  const pkg = complianceData[state.compliance.selectedPackage];
+  const hl_delta_t = state.environmental.hl_idt - state.environmental.hl_odt;
+  const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
+  const latitude = state.environmental.hg_north_latitude;
+
+  const getHLFactor = (r) => r > 0 ? hl_delta_t / r : 0;
+  const getHGFactor = (r, sc = 0) => r > 0 ? (hg_delta_t + sc) / r : 0;
+
+  const factors = {
+    windows: {
+      rEff: state.compliance.windowREff,
+      hlFactor: getHLFactor(state.compliance.windowREff),
+      sc: {}, // Directional
+      hgFactor: {}, // Will use THGM logic or (HGDT+SC)/R
+    },
+    doors: {
+      rEff: state.compliance.doorREff,
+      hlFactor: getHLFactor(state.compliance.doorREff),
+      sc: 0,
+      hgFactor: getHGFactor(state.compliance.doorREff, 0),
+    },
+    bgw: {
+      rEff: pkg.basementWalls.effectiveR,
+      hlFactor: getHLFactor(pkg.basementWalls.effectiveR),
+      sc: 0,
+      hgFactor: getHGFactor(pkg.basementWalls.effectiveR, 0),
+    },
+    agw: {
+      rEff: pkg.wallsAboveGrade.effectiveR,
+      hlFactor: getHLFactor(pkg.wallsAboveGrade.effectiveR),
+      sc: 0,
+      hgFactor: getHGFactor(pkg.wallsAboveGrade.effectiveR, 0),
+    },
+    header: {
+      rEff: pkg.wallsAboveGrade.effectiveR,
+      hlFactor: getHLFactor(pkg.wallsAboveGrade.effectiveR),
+      sc: 0,
+      hgFactor: getHGFactor(pkg.wallsAboveGrade.effectiveR, 0),
+    },
+    ceiling: {
+      rEff: pkg.ceilingWithoutAttic.effectiveR,
+      hlFactor: getHLFactor(pkg.ceilingWithoutAttic.effectiveR),
+      sc: 27,
+      hgFactor: getHGFactor(pkg.ceilingWithoutAttic.effectiveR, 27),
+    },
+    floor: {
+      rEff: pkg.exposedFloor.effectiveR,
+      hlFactor: getHLFactor(pkg.exposedFloor.effectiveR),
+      sc: 0,
+      hgFactor: getHGFactor(pkg.exposedFloor.effectiveR, 0),
+    }
+  };
+
+  // Special case for windows: directional THGM
+  // We'll compute these based on a default window assembly for the component table display
+  const defaultWindow = library.assemblies.find(a => a.type === 'window') || { uFactor: 0.28, shgc: 0.4, glazingType: 'Double' };
+  const isf = 1.0; // Default for table display
+
+  ['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].forEach(dir => {
+    const solar = getSolarValue(latitude, dir);
+    factors.windows.hgFactor[dir] = calculateTHGM(1/factors.windows.rEff, hg_delta_t, defaultWindow.shgc, solar, isf);
+  });
+
+  return factors;
 };
 
 export const calculateRoomMetrics = (room, state) => {
@@ -128,8 +200,9 @@ export const calculateRoomMetrics = (room, state) => {
   const hl_delta_t = state.environmental.hl_idt - state.environmental.hl_odt;
   const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
 
-  const conductiveLoss = calculateRoomConductiveLoss(room, hl_delta_t, state);
-  const { totalGain: conductiveGain, totalWindowGain } = calculateRoomConductiveGain(room, state);
+  const factors = calculateComponentFactors(state);
+  const conductiveLoss = calculateRoomConductiveLoss(room, state, factors);
+  const { totalGain: conductiveGain, totalWindowGain } = calculateRoomConductiveGain(room, state, factors);
 
   const volume = calculateRoomVolume(room.floorArea, room.height);
   const airLeakageLoss = calculateAirLeakage(volume, hl_delta_t, state.externalValues.LRairh);
