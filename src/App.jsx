@@ -8,9 +8,12 @@ import { calculateRoomMetrics } from './utils/calculations';
 import { convertTemp, convertTempDelta } from './utils/unitConverter';
 import { complianceData } from './data/complianceData';
 import ComponentTable from './components/ComponentTable';
+import library from './data/library.json';
 
 function App() {
   const [state, setState] = useState(initialState);
+  const [citySearch, setCitySearch] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [activeRoomIndex, setActiveRoomIndex] = useState(null);
   const [view, setView] = useState('wizard'); // 'wizard', 'thgm', or 'report'
 
@@ -56,7 +59,14 @@ function App() {
       perimeter: 0,
       floorArea: 0,
       height: defaultHeight,
-      windows: {},
+      windows: {
+        'N_S': { area: 0, ...state.globalWindowConfig },
+        'S': { area: 0, ...state.globalWindowConfig },
+        'E_W': { area: 0, ...state.globalWindowConfig },
+        'NE_NW': { area: 0, ...state.globalWindowConfig },
+        'SE_SW': { area: 0, ...state.globalWindowConfig },
+        'H': { area: 0, ...state.globalWindowConfig }
+      },
       wallType: 'AGW',
       hasDuctLoss: false,
       occupancy: 0
@@ -133,14 +143,44 @@ function App() {
             <div className="bg-white p-4 rounded-lg shadow-sm border md:col-span-3">
               <h2 className="text-sm font-black uppercase mb-4 text-blue-900 border-b pb-2">Global Design & General Info</h2>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div>
+                <div className="relative">
                   <label className="block text-[10px] font-bold uppercase text-gray-400">City Selection</label>
                   <input
                     className="w-full border p-1 rounded font-bold text-sm"
-                    value={state.header.city}
-                    onChange={(e) => handleUpdateProject('header', { city: e.target.value })}
+                    value={citySearch || state.header.city}
+                    onChange={(e) => {
+                      setCitySearch(e.target.value);
+                      setShowCityDropdown(true);
+                    }}
+                    onFocus={() => setShowCityDropdown(true)}
                     placeholder="Enter City..."
                   />
+                  {showCityDropdown && (
+                    <div className="absolute z-50 w-full bg-white border rounded shadow-lg max-h-48 overflow-y-auto mt-1">
+                      {library.designConditions.locations
+                        .filter(l => l.city.toLowerCase().includes((citySearch || '').toLowerCase()))
+                        .map(loc => (
+                          <div
+                            key={loc.city}
+                            className="p-2 hover:bg-blue-50 cursor-pointer text-xs font-bold"
+                            onClick={() => {
+                              handleUpdateProject('header', { city: loc.city });
+                              handleUpdateProject('environmental', {
+                                hl_odt: loc.odtHeating,
+                                hg_odt: loc.odtCooling,
+                                hg_daily_range: loc.summerRange,
+                                hg_north_latitude: loc.latitude
+                              });
+                              setCitySearch(loc.city);
+                              setShowCityDropdown(false);
+                            }}
+                          >
+                            {loc.city}
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
                 </div>
                 <TempInput
                   id="global-hl-odt" label="ODTH" isMetric={isMetric}
@@ -492,7 +532,7 @@ function App() {
 
       {view === 'thgm' && (
         <div className="max-w-6xl mx-auto py-8">
-           <THGMWorksheet state={state} />
+           <THGMWorksheet state={state} onUpdateProject={handleUpdateProject} />
         </div>
       )}
 

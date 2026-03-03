@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import library from '../../data/library.json';
 import DimensionInput from '../DimensionInput';
-import { calculateDetailedAreas, calculateComponentFactors, calculateRoomMetrics } from '../../utils/calculations';
+import { calculateDetailedAreas, calculateComponentFactors, calculateRoomMetrics, lookupGlazingData } from '../../utils/calculations';
 
 const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
   const isMetric = projectState.displayUnits === 'METRIC';
@@ -20,10 +20,6 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
     updateRoom({ windows });
   };
 
-  const wallAssemblies = library.assemblies.filter(a => a.type === 'wall');
-  const windowAssemblies = library.assemblies.filter(a => a.type === 'window');
-  const ceilingAssemblies = library.assemblies.filter(a => a.type === 'ceiling');
-  const doorAssemblies = library.assemblies.filter(a => a.type === 'door');
 
   const Row = ({ label, struct, area, lossFactor, gainFactor, loss, gain, isHeader = false }) => (
     <tr className={`border-b border-gray-200 ${isHeader ? 'bg-gray-50 font-black text-[10px] uppercase' : 'text-xs'}`}>
@@ -49,14 +45,14 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
       </div>
 
       <div className="overflow-x-auto border-x border-b border-gray-300 rounded-b-lg shadow-xl">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse table-fixed">
           <thead className="bg-gray-100 text-[10px] uppercase font-black border-b-2 border-gray-800">
             <tr>
               <th className="p-2 border-r text-left w-48">Components</th>
               <th className="p-2 border-r text-center w-16">Struct</th>
               <th className="p-2 border-r text-right w-24">Area</th>
-              <th className="p-2 border-r text-right w-20">HL Factor</th>
-              <th className="p-2 border-r text-right w-20">HG Factor</th>
+              <th className="p-2 border-r text-right w-24">HL Factor</th>
+              <th className="p-2 border-r text-right w-24">HG Factor</th>
               <th className="p-2 border-r text-right w-24 text-red-700">Heat Loss</th>
               <th className="p-2 text-right w-24 text-blue-700">Heat Gain</th>
             </tr>
@@ -86,19 +82,14 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                const area = typeof data === 'object' ? data.area : (data || 0);
                if (area <= 0) return null;
 
-               const assemblyId = (typeof data === 'object' && data.assemblyId) ? data.assemblyId : room.windowAssembly;
                const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
-               const windowAssembly = library.assemblies.find(a => a.id === assemblyId) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
+               const windowConfig = (typeof data === 'object') ? data : projectState.globalWindowConfig || {};
+               const lookup = lookupGlazingData(windowConfig);
+
                const hg_dt = projectState.environmental.hg_odt - projectState.environmental.hg_idt;
-
-               let shgc = windowAssembly.shgc;
-               if (data.frameType && library.shgcTable[data.frameType]) {
-                 shgc = library.shgcTable[data.frameType][data.isStorm ? 'Storm' : 'Regular'];
-               }
-
-               const isf = library.isfTable[shadingType]?.[windowAssembly.glazingType || 'Double'] || 1.0;
+               const isf = library.isfTable[shadingType]?.[windowConfig.type || 'Double'] || 1.0;
                const solarVal = library.solarTable[Math.min(Math.max(Math.round(projectState.environmental.hg_north_latitude), 40), 48).toString()][dir]?.imp || 0;
-               const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (shgc * solarVal * isf);
+               const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (lookup.shgc * solarVal * isf);
 
                return (
                 <Row
@@ -116,12 +107,9 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                 <td colSpan="5" className="p-2">
                     <div className="space-y-2">
                         {['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].map(dir => {
-                            const data = room.windows[dir] || { area: 0, assemblyId: room.windowAssembly, shadingType: room.shadingType || 'No shades', frameType: '', isStorm: false };
+                            const data = room.windows[dir] || { area: 0, shadingType: room.shadingType || 'No shades' };
                             const area = typeof data === 'object' ? data.area : data;
-                            const assemblyId = typeof data === 'object' ? data.assemblyId : room.windowAssembly;
                             const shadingType = typeof data === 'object' ? data.shadingType : (room.shadingType || 'No shades');
-                            const frameType = typeof data === 'object' ? data.frameType : '';
-                            const isStorm = typeof data === 'object' ? data.isStorm : false;
 
                             return (
                                 <div key={dir} className="flex flex-col gap-1 border-b border-blue-100 pb-2 last:border-0">
@@ -135,16 +123,11 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                                                 onChange={(e) => handleWindowChange(dir, 'area', e.target.value)}
                                             />
                                         </div>
-                                        <div className="col-span-2 flex flex-col">
-                                            <span className="text-[7px] font-bold uppercase text-gray-400">Glazing System</span>
-                                            <select
-                                                className="w-full border rounded p-1 text-[9px] bg-white font-bold"
-                                                value={assemblyId || ''}
-                                                onChange={(e) => handleWindowChange(dir, 'assemblyId', e.target.value)}
-                                            >
-                                                <option value="">Select...</option>
-                                                {windowAssemblies.map(a => <option key={a.id} value={a.id}>{a.description}</option>)}
-                                            </select>
+                                        <div className="col-span-3 flex flex-col">
+                                            <span className="text-[7px] font-bold uppercase text-gray-400">Selected Assembly</span>
+                                            <div className="p-1 text-[9px] font-bold bg-blue-50 border border-blue-100 rounded text-blue-800">
+                                              {projectState.globalWindowConfig.type} {projectState.globalWindowConfig.frame} ({projectState.globalWindowConfig.coating})
+                                            </div>
                                         </div>
                                         <div className="col-span-2 flex flex-col">
                                             <span className="text-[7px] font-bold uppercase text-gray-400">Internal Shading</span>
@@ -157,28 +140,7 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-6 gap-2 items-center ml-12">
-                                        <div className="col-span-3 flex flex-col">
-                                            <span className="text-[7px] font-bold uppercase text-gray-400">Frame Type (HRAI SHGC Table)</span>
-                                            <select
-                                                className="w-full border rounded p-1 text-[9px] bg-white font-bold"
-                                                value={frameType || ''}
-                                                onChange={(e) => handleWindowChange(dir, 'frameType', e.target.value)}
-                                            >
-                                                <option value="">Default from Assembly</option>
-                                                {Object.keys(library.shgcTable).map(t => <option key={t} value={t}>{t}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="col-span-1 flex items-center gap-2 mt-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={isStorm}
-                                                onChange={(e) => handleWindowChange(dir, 'isStorm', e.target.checked)}
-                                                className="w-3 h-3"
-                                            />
-                                            <span className="text-[8px] font-bold uppercase">Storm</span>
-                                        </div>
-                                    </div>
+                                    {/* Additional frame/storm overrides can be added if needed, but currently global config is preferred */}
                                 </div>
                             );
                         })}
