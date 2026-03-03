@@ -26,7 +26,12 @@ const DimensionInput = ({ label, value, id, isMetric, type, onChange }) => {
   };
 
   const handleChange = (e) => {
-    const newVal = parseFloat(e.target.value);
+    const rawVal = e.target.value;
+    if (rawVal === '') {
+        onChange(0);
+        return;
+    }
+    const newVal = parseFloat(rawVal);
     if (isNaN(newVal)) return;
 
     // Convert back to Imperial for storage

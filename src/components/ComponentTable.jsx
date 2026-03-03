@@ -6,9 +6,9 @@ const ComponentTable = ({ state, onUpdate }) => {
   const hl_dt = state.environmental.hl_idt - state.environmental.hl_odt;
   const hg_dt = state.environmental.hg_odt - state.environmental.hg_idt;
 
-  const handleManualHLFactorChange = (key, value) => {
-    const manualHLFactors = { ...state.compliance.manualHLFactors, [key]: parseFloat(value) || 0 };
-    onUpdate('compliance', { manualHLFactors });
+  const handleREffChange = (key, value) => {
+    const effRValues = { ...state.compliance.effRValues, [key]: parseFloat(value) || 0 };
+    onUpdate('compliance', { effRValues });
   };
 
   const handleSCChange = (key, value) => {
@@ -16,30 +16,21 @@ const ComponentTable = ({ state, onUpdate }) => {
     onUpdate('compliance', { solarCorrection });
   };
 
-  const renderRow = (label, structure, rEff, hlFactor, sc, hgFactor, key, isREffEditable = false, rEffKey = '') => {
+  const renderRow = (label, structure, rEff, hlFactor, sc, hgFactor, key) => {
     return (
       <tr className="border-b text-[10px]">
         <td className="p-2 border font-bold uppercase">{label}</td>
         <td className="p-2 border text-center font-bold text-green-700 uppercase">{structure}</td>
         <td className="p-2 border text-center">
-          {isREffEditable ? (
             <input
               type="number" step="0.01"
               className="w-16 border rounded p-1 font-bold text-center text-red-600 bg-red-50"
               value={rEff}
-              onChange={(e) => onUpdate('compliance', { [rEffKey]: parseFloat(e.target.value) || 0 })}
+              onChange={(e) => handleREffChange(key, e.target.value)}
             />
-          ) : (
-            <span className="font-bold text-red-600">{typeof rEff === 'number' ? rEff.toFixed(2) : rEff}</span>
-          )}
         </td>
-        <td className="p-2 border text-center">
-            <input
-              type="number" step="0.01"
-              className="w-16 border rounded p-1 font-bold text-center text-red-600 bg-red-50"
-              value={hlFactor.toFixed(2)}
-              onChange={(e) => handleManualHLFactorChange(key, e.target.value)}
-            />
+        <td className="p-2 border text-center font-bold text-red-600">
+            {hlFactor.toFixed(2)}
         </td>
         <td className="p-2 border text-center">
             <input
@@ -112,23 +103,14 @@ const ComponentTable = ({ state, onUpdate }) => {
                     type="number" step="0.01"
                     className="w-16 border rounded p-1 font-bold text-center text-red-600 bg-red-50"
                     value={factors.windows.rEff}
-                    onChange={(e) => onUpdate('compliance', { windowREff: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => handleREffChange('windows', e.target.value)}
                   />
                 ) : (
                   <span className="font-bold text-red-600 opacity-30">{factors.windows.rEff.toFixed(2)}</span>
                 )}
               </td>
-              <td className="p-2 border text-center">
-                {i === 0 ? (
-                  <input
-                    type="number" step="0.01"
-                    className="w-16 border rounded p-1 font-bold text-center text-red-600 bg-red-50"
-                    value={factors.windows.hlFactor.toFixed(2)}
-                    onChange={(e) => handleManualHLFactorChange('windows', e.target.value)}
-                  />
-                ) : (
-                  <span className="font-bold text-red-600 opacity-30">{factors.windows.hlFactor.toFixed(2)}</span>
-                )}
+              <td className="p-2 border text-center font-bold text-red-600">
+                {factors.windows.hlFactor.toFixed(2)}
               </td>
               <td className="p-2 border text-center">
                 {i === 0 ? (
@@ -148,20 +130,22 @@ const ComponentTable = ({ state, onUpdate }) => {
             </tr>
           ))}
 
-          {renderRow('3. Exposed Doors', 'D', factors.doors.rEff, factors.doors.hlFactor, factors.doors.sc, factors.doors.hgFactor, 'doors', true, 'doorREff')}
+          {renderRow('3. Exposed Doors', 'D', factors.doors.rEff, factors.doors.hlFactor, factors.doors.sc, factors.doors.hgFactor, 'doors')}
 
           {/* Net Exposed Walls (Row 4) */}
           <tr className="border-b text-[10px]">
             <td rowSpan="2" className="p-2 border font-bold uppercase align-top">4. Net Exposed Walls</td>
             <td className="p-2 border text-center font-bold text-green-700 uppercase">BGW</td>
-            <td className="p-2 border text-center font-bold text-red-600">{factors.bgw.rEff.toFixed(2)}</td>
             <td className="p-2 border text-center">
                 <input
                   type="number" step="0.01"
                   className="w-16 border rounded p-1 font-bold text-center text-red-600 bg-red-50"
-                  value={factors.bgw.hlFactor.toFixed(2)}
-                  onChange={(e) => handleManualHLFactorChange('bgw', e.target.value)}
+                  value={factors.bgw.rEff}
+                  onChange={(e) => handleREffChange('bgw', e.target.value)}
                 />
+            </td>
+            <td className="p-2 border text-center font-bold text-red-600">
+                {factors.bgw.hlFactor.toFixed(2)}
             </td>
             <td className="p-2 border text-center">
                 <input
@@ -175,14 +159,16 @@ const ComponentTable = ({ state, onUpdate }) => {
           </tr>
           <tr className="border-b text-[10px]">
             <td className="p-2 border text-center font-bold text-green-700 uppercase">AGW</td>
-            <td className="p-2 border text-center font-bold text-red-600">{factors.agw.rEff.toFixed(2)}</td>
             <td className="p-2 border text-center">
                 <input
                   type="number" step="0.01"
                   className="w-16 border rounded p-1 font-bold text-center text-red-600 bg-red-50"
-                  value={factors.agw.hlFactor.toFixed(2)}
-                  onChange={(e) => handleManualHLFactorChange('agw', e.target.value)}
+                  value={factors.agw.rEff}
+                  onChange={(e) => handleREffChange('agw', e.target.value)}
                 />
+            </td>
+            <td className="p-2 border text-center font-bold text-red-600">
+                {factors.agw.hlFactor.toFixed(2)}
             </td>
             <td className="p-2 border text-center">
                 <input
