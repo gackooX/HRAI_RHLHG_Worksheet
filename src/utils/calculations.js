@@ -22,6 +22,8 @@ const getISFValue = (shadingType, glazingType) => {
 };
 
 export const calculateTHGM = (uFactor, hgdt, shgc, solar, isf) => {
+  // Formula: THGM = (HGDT / R) + (SHGC * SOLAR * ISF)
+  // where uFactor = 1 / R
   return (uFactor * hgdt) + (shgc * solar * isf);
 };
 
