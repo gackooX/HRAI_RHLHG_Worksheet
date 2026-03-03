@@ -90,15 +90,15 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
                const windowAssembly = library.assemblies.find(a => a.id === assemblyId) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
                const hg_dt = projectState.environmental.hg_odt - projectState.environmental.hg_idt;
-               const solar = factors.windows.hgFactor[dir] ? calculateComponentFactors(projectState).windows.hgFactor[dir] : 0; // Fallback or re-calc
-               // Recalculate THGM for this specific window
-               const isf = library.isfTable[shadingType]?.[windowAssembly.glazingType || 'Double'] || 1.0;
-               const thgm = ( (1/factors.windows.rEff) * hg_dt) + (windowAssembly.shgc * factors.windows.hgFactor[dir] * isf); // Approximate using factors.hgFactor[dir] as solar
 
-               // Actually we should just use the metrics result if possible, or redo precise calc here.
-               // Let's redo precise THGM here.
+               let shgc = windowAssembly.shgc;
+               if (data.frameType && library.shgcTable[data.frameType]) {
+                 shgc = library.shgcTable[data.frameType][data.isStorm ? 'Storm' : 'Regular'];
+               }
+
+               const isf = library.isfTable[shadingType]?.[windowAssembly.glazingType || 'Double'] || 1.0;
                const solarVal = library.solarTable[Math.min(Math.max(Math.round(projectState.environmental.hg_north_latitude), 40), 48).toString()][dir]?.imp || 0;
-               const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (windowAssembly.shgc * solarVal * isf);
+               const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (shgc * solarVal * isf);
 
                return (
                 <Row
@@ -116,42 +116,68 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                 <td colSpan="5" className="p-2">
                     <div className="space-y-2">
                         {['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].map(dir => {
-                            const data = room.windows[dir] || { area: 0, assemblyId: room.windowAssembly, shadingType: room.shadingType || 'No shades' };
+                            const data = room.windows[dir] || { area: 0, assemblyId: room.windowAssembly, shadingType: room.shadingType || 'No shades', frameType: '', isStorm: false };
                             const area = typeof data === 'object' ? data.area : data;
                             const assemblyId = typeof data === 'object' ? data.assemblyId : room.windowAssembly;
                             const shadingType = typeof data === 'object' ? data.shadingType : (room.shadingType || 'No shades');
+                            const frameType = typeof data === 'object' ? data.frameType : '';
+                            const isStorm = typeof data === 'object' ? data.isStorm : false;
 
                             return (
-                                <div key={dir} className="grid grid-cols-6 gap-2 items-center border-b border-blue-100 pb-1 last:border-0">
-                                    <span className="text-[10px] font-black text-blue-800 w-12">{dir.replace('_', '/')}</span>
-                                    <div className="flex flex-col">
-                                        <span className="text-[7px] font-bold uppercase text-gray-400">Area</span>
-                                        <input
-                                            type="number" className="w-full border rounded p-1 text-[10px] font-bold"
-                                            value={area || ''}
-                                            onChange={(e) => handleWindowChange(dir, 'area', e.target.value)}
-                                        />
+                                <div key={dir} className="flex flex-col gap-1 border-b border-blue-100 pb-2 last:border-0">
+                                    <div className="grid grid-cols-6 gap-2 items-center">
+                                        <span className="text-[10px] font-black text-blue-800 w-12">{dir.replace('_', '/')}</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-[7px] font-bold uppercase text-gray-400">Area</span>
+                                            <input
+                                                type="number" className="w-full border rounded p-1 text-[10px] font-bold"
+                                                value={area || ''}
+                                                onChange={(e) => handleWindowChange(dir, 'area', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="col-span-2 flex flex-col">
+                                            <span className="text-[7px] font-bold uppercase text-gray-400">Glazing System</span>
+                                            <select
+                                                className="w-full border rounded p-1 text-[9px] bg-white font-bold"
+                                                value={assemblyId || ''}
+                                                onChange={(e) => handleWindowChange(dir, 'assemblyId', e.target.value)}
+                                            >
+                                                <option value="">Select...</option>
+                                                {windowAssemblies.map(a => <option key={a.id} value={a.id}>{a.description}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="col-span-2 flex flex-col">
+                                            <span className="text-[7px] font-bold uppercase text-gray-400">Internal Shading</span>
+                                            <select
+                                                className="w-full border rounded p-1 text-[9px] bg-white font-bold"
+                                                value={shadingType}
+                                                onChange={(e) => handleWindowChange(dir, 'shadingType', e.target.value)}
+                                            >
+                                                {Object.keys(library.isfTable).map(t => <option key={t} value={t}>{t}</option>)}
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div className="col-span-2 flex flex-col">
-                                        <span className="text-[7px] font-bold uppercase text-gray-400">Glazing System</span>
-                                        <select
-                                            className="w-full border rounded p-1 text-[9px] bg-white font-bold"
-                                            value={assemblyId || ''}
-                                            onChange={(e) => handleWindowChange(dir, 'assemblyId', e.target.value)}
-                                        >
-                                            <option value="">Select...</option>
-                                            {windowAssemblies.map(a => <option key={a.id} value={a.id}>{a.description}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="col-span-2 flex flex-col">
-                                        <span className="text-[7px] font-bold uppercase text-gray-400">Internal Shading</span>
-                                        <select
-                                            className="w-full border rounded p-1 text-[9px] bg-white font-bold"
-                                            value={shadingType}
-                                            onChange={(e) => handleWindowChange(dir, 'shadingType', e.target.value)}
-                                        >
-                                            {Object.keys(library.isfTable).map(t => <option key={t} value={t}>{t}</option>)}
-                                        </select>
+                                    <div className="grid grid-cols-6 gap-2 items-center ml-12">
+                                        <div className="col-span-3 flex flex-col">
+                                            <span className="text-[7px] font-bold uppercase text-gray-400">Frame Type (HRAI SHGC Table)</span>
+                                            <select
+                                                className="w-full border rounded p-1 text-[9px] bg-white font-bold"
+                                                value={frameType || ''}
+                                                onChange={(e) => handleWindowChange(dir, 'frameType', e.target.value)}
+                                            >
+                                                <option value="">Default from Assembly</option>
+                                                {Object.keys(library.shgcTable).map(t => <option key={t} value={t}>{t}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="col-span-1 flex items-center gap-2 mt-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={isStorm}
+                                                onChange={(e) => handleWindowChange(dir, 'isStorm', e.target.checked)}
+                                                className="w-3 h-3"
+                                            />
+                                            <span className="text-[8px] font-bold uppercase">Storm</span>
+                                        </div>
                                     </div>
                                 </div>
                             );

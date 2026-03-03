@@ -126,11 +126,18 @@ export const calculateRoomConductiveGain = (room, state, factors) => {
         const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
 
         const windowAssembly = library.assemblies.find(a => a.id === assemblyId) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
+
+        // Use frame-based SHGC if frameType is provided
+        let shgc = windowAssembly.shgc;
+        if (data.frameType && library.shgcTable[data.frameType]) {
+          shgc = library.shgcTable[data.frameType][data.isStorm ? 'Storm' : 'Regular'];
+        }
+
         const glazingType = windowAssembly.glazingType || 'Double';
         const isf = getISFValue(shadingType, glazingType);
         const solar = getSolarValue(latitude, dir);
 
-        const thgm = calculateTHGM(1/factors.windows.rEff, hg_delta_t, windowAssembly.shgc, solar, isf);
+        const thgm = calculateTHGM(1/factors.windows.rEff, hg_delta_t, shgc, solar, isf);
         totalWindowGain += area * thgm;
       }
     });

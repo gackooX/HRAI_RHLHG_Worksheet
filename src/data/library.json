@@ -166,5 +166,11 @@
     "No shades": { "Single": 1.0, "Double": 1.0, "Triple": 1.0, "Heat Mirror": 1.0 },
     "Blinds/Curtains": { "Single": 0.50, "Double": 0.55, "Triple": 0.57, "Heat Mirror": 0.60 },
     "Reflective": { "Single": 0.35, "Double": 0.37, "Triple": 0.40, "Heat Mirror": 0.44 }
+  },
+  "shgcTable": {
+    "Fixed-aluminum": { "Regular": 0.73, "Storm": 0.65 },
+    "Fixed-wood": { "Regular": 0.67, "Storm": 0.60 },
+    "Operable-aluminum": { "Regular": 0.71, "Storm": 0.63 },
+    "Operable-wood": { "Regular": 0.55, "Storm": 0.49 }
   }
 }

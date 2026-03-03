@@ -22,6 +22,19 @@ const THGMWorksheet = ({ state }) => {
   const defaultWindow = library.assemblies.find(a => a.type === 'window') || { uFactor: 0.28, shgc: 0.4, glazingType: 'Double' };
   const isfDefault = 1.0;
 
+  // Use the first room's window config as a representative if available, otherwise default
+  const firstRoom = state.rooms[0];
+  const getWindowConfig = (dir) => {
+    const config = firstRoom?.windows?.[dir] || { area: 0, assemblyId: firstRoom?.windowAssembly, shadingType: firstRoom?.shadingType || 'No shades', frameType: '', isStorm: false };
+    const assembly = library.assemblies.find(a => a.id === config.assemblyId) || defaultWindow;
+    let shgc = assembly.shgc;
+    if (config.frameType && library.shgcTable[config.frameType]) {
+      shgc = library.shgcTable[config.frameType][config.isStorm ? 'Storm' : 'Regular'];
+    }
+    const isf = library.isfTable[config.shadingType || 'No shades']?.[assembly.glazingType || 'Double'] || isfDefault;
+    return { shgc, isf, assemblyDescription: assembly.description };
+  };
+
   return (
     <div className="bg-white p-8 border-2 border-black max-w-[8.5in] mx-auto font-sans text-[10px] print:mx-0 print:border-0 print:p-0">
       <div className="text-center border-b-2 border-black pb-2 mb-4">
@@ -76,7 +89,7 @@ const THGMWorksheet = ({ state }) => {
             <tr className="border-b border-black">
               <td className="border-r border-black p-1 font-bold uppercase">#2 SHGC</td>
               {directions.map(d => (
-                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{defaultWindow.shgc.toFixed(2)}</td>
+                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{getWindowConfig(d.id).shgc.toFixed(2)}</td>
               ))}
             </tr>
             <tr className="border-b border-black">
@@ -90,7 +103,7 @@ const THGMWorksheet = ({ state }) => {
             <tr className="border-b border-black">
               <td className="border-r border-black p-1 font-bold uppercase">#4 ISF</td>
               {directions.map(d => (
-                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{isfDefault.toFixed(2)}</td>
+                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{getWindowConfig(d.id).isf.toFixed(2)}</td>
               ))}
             </tr>
             <tr className="border-b border-black">
@@ -98,7 +111,8 @@ const THGMWorksheet = ({ state }) => {
               {directions.map(d => {
                 const latKey = Math.min(Math.max(Math.round(latitude), 40), 48).toString();
                 const solar = library.solarTable[latKey][d.id]?.imp || 0;
-                const result = defaultWindow.shgc * solar * isfDefault;
+                const config = getWindowConfig(d.id);
+                const result = config.shgc * solar * config.isf;
                 return <td key={d.id} className="border-r border-black p-1 text-center font-mono">{result.toFixed(3)}</td>;
               })}
             </tr>
@@ -107,8 +121,9 @@ const THGMWorksheet = ({ state }) => {
               {directions.map(d => {
                 const latKey = Math.min(Math.max(Math.round(latitude), 40), 48).toString();
                 const solar = library.solarTable[latKey][d.id]?.imp || 0;
+                const config = getWindowConfig(d.id);
                 const part1 = hg_dt / rEff;
-                const part5 = defaultWindow.shgc * solar * isfDefault;
+                const part5 = config.shgc * solar * config.isf;
                 const thgm = part1 + part5;
                 return <td key={d.id} className="border-r border-black p-1 text-center font-black text-blue-800 text-[11px] font-mono">{thgm.toFixed(3)}</td>;
               })}
