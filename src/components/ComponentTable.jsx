@@ -57,11 +57,11 @@ const ComponentTable = ({ state, onUpdate }) => {
                <span className="text-[8px] rotate-180 [writing-mode:vertical-lr] inline-block">STRUCTURE</span>
             </th>
             <th className="border-r border-black w-24">
-              <div className="p-1 border-b border-black">HL ΔT = {hl_dt}</div>
+              <div className="p-1 border-b border-black text-left">HL ΔT = {hl_dt}</div>
               <div className="p-1 text-[8px]">EFFECTIVE R-VALUE (COL 1)</div>
             </th>
             <th className="border-r border-black w-24">
-              <div className="p-1 border-b border-black invisible">.</div>
+              <div className="p-1 border-b border-black text-left">HL ΔT = {hl_dt}</div>
               <div className="p-1 flex flex-col items-center">
                  <span className="border-b border-black w-10 leading-tight">HL ΔT</span>
                  <span className="leading-tight">R</span>
@@ -69,14 +69,14 @@ const ComponentTable = ({ state, onUpdate }) => {
               </div>
             </th>
             <th className="border-r border-black w-16">
-              <div className="p-1 border-b border-black invisible">.</div>
+              <div className="p-1 border-b border-black text-left">HG ΔT = {hg_dt}</div>
               <div className="p-1 flex flex-col items-center justify-center">
                 <span>SC</span>
                 <span className="text-[8px]">COL 3</span>
               </div>
             </th>
             <th className="w-24">
-              <div className="p-1 border-b border-black">HG ΔT = {hg_dt}</div>
+              <div className="p-1 border-b border-black text-left">HG ΔT = {hg_dt}</div>
               <div className="p-1 flex flex-col items-center justify-center">
                 <span className="border-b border-black w-16 text-[8px]">(HGΔT + SC)</span>
                 <span className="leading-tight">R</span>
