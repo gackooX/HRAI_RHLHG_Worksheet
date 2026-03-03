@@ -10,7 +10,7 @@ const WizardContainer = ({ room, projectState, onUpdate, onComplete, onCancel, o
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-2xl border border-gray-200 max-w-2xl mx-auto">
+    <div className="bg-white p-6 rounded-xl shadow-2xl border border-gray-200 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-black text-blue-900">Room Wizard</h2>
         <div className="flex gap-1">

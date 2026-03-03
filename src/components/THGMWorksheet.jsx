@@ -127,7 +127,9 @@ const THGMWorksheet = ({ state, onUpdateProject }) => {
         </div>
         <div className="mt-4 flex gap-4 text-blue-900">
            <div className="px-3 py-1 bg-white border border-blue-200 rounded font-black">CALCULATED R-VALUE: {factors.windows.rEff.toFixed(2)}</div>
-           <div className="px-3 py-1 bg-white border border-blue-200 rounded font-black text-red-600">HL FACTOR: {factors.windows.hlFactor.toFixed(3)}</div>
+           <div className="px-3 py-1 bg-white border border-blue-200 rounded font-black text-blue-600">HG &Delta;T: {hg_dt}</div>
+           <div className="px-3 py-1 bg-white border border-blue-200 rounded font-black text-green-700">SHGC: {lookupGlazingData(globalConfig).shgc.toFixed(3)}</div>
+           <div className="px-3 py-1 bg-white border border-blue-200 rounded font-black text-indigo-700">ISF: {getWindowConfig('N_S').isf.toFixed(2)}</div>
         </div>
       </div>
 

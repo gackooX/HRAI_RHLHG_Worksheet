@@ -169,7 +169,8 @@ export const calculateRoomConductiveGain = (room, state, factors) => {
         const isf = getISFValue(shadingType, windowConfig.type || 'Double');
         const solar = getSolarValue(latitude, dir);
 
-        const thgm = calculateTHGM(1/lookup.rValue, hg_delta_t, lookup.shgc, solar, isf);
+        // Window R-Value is now globally driven by Compliance Package (1/U)
+        const thgm = calculateTHGM(1/factors.windows.rEff, hg_delta_t, lookup.shgc, solar, isf);
         totalWindowGain += area * thgm;
       }
     });
@@ -215,15 +216,19 @@ export const calculateComponentFactors = (state) => {
   const getHGFactor = (r, scKey) => r > 0 ? (hg_delta_t + (scValues[scKey] || 0)) / r : 0;
   const effR = state.compliance.effRValues;
 
-  // Determine Global Window R-Value from state
+  // Pull Window U-Value from compliance package and calculate R = 1/U
+  const windowU = pkg.windows.maxU;
+  const windowREff = 1 / windowU;
+
+  // Determine Global Window SHGC from lookup (Engine now strictly for SHGC/ISF)
   const globalWindowLookup = lookupGlazingData(state.globalWindowConfig || {
     type: 'Double', frame: 'Operable-Aluminum', spacer: 'Insulating', coating: 'Clear', gapGas: '1/4 Air'
   });
 
   const factors = {
     windows: {
-      rEff: globalWindowLookup.rValue,
-      hlFactor: getHLFactor(globalWindowLookup.rValue),
+      rEff: windowREff,
+      hlFactor: getHLFactor(windowREff),
       sc: scValues.windows,
       hgFactor: {}, // Will use THGM logic or (HGDT+SC)/R
     },

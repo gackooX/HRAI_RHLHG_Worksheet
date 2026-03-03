@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import WizardContainer from './components/wizard/WizardContainer';
 import ReportGenerator from './components/ReportGenerator';
 import THGMWorksheet from './components/THGMWorksheet';
+import LibraryPage from './components/LibraryPage';
 import TempInput from './components/TempInput';
 import { initialState } from './state/projectState';
 import { calculateRoomMetrics } from './utils/calculations';
@@ -15,7 +16,7 @@ function App() {
   const [citySearch, setCitySearch] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [activeRoomIndex, setActiveRoomIndex] = useState(null);
-  const [view, setView] = useState('wizard'); // 'wizard', 'thgm', or 'report'
+  const [view, setView] = useState('wizard'); // 'wizard', 'thgm', 'report', or 'library'
 
   const handleUpdateProject = (key, value) => {
     setState(prev => {
@@ -113,6 +114,12 @@ function App() {
           >
             Report Generator
           </button>
+          <button
+            onClick={() => setView('library')}
+            className={`px-4 py-2 rounded font-bold ${view === 'library' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+          >
+            Library
+          </button>
         </div>
 
         <div className="flex items-center gap-4">
@@ -142,46 +149,7 @@ function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white p-4 rounded-lg shadow-sm border md:col-span-3">
               <h2 className="text-sm font-black uppercase mb-4 text-blue-900 border-b pb-2">Global Design & General Info</h2>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="relative">
-                  <label className="block text-[10px] font-bold uppercase text-gray-400">City Selection</label>
-                  <input
-                    className="w-full border p-1 rounded font-bold text-sm"
-                    value={citySearch || state.header.city}
-                    onChange={(e) => {
-                      setCitySearch(e.target.value);
-                      setShowCityDropdown(true);
-                    }}
-                    onFocus={() => setShowCityDropdown(true)}
-                    placeholder="Enter City..."
-                  />
-                  {showCityDropdown && (
-                    <div className="absolute z-50 w-full bg-white border rounded shadow-lg max-h-48 overflow-y-auto mt-1">
-                      {library.designConditions.locations
-                        .filter(l => l.city.toLowerCase().includes((citySearch || '').toLowerCase()))
-                        .map(loc => (
-                          <div
-                            key={loc.city}
-                            className="p-2 hover:bg-blue-50 cursor-pointer text-xs font-bold"
-                            onClick={() => {
-                              handleUpdateProject('header', { city: loc.city });
-                              handleUpdateProject('environmental', {
-                                hl_odt: loc.odtHeating,
-                                hg_odt: loc.odtCooling,
-                                hg_daily_range: loc.summerRange,
-                                hg_north_latitude: loc.latitude
-                              });
-                              setCitySearch(loc.city);
-                              setShowCityDropdown(false);
-                            }}
-                          >
-                            {loc.city}
-                          </div>
-                        ))
-                      }
-                    </div>
-                  )}
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <TempInput
                   id="global-hl-odt" label="ODTH" isMetric={isMetric}
                   value={state.environmental.hl_odt} onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
@@ -239,11 +207,16 @@ function App() {
               </div>
               <div className="md:col-span-1">
                 <label className="block text-[10px] font-bold uppercase text-gray-500">Province</label>
-                <input
-                  className="w-full border p-2 rounded font-bold"
+                <select
+                  className="w-full border p-2 rounded font-bold bg-white"
                   value={state.header.province}
                   onChange={(e) => handleUpdateProject('header', { province: e.target.value })}
-                />
+                >
+                  <option value="">Select Province</option>
+                  {["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"].map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
               </div>
               <div className="md:col-span-1">
                 <label className="block text-[10px] font-bold uppercase text-gray-500">Postal Code</label>
@@ -252,6 +225,53 @@ function App() {
                   value={state.header.postalCode}
                   onChange={(e) => handleUpdateProject('header', { postalCode: e.target.value })}
                 />
+              </div>
+
+              {/* City selection relocated and fixed */}
+              <div className="md:col-span-1 relative">
+                <label className="block text-[10px] font-bold uppercase text-gray-500">City Selection</label>
+                <input
+                  className="w-full border p-2 rounded font-bold"
+                  value={citySearch || state.header.city}
+                  onChange={(e) => {
+                    setCitySearch(e.target.value);
+                    setShowCityDropdown(true);
+                    // Allow custom name while typing
+                    handleUpdateProject('header', { city: e.target.value });
+                  }}
+                  onFocus={() => setShowCityDropdown(true)}
+                  onBlur={() => {
+                    // Slight delay to allow onClick to register
+                    setTimeout(() => setShowCityDropdown(false), 200);
+                  }}
+                  placeholder="Enter City..."
+                />
+                {showCityDropdown && (
+                  <div className="absolute z-50 w-full bg-white border rounded shadow-lg max-h-48 overflow-y-auto mt-1">
+                    {library.designConditions.locations
+                      .filter(l => l.city.toLowerCase().includes((citySearch || '').toLowerCase()))
+                      .map(loc => (
+                        <div
+                          key={loc.city}
+                          className="p-2 hover:bg-blue-50 cursor-pointer text-xs font-bold"
+                          onClick={() => {
+                            handleUpdateProject('header', { city: loc.city });
+                            handleUpdateProject('environmental', {
+                              hl_odt: loc.odtHeating,
+                              hg_odt: loc.odtCooling,
+                              hg_daily_range: loc.summerRange,
+                              hg_north_latitude: loc.latitude
+                            });
+                            setCitySearch(loc.city);
+                            setShowCityDropdown(false);
+                          }}
+                        >
+                          {loc.city}
+                        </div>
+                      ))
+                    }
+                  </div>
+                )}
               </div>
             </div>
 
@@ -284,7 +304,13 @@ function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
                <div className="col-span-4 text-[10px] font-black uppercase text-gray-400 mb-2">Floor Heights</div>
-               {['Basement', 'Level 1', 'Level 2', 'Level 3'].map(lvl => (
+               {['Basement', 'Level 1', 'Level 2', 'Level 3']
+                .filter(lvl => {
+                  if (lvl === 'Basement') return state.foundation.foundationType === 'Basement';
+                  const levelNum = parseInt(lvl.split(' ')[1]);
+                  return levelNum <= state.foundation.numStoreys;
+                })
+                .map(lvl => (
                  <div key={lvl}>
                     <label className="block text-[10px] font-bold uppercase text-gray-500">{lvl} Height</label>
                     <div className="flex items-center gap-1">
@@ -341,6 +367,21 @@ function App() {
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-black mb-4 border-b pb-2 text-red-700">Heat Loss</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="flex items-center justify-start p-2 bg-red-50 rounded border border-red-100">
+                <span className="text-red-600 font-black text-sm">
+                  HL ΔT: {isMetric
+                    ? Math.round(convertTempDelta(state.environmental.hl_idt - state.environmental.hl_odt) * 10) / 10
+                    : state.environmental.hl_idt - state.environmental.hl_odt}
+                </span>
+              </div>
+              <TempInput
+                id="global-hl-odt" label="ODTH" isMetric={isMetric}
+                value={state.environmental.hl_odt} onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
+              />
+              <TempInput
+                id="global-hl-idt" label="IDTH" isMetric={isMetric}
+                value={state.environmental.hl_idt} onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
+              />
               <TempInput
                 id="soil-temp" label="Mean Soil Temp" isMetric={isMetric}
                 value={state.environmental.hl_mean_soil_temp} onChange={(v) => handleUpdateProject('environmental', { hl_mean_soil_temp: v })}
@@ -352,13 +393,6 @@ function App() {
                   value={state.externalValues.LRairh}
                   onChange={(e) => handleUpdateProject('externalValues', { LRairh: parseFloat(e.target.value) })}
                 />
-              </div>
-              <div className="flex items-center justify-center p-2 bg-red-50 rounded border border-red-100">
-                <span className="text-red-600 font-black text-sm">
-                  HL ΔT: {isMetric
-                    ? Math.round(convertTempDelta(state.environmental.hl_idt - state.environmental.hl_odt) * 10) / 10
-                    : state.environmental.hl_idt - state.environmental.hl_odt}
-                </span>
               </div>
               <div>
                 <label htmlFor="hrv" className="block text-xs font-bold uppercase text-gray-500 mb-1">HRV Sensible Effectiveness</label>
@@ -380,6 +414,21 @@ function App() {
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-black mb-4 border-b pb-2 text-blue-700">Heat Gain</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="flex items-center justify-start p-2 bg-blue-50 rounded border border-blue-100">
+                <span className="text-blue-600 font-black text-sm">
+                  HG ΔT: {isMetric
+                    ? Math.round(convertTempDelta(state.environmental.hg_odt - state.environmental.hg_idt) * 10) / 10
+                    : state.environmental.hg_odt - state.environmental.hg_idt}
+                </span>
+              </div>
+              <TempInput
+                id="global-hg-odt" label="DCDBT (ODTC)" isMetric={isMetric}
+                value={state.environmental.hg_odt} onChange={(v) => handleUpdateProject('environmental', { hg_odt: v })}
+              />
+              <TempInput
+                id="global-hg-idt" label="IDTC" isMetric={isMetric}
+                value={state.environmental.hg_idt} onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
+              />
               <div>
                 <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Daily Range (ΔT)</label>
                 <div className="flex items-center gap-1">
@@ -413,13 +462,6 @@ function App() {
                   value={state.externalValues.LRairc}
                   onChange={(e) => handleUpdateProject('externalValues', { LRairc: parseFloat(e.target.value) })}
                 />
-              </div>
-              <div className="flex items-center justify-center p-2 bg-blue-50 rounded border border-blue-100">
-                <span className="text-blue-600 font-black text-sm">
-                  HG ΔT: {isMetric
-                    ? Math.round(convertTempDelta(state.environmental.hg_odt - state.environmental.hg_idt) * 10) / 10
-                    : state.environmental.hg_odt - state.environmental.hg_idt}
-                </span>
               </div>
               <div className="col-span-2 p-2 bg-blue-50 rounded border border-blue-100 flex items-center">
                  <span className="text-blue-800 text-[10px] font-bold uppercase">Note: Transparent Assembly Heat Gain Multiplier (THGM) is calculated per window orientation.</span>
@@ -540,6 +582,10 @@ function App() {
         <div className="flex justify-center">
           <ReportGenerator state={processedState} />
         </div>
+      )}
+
+      {view === 'library' && (
+        <LibraryPage />
       )}
 
       {/* Print Only View */}

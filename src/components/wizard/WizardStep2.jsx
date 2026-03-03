@@ -113,7 +113,7 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
 
                             return (
                                 <div key={dir} className="flex flex-col gap-1 border-b border-blue-100 pb-2 last:border-0">
-                                    <div className="grid grid-cols-6 gap-2 items-center">
+                                    <div className="grid grid-cols-3 gap-2 items-center">
                                         <span className="text-[10px] font-black text-blue-800 w-12">{dir.replace('_', '/')}</span>
                                         <div className="flex flex-col">
                                             <span className="text-[7px] font-bold uppercase text-gray-400">Area</span>
@@ -122,12 +122,6 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                                                 value={area || ''}
                                                 onChange={(e) => handleWindowChange(dir, 'area', e.target.value)}
                                             />
-                                        </div>
-                                        <div className="col-span-3 flex flex-col">
-                                            <span className="text-[7px] font-bold uppercase text-gray-400">Selected Assembly</span>
-                                            <div className="p-1 text-[9px] font-bold bg-blue-50 border border-blue-100 rounded text-blue-800">
-                                              {projectState.globalWindowConfig.type} {projectState.globalWindowConfig.frame} ({projectState.globalWindowConfig.coating})
-                                            </div>
                                         </div>
                                         <div className="col-span-2 flex flex-col">
                                             <span className="text-[7px] font-bold uppercase text-gray-400">Internal Shading</span>
