@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import WizardContainer from './components/wizard/WizardContainer';
 import ReportGenerator from './components/ReportGenerator';
+import THGMWorksheet from './components/THGMWorksheet';
 import TempInput from './components/TempInput';
 import { initialState } from './state/projectState';
 import { calculateRoomMetrics } from './utils/calculations';
@@ -11,7 +12,7 @@ import ComponentTable from './components/ComponentTable';
 function App() {
   const [state, setState] = useState(initialState);
   const [activeRoomIndex, setActiveRoomIndex] = useState(null);
-  const [view, setView] = useState('wizard'); // 'wizard' or 'report'
+  const [view, setView] = useState('wizard'); // 'wizard', 'thgm', or 'report'
 
   const handleUpdateProject = (key, value) => {
     setState(prev => {
@@ -89,6 +90,12 @@ function App() {
             className={`px-4 py-2 rounded font-bold ${view === 'wizard' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
           >
             Input Wizard
+          </button>
+          <button
+            onClick={() => setView('thgm')}
+            className={`px-4 py-2 rounded font-bold ${view === 'thgm' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+          >
+            THGM Worksheet
           </button>
           <button
             onClick={() => setView('report')}
@@ -480,6 +487,12 @@ function App() {
               onUpdateProject={handleUpdateProject}
             />
           )}
+        </div>
+      )}
+
+      {view === 'thgm' && (
+        <div className="max-w-6xl mx-auto py-8">
+           <THGMWorksheet state={state} />
         </div>
       )}
 
