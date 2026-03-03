@@ -1,8 +1,8 @@
 import React from 'react';
 import library from '../data/library.json';
-import { calculateComponentFactors } from '../utils/calculations';
+import { calculateComponentFactors, lookupGlazingData } from '../utils/calculations';
 
-const THGMWorksheet = ({ state }) => {
+const THGMWorksheet = ({ state, onUpdateProject }) => {
   const factors = calculateComponentFactors(state);
   const hg_dt = state.environmental.hg_odt - state.environmental.hg_idt;
   const latitude = state.environmental.hg_north_latitude;
@@ -22,17 +22,20 @@ const THGMWorksheet = ({ state }) => {
   const defaultWindow = library.assemblies.find(a => a.type === 'window') || { uFactor: 0.28, shgc: 0.4, glazingType: 'Double' };
   const isfDefault = 1.0;
 
-  // Use the first room's window config as a representative if available, otherwise default
-  const firstRoom = state.rooms[0];
+  // Use global window config for the worksheet defaults
+  const globalConfig = state.globalWindowConfig || {
+    type: 'Double', frame: 'Operable-Aluminum', spacer: 'Insulating', coating: 'Clear', gapGas: '1/4 Air', hasStorm: false
+  };
+
+  const updateGlobalConfig = (field, val) => {
+    onUpdateProject('globalWindowConfig', { ...globalConfig, [field]: val });
+  };
+
   const getWindowConfig = (dir) => {
-    const config = firstRoom?.windows?.[dir] || { area: 0, assemblyId: firstRoom?.windowAssembly, shadingType: firstRoom?.shadingType || 'No shades', frameType: '', isStorm: false };
-    const assembly = library.assemblies.find(a => a.id === config.assemblyId) || defaultWindow;
-    let shgc = assembly.shgc;
-    if (config.frameType && library.shgcTable[config.frameType]) {
-      shgc = library.shgcTable[config.frameType][config.isStorm ? 'Storm' : 'Regular'];
-    }
-    const isf = library.isfTable[config.shadingType || 'No shades']?.[assembly.glazingType || 'Double'] || isfDefault;
-    return { shgc, isf, assemblyDescription: assembly.description };
+    // Current logic uses global config for all orientations in the worksheet for multiplier calculation
+    const lookup = lookupGlazingData(globalConfig);
+    const isf = library.isfTable['No shades']?.[globalConfig.type || 'Double'] || isfDefault;
+    return { shgc: lookup.shgc, isf, rValue: lookup.rValue };
   };
 
   return (
@@ -50,15 +53,93 @@ const THGMWorksheet = ({ state }) => {
         </div>
       </div>
 
+      {/* Global Window Configuration Selector */}
+      <div className="mb-8 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg no-print">
+        <h3 className="text-sm font-black uppercase text-blue-900 mb-3">Global Window Specification Engine</h3>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          <div>
+            <label className="block text-[8px] font-bold text-blue-700 uppercase">Glazing Type</label>
+            <select
+              className="w-full border p-1 rounded font-bold text-[10px]"
+              value={globalConfig.type}
+              onChange={(e) => updateGlobalConfig('type', e.target.value)}
+            >
+              <option>Single</option>
+              <option>Double</option>
+              <option>Triple</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-[8px] font-bold text-blue-700 uppercase">Frame Material</label>
+            <select
+              className="w-full border p-1 rounded font-bold text-[10px]"
+              value={globalConfig.frame}
+              onChange={(e) => updateGlobalConfig('frame', e.target.value)}
+            >
+              {Object.keys(library.glazingRValueTable[globalConfig.type] || {}).map(f => <option key={f}>{f}</option>)}
+            </select>
+          </div>
+          {globalConfig.type !== 'Single' && (
+            <>
+              <div>
+                <label className="block text-[8px] font-bold text-blue-700 uppercase">Spacer</label>
+                <select
+                  className="w-full border p-1 rounded font-bold text-[10px]"
+                  value={globalConfig.spacer}
+                  onChange={(e) => updateGlobalConfig('spacer', e.target.value)}
+                >
+                  <option>Metal</option>
+                  <option>Insulating</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[8px] font-bold text-blue-700 uppercase">Coating</label>
+                <select
+                  className="w-full border p-1 rounded font-bold text-[10px]"
+                  value={globalConfig.coating}
+                  onChange={(e) => updateGlobalConfig('coating', e.target.value)}
+                >
+                  <option>Clear</option>
+                  <option>Low-E</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[8px] font-bold text-blue-700 uppercase">Gap & Gas</label>
+                <select
+                  className="w-full border p-1 rounded font-bold text-[10px]"
+                  value={globalConfig.gapGas}
+                  onChange={(e) => updateGlobalConfig('gapGas', e.target.value)}
+                >
+                  {Object.keys((library.glazingRValueTable[globalConfig.type]?.[globalConfig.frame]?.[globalConfig.spacer]?.[globalConfig.coating]) || {}).map(g => <option key={g}>{g}</option>)}
+                </select>
+              </div>
+            </>
+          )}
+          {globalConfig.type === 'Single' && (
+             <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="checkbox" checked={globalConfig.hasStorm}
+                  onChange={(e) => updateGlobalConfig('hasStorm', e.target.checked)}
+                />
+                <span className="text-[10px] font-bold uppercase">Storm Window</span>
+             </div>
+          )}
+        </div>
+        <div className="mt-4 flex gap-4 text-blue-900">
+           <div className="px-3 py-1 bg-white border border-blue-200 rounded font-black">CALCULATED R-VALUE: {factors.windows.rEff.toFixed(2)}</div>
+           <div className="px-3 py-1 bg-white border border-blue-200 rounded font-black text-red-600">HL FACTOR: {factors.windows.hlFactor.toFixed(3)}</div>
+        </div>
+      </div>
+
       {/* THGM Calculation Table */}
       <div className="mb-8">
         <h2 className="bg-gray-100 border-x border-t border-black p-1 text-center font-black uppercase border-b">THGM Calculation Table</h2>
-        <table className="w-full border-collapse border border-black">
+        <table className="w-full border-collapse border border-black table-fixed">
           <thead>
             <tr className="border-b border-black bg-gray-50">
               <th className="border-r border-black p-1 w-1/4"></th>
               {directions.map(d => (
-                <th key={d.id} className="border-r border-black p-1 text-[8px] uppercase">{d.label}</th>
+                <th key={d.id} className="border-r border-black p-1 text-[8px] uppercase w-24">{d.label}</th>
               ))}
             </tr>
           </thead>
@@ -74,7 +155,7 @@ const THGMWorksheet = ({ state }) => {
             <tr className="border-b border-black">
               <td className="border-r border-black p-1 font-bold uppercase">Effective R-value</td>
               {directions.map(d => (
-                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{rEff.toFixed(2)}</td>
+                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{getWindowConfig(d.id).rValue.toFixed(2)}</td>
               ))}
             </tr>
             <tr className="border-b border-black h-12">
@@ -83,7 +164,7 @@ const THGMWorksheet = ({ state }) => {
                 <span className="border-t border-black px-2 mt-1 italic">HG&Delta;T / R</span>
               </td>
               {directions.map(d => (
-                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{(hg_dt / rEff).toFixed(3)}</td>
+                <td key={d.id} className="border-r border-black p-1 text-center font-mono">{(hg_dt / getWindowConfig(d.id).rValue).toFixed(3)}</td>
               ))}
             </tr>
             <tr className="border-b border-black">
@@ -122,7 +203,7 @@ const THGMWorksheet = ({ state }) => {
                 const latKey = Math.min(Math.max(Math.round(latitude), 40), 48).toString();
                 const solar = library.solarTable[latKey][d.id]?.imp || 0;
                 const config = getWindowConfig(d.id);
-                const part1 = hg_dt / rEff;
+                const part1 = hg_dt / config.rValue;
                 const part5 = config.shgc * solar * config.isf;
                 const thgm = part1 + part5;
                 return <td key={d.id} className="border-r border-black p-1 text-center font-black text-blue-800 text-[11px] font-mono">{thgm.toFixed(3)}</td>;

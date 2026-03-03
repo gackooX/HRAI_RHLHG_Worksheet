@@ -62,6 +62,14 @@ export const initialState = {
     LRairh: 0.873, // Heating leakage default
     LRairc: 0.030, // Cooling leakage default
   },
+  globalWindowConfig: {
+    type: 'Double',
+    frame: 'Operable-Aluminum',
+    spacer: 'Insulating',
+    coating: 'Clear',
+    gapGas: '1/4 Air',
+    hasStorm: false
+  },
   rooms: [],
   displayUnits: 'IMPERIAL', // IMPERIAL or METRIC
 };

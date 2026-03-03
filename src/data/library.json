@@ -11,14 +11,14 @@
       "type": "window",
       "description": "Double Glazed, Low-E, Argon, Vinyl Frame",
       "uFactor": 0.28,
-      "shgc": 0.40,
+      "shgc": 0.4,
       "glazingType": "Double"
     },
     {
       "id": "door-1",
       "type": "door",
       "description": "Insulated Steel, Wood Core",
-      "uFactor": 0.20
+      "uFactor": 0.2
     },
     {
       "id": "wall-2",
@@ -30,7 +30,7 @@
       "id": "wall-3",
       "type": "wall",
       "description": "ICF Wall, 2.5\" EPS, 6\" Concrete, R-22 Effective",
-      "uFactor": 0.040
+      "uFactor": 0.04
     },
     {
       "id": "window-2",
@@ -44,7 +44,7 @@
       "id": "window-3",
       "type": "window",
       "description": "Single Glazed, Wood Frame (Old)",
-      "uFactor": 1.10,
+      "uFactor": 1.1,
       "shgc": 0.75,
       "glazingType": "Single"
     },
@@ -52,7 +52,7 @@
       "id": "ceiling-1",
       "type": "ceiling",
       "description": "Attic, R-50 Blown Cellulose",
-      "uFactor": 0.020
+      "uFactor": 0.02
     }
   ],
   "foundationMultipliers": {
@@ -85,92 +85,1270 @@
         "odtCooling": 77,
         "summerRange": 14,
         "latitude": 49
+      },
+      {
+        "city": "Montreal",
+        "odtHeating": -11,
+        "odtCooling": 86,
+        "summerRange": 20,
+        "latitude": 45
+      },
+      {
+        "city": "Calgary",
+        "odtHeating": -18,
+        "odtCooling": 82,
+        "summerRange": 27,
+        "latitude": 51
+      },
+      {
+        "city": "Edmonton",
+        "odtHeating": -24,
+        "odtCooling": 81,
+        "summerRange": 25,
+        "latitude": 53
+      },
+      {
+        "city": "Winnipeg",
+        "odtHeating": -27,
+        "odtCooling": 86,
+        "summerRange": 22,
+        "latitude": 50
+      },
+      {
+        "city": "Quebec City",
+        "odtHeating": -18,
+        "odtCooling": 82,
+        "summerRange": 18,
+        "latitude": 46
+      },
+      {
+        "city": "Hamilton",
+        "odtHeating": -4,
+        "odtCooling": 86,
+        "summerRange": 18,
+        "latitude": 43
+      },
+      {
+        "city": "London",
+        "odtHeating": -4,
+        "odtCooling": 84,
+        "summerRange": 20,
+        "latitude": 43
+      },
+      {
+        "city": "Kitchener",
+        "odtHeating": -6,
+        "odtCooling": 84,
+        "summerRange": 20,
+        "latitude": 43
+      },
+      {
+        "city": "St. Catharines",
+        "odtHeating": -2,
+        "odtCooling": 86,
+        "summerRange": 18,
+        "latitude": 43
+      },
+      {
+        "city": "Halifax",
+        "odtHeating": -4,
+        "odtCooling": 79,
+        "summerRange": 16,
+        "latitude": 44
+      },
+      {
+        "city": "Oshawa",
+        "odtHeating": -4,
+        "odtCooling": 84,
+        "summerRange": 18,
+        "latitude": 44
+      },
+      {
+        "city": "Victoria",
+        "odtHeating": 19,
+        "odtCooling": 75,
+        "summerRange": 14,
+        "latitude": 48
+      },
+      {
+        "city": "Windsor",
+        "odtHeating": 1,
+        "odtCooling": 88,
+        "summerRange": 18,
+        "latitude": 42
+      },
+      {
+        "city": "Saskatoon",
+        "odtHeating": -29,
+        "odtCooling": 86,
+        "summerRange": 25,
+        "latitude": 52
+      },
+      {
+        "city": "Regina",
+        "odtHeating": -29,
+        "odtCooling": 86,
+        "summerRange": 25,
+        "latitude": 50
+      },
+      {
+        "city": "Sherbrooke",
+        "odtHeating": -17,
+        "odtCooling": 82,
+        "summerRange": 22,
+        "latitude": 45
+      },
+      {
+        "city": "St. John's",
+        "odtHeating": -8,
+        "odtCooling": 75,
+        "summerRange": 14,
+        "latitude": 47
+      },
+      {
+        "city": "Barrie",
+        "odtHeating": -9,
+        "odtCooling": 82,
+        "summerRange": 20,
+        "latitude": 44
+      },
+      {
+        "city": "Kelowna",
+        "odtHeating": 0,
+        "odtCooling": 88,
+        "summerRange": 31,
+        "latitude": 50
+      },
+      {
+        "city": "Abbotsford",
+        "odtHeating": 16,
+        "odtCooling": 82,
+        "summerRange": 18,
+        "latitude": 49
+      },
+      {
+        "city": "Sudbury",
+        "odtHeating": -20,
+        "odtCooling": 81,
+        "summerRange": 22,
+        "latitude": 46
+      },
+      {
+        "city": "Kingston",
+        "odtHeating": -8,
+        "odtCooling": 84,
+        "summerRange": 18,
+        "latitude": 44
+      },
+      {
+        "city": "Guelph",
+        "odtHeating": -6,
+        "odtCooling": 84,
+        "summerRange": 20,
+        "latitude": 43
+      },
+      {
+        "city": "Thunder Bay",
+        "odtHeating": -22,
+        "odtCooling": 79,
+        "summerRange": 22,
+        "latitude": 48
+      },
+      {
+        "city": "Moncton",
+        "odtHeating": -13,
+        "odtCooling": 82,
+        "summerRange": 20,
+        "latitude": 46
+      },
+      {
+        "city": "Saint John",
+        "odtHeating": -11,
+        "odtCooling": 77,
+        "summerRange": 16,
+        "latitude": 45
+      },
+      {
+        "city": "Peterborough",
+        "odtHeating": -11,
+        "odtCooling": 84,
+        "summerRange": 20,
+        "latitude": 44
       }
     ]
   },
   "solarTable": {
     "40": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 51, "met": 160 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 80, "met": 252 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 51,
+        "met": 160
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 80,
+        "met": 252
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "41": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 53, "met": 166 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 83, "met": 261 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 53,
+        "met": 166
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 83,
+        "met": 261
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "42": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 55, "met": 172 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 86, "met": 271 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 55,
+        "met": 172
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 86,
+        "met": 271
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "43": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 56, "met": 178 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 89, "met": 280 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 56,
+        "met": 178
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 89,
+        "met": 280
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "44": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 58, "met": 184 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 92, "met": 290 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 58,
+        "met": 184
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 92,
+        "met": 290
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "45": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 60, "met": 190 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 95, "met": 299 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 60,
+        "met": 190
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 95,
+        "met": 299
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "46": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 62, "met": 196 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 98, "met": 309 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 62,
+        "met": 196
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 98,
+        "met": 309
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "47": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 64, "met": 202 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 101, "met": 318 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 64,
+        "met": 202
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 101,
+        "met": 318
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     },
     "48": {
-      "N_S": { "imp": 29, "met": 93 },
-      "S": { "imp": 66, "met": 208 },
-      "E_W": { "imp": 90, "met": 285 },
-      "NE_NW": { "imp": 62, "met": 194 },
-      "SE_SW": { "imp": 104, "met": 328 },
-      "H": { "imp": 169, "met": 534 }
+      "N_S": {
+        "imp": 29,
+        "met": 93
+      },
+      "S": {
+        "imp": 66,
+        "met": 208
+      },
+      "E_W": {
+        "imp": 90,
+        "met": 285
+      },
+      "NE_NW": {
+        "imp": 62,
+        "met": 194
+      },
+      "SE_SW": {
+        "imp": 104,
+        "met": 328
+      },
+      "H": {
+        "imp": 169,
+        "met": 534
+      }
     }
   },
   "isfTable": {
-    "No shades": { "Single": 1.0, "Double": 1.0, "Triple": 1.0, "Heat Mirror": 1.0 },
-    "Blinds/Curtains": { "Single": 0.50, "Double": 0.55, "Triple": 0.57, "Heat Mirror": 0.60 },
-    "Reflective": { "Single": 0.35, "Double": 0.37, "Triple": 0.40, "Heat Mirror": 0.44 }
+    "No shades": {
+      "Single": 1.0,
+      "Double": 1.0,
+      "Triple": 1.0,
+      "Heat Mirror": 1.0
+    },
+    "Blinds/Curtains": {
+      "Single": 0.5,
+      "Double": 0.55,
+      "Triple": 0.57,
+      "Heat Mirror": 0.6
+    },
+    "Reflective": {
+      "Single": 0.35,
+      "Double": 0.37,
+      "Triple": 0.4,
+      "Heat Mirror": 0.44
+    }
   },
   "shgcTable": {
-    "Fixed-aluminum": { "Regular": 0.73, "Storm": 0.65 },
-    "Fixed-wood": { "Regular": 0.67, "Storm": 0.60 },
-    "Operable-aluminum": { "Regular": 0.71, "Storm": 0.63 },
-    "Operable-wood": { "Regular": 0.55, "Storm": 0.49 }
+    "Fixed-aluminum": {
+      "Regular": 0.73,
+      "Storm": 0.65
+    },
+    "Fixed-wood": {
+      "Regular": 0.67,
+      "Storm": 0.6
+    },
+    "Operable-aluminum": {
+      "Regular": 0.71,
+      "Storm": 0.63
+    },
+    "Operable-wood": {
+      "Regular": 0.55,
+      "Storm": 0.49
+    }
+  },
+  "glazingRValueTable": {
+    "Single": {
+      "Fixed-Aluminum": {
+        "No": {
+          "R": 0.83,
+          "SHGC": 0.73
+        },
+        "Yes": {
+          "R": 1.31,
+          "SHGC": 0.65
+        }
+      },
+      "Fixed-Wood": {
+        "No": {
+          "R": 1.05,
+          "SHGC": 0.67
+        },
+        "Yes": {
+          "R": 1.67,
+          "SHGC": 0.6
+        }
+      },
+      "Operable-Aluminum": {
+        "No": {
+          "R": 0.74,
+          "SHGC": 0.71
+        },
+        "Yes": {
+          "R": 1.14,
+          "SHGC": 0.63
+        }
+      },
+      "Operable-Wood": {
+        "No": {
+          "R": 1.1,
+          "SHGC": 0.55
+        },
+        "Yes": {
+          "R": 1.67,
+          "SHGC": 0.49
+        }
+      }
+    },
+    "Double": {
+      "Fixed-Aluminum": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              1.25,
+              0.65
+            ],
+            "1/4 Argon": [
+              1.25,
+              0.65
+            ],
+            "11/32 Krypton": [
+              1.35,
+              0.65
+            ],
+            "1/2 Air": [
+              1.31,
+              0.65
+            ],
+            "1/2 Argon": [
+              1.35,
+              0.65
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.42,
+              0.47
+            ],
+            "1/4 Argon": [
+              1.53,
+              0.47
+            ],
+            "11/32 Krypton": [
+              1.75,
+              0.47
+            ],
+            "1/2 Air": [
+              1.59,
+              0.47
+            ],
+            "1/2 Argon": [
+              1.72,
+              0.47
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              1.25,
+              0.65
+            ],
+            "1/4 Argon": [
+              1.31,
+              0.65
+            ],
+            "11/32 Krypton": [
+              1.42,
+              0.65
+            ],
+            "1/2 Air": [
+              1.35,
+              0.65
+            ],
+            "1/2 Argon": [
+              1.42,
+              0.65
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.48,
+              0.47
+            ],
+            "1/4 Argon": [
+              1.63,
+              0.47
+            ],
+            "11/32 Krypton": [
+              1.87,
+              0.47
+            ],
+            "1/2 Air": [
+              1.7,
+              0.47
+            ],
+            "1/2 Argon": [
+              1.82,
+              0.47
+            ]
+          }
+        }
+      },
+      "Fixed-Wood/Vinyl": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              1.7,
+              0.6
+            ],
+            "1/4 Argon": [
+              1.82,
+              0.6
+            ],
+            "11/32 Krypton": [
+              1.99,
+              0.6
+            ],
+            "1/2 Air": [
+              1.87,
+              0.6
+            ],
+            "1/2 Argon": [
+              1.99,
+              0.6
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.04,
+              0.47
+            ],
+            "1/4 Argon": [
+              2.33,
+              0.47
+            ],
+            "11/32 Krypton": [
+              2.9,
+              0.47
+            ],
+            "1/2 Air": [
+              2.5,
+              0.47
+            ],
+            "1/2 Argon": [
+              2.56,
+              0.47
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              1.82,
+              0.59
+            ],
+            "1/4 Argon": [
+              1.99,
+              0.59
+            ],
+            "11/32 Krypton": [
+              2.15,
+              0.59
+            ],
+            "1/2 Air": [
+              2.04,
+              0.59
+            ],
+            "1/2 Argon": [
+              2.15,
+              0.59
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.27,
+              0.47
+            ],
+            "1/4 Argon": [
+              2.67,
+              0.47
+            ],
+            "11/32 Krypton": [
+              3.35,
+              0.47
+            ],
+            "1/2 Air": [
+              2.9,
+              0.47
+            ],
+            "1/2 Argon": [
+              3.24,
+              0.47
+            ]
+          }
+        }
+      },
+      "Operable-Aluminum": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              1.08,
+              0.63
+            ],
+            "1/4 Argon": [
+              1.08,
+              0.63
+            ],
+            "11/32 Krypton": [
+              1.14,
+              0.63
+            ],
+            "1/2 Air": [
+              1.14,
+              0.63
+            ],
+            "1/2 Argon": [
+              1.14,
+              0.63
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.19,
+              0.47
+            ],
+            "1/4 Argon": [
+              1.25,
+              0.47
+            ],
+            "11/32 Krypton": [
+              1.37,
+              0.47
+            ],
+            "1/2 Air": [
+              1.31,
+              0.47
+            ],
+            "1/2 Argon": [
+              1.35,
+              0.47
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              1.08,
+              0.63
+            ],
+            "1/4 Argon": [
+              1.14,
+              0.63
+            ],
+            "11/32 Krypton": [
+              1.19,
+              0.63
+            ],
+            "1/2 Air": [
+              1.14,
+              0.63
+            ],
+            "1/2 Argon": [
+              1.19,
+              0.63
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.19,
+              0.47
+            ],
+            "1/4 Argon": [
+              1.35,
+              0.47
+            ],
+            "11/32 Krypton": [
+              1.48,
+              0.47
+            ],
+            "1/2 Air": [
+              1.37,
+              0.47
+            ],
+            "1/2 Argon": [
+              1.42,
+              0.47
+            ]
+          }
+        }
+      },
+      "Operable-Wood/Vinyl": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              2.1,
+              0.49
+            ],
+            "1/4 Argon": [
+              1.82,
+              0.49
+            ],
+            "11/32 Krypton": [
+              1.99,
+              0.49
+            ],
+            "1/2 Air": [
+              1.87,
+              0.49
+            ],
+            "1/2 Argon": [
+              1.93,
+              0.49
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.1,
+              0.47
+            ],
+            "1/4 Argon": [
+              2.21,
+              0.47
+            ],
+            "11/32 Krypton": [
+              2.61,
+              0.47
+            ],
+            "1/2 Air": [
+              2.38,
+              0.47
+            ],
+            "1/2 Argon": [
+              2.5,
+              0.47
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              2.33,
+              0.49
+            ],
+            "1/4 Argon": [
+              1.99,
+              0.49
+            ],
+            "11/32 Krypton": [
+              2.15,
+              0.49
+            ],
+            "1/2 Air": [
+              2.04,
+              0.49
+            ],
+            "1/2 Argon": [
+              2.1,
+              0.49
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.61,
+              0.47
+            ],
+            "1/4 Argon": [
+              2.5,
+              0.47
+            ],
+            "11/32 Krypton": [
+              2.95,
+              0.47
+            ],
+            "1/2 Air": [
+              2.67,
+              0.47
+            ],
+            "1/2 Argon": [
+              2.9,
+              0.47
+            ]
+          }
+        }
+      }
+    },
+    "Triple": {
+      "Fixed-Aluminum": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              1.48,
+              0.58
+            ],
+            "1/4 Argon": [
+              1.53,
+              0.58
+            ],
+            "11/32 Krypton": [
+              1.65,
+              0.58
+            ],
+            "1/2 Air": [
+              1.59,
+              0.58
+            ],
+            "1/2 Argon": [
+              1.65,
+              0.58
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.59,
+              0.4
+            ],
+            "1/4 Argon": [
+              1.7,
+              0.4
+            ],
+            "11/32 Krypton": [
+              1.93,
+              0.4
+            ],
+            "1/2 Air": [
+              1.82,
+              0.4
+            ],
+            "1/2 Argon": [
+              1.93,
+              0.4
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              1.53,
+              0.58
+            ],
+            "1/4 Argon": [
+              1.59,
+              0.58
+            ],
+            "11/32 Krypton": [
+              1.76,
+              0.58
+            ],
+            "1/2 Air": [
+              1.7,
+              0.58
+            ],
+            "1/2 Argon": [
+              1.76,
+              0.58
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.7,
+              0.4
+            ],
+            "1/4 Argon": [
+              1.82,
+              0.4
+            ],
+            "11/32 Krypton": [
+              2.1,
+              0.4
+            ],
+            "1/2 Air": [
+              1.93,
+              0.4
+            ],
+            "1/2 Argon": [
+              2.04,
+              0.4
+            ]
+          }
+        }
+      },
+      "Fixed-Wood/Vinyl": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              2.21,
+              0.53
+            ],
+            "1/4 Argon": [
+              2.33,
+              0.53
+            ],
+            "11/32 Krypton": [
+              2.67,
+              0.53
+            ],
+            "1/2 Air": [
+              2.5,
+              0.53
+            ],
+            "1/2 Argon": [
+              2.61,
+              0.53
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.44,
+              0.4
+            ],
+            "1/4 Argon": [
+              2.78,
+              0.4
+            ],
+            "11/32 Krypton": [
+              3.41,
+              0.4
+            ],
+            "1/2 Air": [
+              3.07,
+              0.4
+            ],
+            "1/2 Argon": [
+              3.35,
+              0.4
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              2.44,
+              0.53
+            ],
+            "1/4 Argon": [
+              2.67,
+              0.53
+            ],
+            "11/32 Krypton": [
+              3.12,
+              0.53
+            ],
+            "1/2 Air": [
+              2.95,
+              0.53
+            ],
+            "1/2 Argon": [
+              3.07,
+              0.53
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.84,
+              0.4
+            ],
+            "1/4 Argon": [
+              3.24,
+              0.4
+            ],
+            "11/32 Krypton": [
+              4.26,
+              0.4
+            ],
+            "1/2 Air": [
+              3.76,
+              0.4
+            ],
+            "1/2 Argon": [
+              4.14,
+              0.4
+            ]
+          }
+        }
+      },
+      "Operable-Aluminum": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              1.19,
+              0.57
+            ],
+            "1/4 Argon": [
+              1.25,
+              0.57
+            ],
+            "11/32 Krypton": [
+              1.36,
+              0.57
+            ],
+            "1/2 Air": [
+              1.31,
+              0.57
+            ],
+            "1/2 Argon": [
+              1.31,
+              0.57
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.31,
+              0.4
+            ],
+            "1/4 Argon": [
+              1.36,
+              0.4
+            ],
+            "11/32 Krypton": [
+              1.53,
+              0.4
+            ],
+            "1/2 Air": [
+              1.42,
+              0.4
+            ],
+            "1/2 Argon": [
+              1.48,
+              0.4
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              1.53,
+              0.58
+            ],
+            "1/4 Argon": [
+              1.31,
+              0.57
+            ],
+            "11/32 Krypton": [
+              1.42,
+              0.57
+            ],
+            "1/2 Air": [
+              1.36,
+              0.57
+            ],
+            "1/2 Argon": [
+              1.42,
+              0.57
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              1.7,
+              0.4
+            ],
+            "1/4 Argon": [
+              1.82,
+              0.4
+            ],
+            "11/32 Krypton": [
+              1.59,
+              0.4
+            ],
+            "1/2 Air": [
+              1.53,
+              0.4
+            ],
+            "1/2 Argon": [
+              1.59,
+              0.4
+            ]
+          }
+        }
+      },
+      "Operable-Wood/Vinyl": {
+        "Metal": {
+          "Clear": {
+            "1/4 Air": [
+              2.1,
+              0.44
+            ],
+            "1/4 Argon": [
+              2.21,
+              0.44
+            ],
+            "11/32 Krypton": [
+              2.5,
+              0.44
+            ],
+            "1/2 Air": [
+              2.38,
+              0.44
+            ],
+            "1/2 Argon": [
+              2.5,
+              0.44
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.33,
+              0.4
+            ],
+            "1/4 Argon": [
+              2.5,
+              0.4
+            ],
+            "11/32 Krypton": [
+              3.01,
+              0.4
+            ],
+            "1/2 Air": [
+              2.78,
+              0.4
+            ],
+            "1/2 Argon": [
+              2.95,
+              0.4
+            ]
+          }
+        },
+        "Insulating": {
+          "Clear": {
+            "1/4 Air": [
+              2.33,
+              0.44
+            ],
+            "1/4 Argon": [
+              2.5,
+              0.44
+            ],
+            "11/32 Krypton": [
+              2.95,
+              0.44
+            ],
+            "1/2 Air": [
+              2.84,
+              0.44
+            ],
+            "1/2 Argon": [
+              2.95,
+              0.44
+            ]
+          },
+          "Low-E": {
+            "1/4 Air": [
+              2.61,
+              0.43
+            ],
+            "1/4 Argon": [
+              2.9,
+              0.43
+            ],
+            "11/32 Krypton": [
+              3.75,
+              0.43
+            ],
+            "1/2 Air": [
+              3.41,
+              0.43
+            ],
+            "1/2 Argon": [
+              3.63,
+              0.43
+            ]
+          }
+        }
+      }
+    }
   }
 }

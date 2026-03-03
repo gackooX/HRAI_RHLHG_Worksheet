@@ -1,9 +1,9 @@
 /**
  * Calculation utilities for HRAI Heat Loss & Heat Gain (Headless Model)
  */
-import library from '../data/library.json';
-import { complianceData } from '../data/complianceData';
-import { convertTempDelta, convertArea, convertVolume, convertPower } from './unitConverter';
+import library from '../data/library.json' with { type: 'json' };
+import { complianceData } from '../data/complianceData.js';
+import { convertTempDelta, convertArea, convertVolume, convertPower } from './unitConverter.js';
 
 const getUFactor = (id, defaultU) => {
   const assembly = library.assemblies.find(a => a.id === id);
@@ -19,6 +19,32 @@ const getSolarValue = (latitude, direction) => {
 
 const getISFValue = (shadingType, glazingType) => {
   return library.isfTable[shadingType]?.[glazingType] || 1.0;
+};
+
+export const lookupGlazingData = (config) => {
+  const { type, frame, spacer, coating, gapGas, hasStorm } = config;
+  const table = library.glazingRValueTable;
+
+  if (type === 'Single') {
+    const stormKey = hasStorm ? 'Yes' : 'No';
+    const entry = table[type][frame]?.[stormKey];
+    return entry ? { rValue: entry.R, shgc: entry.SHGC } : { rValue: 0.83, shgc: 0.73 };
+  }
+
+  // Double or Triple
+  const frameData = table[type]?.[frame];
+  if (!frameData) return { rValue: 1.0, shgc: 0.5 };
+
+  const spacerData = frameData[spacer];
+  if (!spacerData) return { rValue: 1.0, shgc: 0.5 };
+
+  const coatingData = spacerData[coating];
+  if (!coatingData) return { rValue: 1.0, shgc: 0.5 };
+
+  const finalData = coatingData[gapGas];
+  if (!finalData) return { rValue: 1.0, shgc: 0.5 };
+
+  return { rValue: finalData[0], shgc: finalData[1] };
 };
 
 export const calculateTHGM = (uFactor, hgdt, shgc, solar, isf) => {
@@ -89,12 +115,21 @@ export const calculateDetailedAreas = (room, state) => {
 export const calculateRoomConductiveLoss = (room, state, factors) => {
   const areas = calculateDetailedAreas(room, state);
 
+  // Ceiling logic: Only include if it's the top floor
+  const levels = ['Basement', 'Level 1', 'Level 2', 'Level 3'];
+  const activeLevels = levels.filter(l => state.rooms.some(r => r.level === l));
+  const topLevel = activeLevels[activeLevels.length - 1];
+  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && room.level !== 'Basement');
+
   let loss = (areas.windowArea * factors.windows.hlFactor) +
              (areas.doorArea * factors.doors.hlFactor) +
              (areas.headerArea * factors.header.hlFactor) +
              (areas.netAGW * factors.agw.hlFactor) +
-             (areas.netBGW * factors.bgw.hlFactor) +
-             (areas.floorArea * factors.ceiling.hlFactor);
+             (areas.netBGW * factors.bgw.hlFactor);
+
+  if (isTopFloor) {
+    loss += (areas.floorArea * factors.ceiling.hlFactor);
+  }
 
   if (state.designMultipliers.includeExposedFloor) {
     loss += (areas.floorArea * factors.floor.hlFactor);
@@ -122,33 +157,39 @@ export const calculateRoomConductiveGain = (room, state, factors) => {
       // Handle both legacy area-only format and new object format
       const area = typeof data === 'object' ? data.area : data;
       if (area > 0) {
-        const assemblyId = (typeof data === 'object' && data.assemblyId) ? data.assemblyId : room.windowAssembly;
         const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
 
-        const windowAssembly = library.assemblies.find(a => a.id === assemblyId) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
+        // Automated Lookup - Merge global config with room-specific overrides (like area)
+        const windowConfig = {
+          ...(state.globalWindowConfig || {}),
+          ...(typeof data === 'object' ? data : { area: data })
+        };
+        const lookup = lookupGlazingData(windowConfig);
 
-        // Use frame-based SHGC if frameType is provided
-        let shgc = windowAssembly.shgc;
-        if (data.frameType && library.shgcTable[data.frameType]) {
-          shgc = library.shgcTable[data.frameType][data.isStorm ? 'Storm' : 'Regular'];
-        }
-
-        const glazingType = windowAssembly.glazingType || 'Double';
-        const isf = getISFValue(shadingType, glazingType);
+        const isf = getISFValue(shadingType, windowConfig.type || 'Double');
         const solar = getSolarValue(latitude, dir);
 
-        const thgm = calculateTHGM(1/factors.windows.rEff, hg_delta_t, shgc, solar, isf);
+        const thgm = calculateTHGM(1/lookup.rValue, hg_delta_t, lookup.shgc, solar, isf);
         totalWindowGain += area * thgm;
       }
     });
   }
 
+  // Ceiling logic: Only include if it's the top floor
+  const levels = ['Basement', 'Level 1', 'Level 2', 'Level 3'];
+  const activeLevels = levels.filter(l => state.rooms.some(r => r.level === l));
+  const topLevel = activeLevels[activeLevels.length - 1];
+  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && room.level !== 'Basement');
+
   let gain = totalWindowGain +
              (areas.doorArea * factors.doors.hgFactor) +
              (areas.headerArea * factors.header.hgFactor) +
              (areas.netAGW * factors.agw.hgFactor) +
-             (areas.netBGW * factors.bgw.hgFactor) +
-             (areas.floorArea * factors.ceiling.hgFactor);
+             (areas.netBGW * factors.bgw.hgFactor);
+
+  if (isTopFloor) {
+    gain += (areas.floorArea * factors.ceiling.hgFactor);
+  }
 
   if (state.designMultipliers.includeExposedFloor) {
     gain += (areas.floorArea * factors.floor.hgFactor);
@@ -174,10 +215,15 @@ export const calculateComponentFactors = (state) => {
   const getHGFactor = (r, scKey) => r > 0 ? (hg_delta_t + (scValues[scKey] || 0)) / r : 0;
   const effR = state.compliance.effRValues;
 
+  // Determine Global Window R-Value from state
+  const globalWindowLookup = lookupGlazingData(state.globalWindowConfig || {
+    type: 'Double', frame: 'Operable-Aluminum', spacer: 'Insulating', coating: 'Clear', gapGas: '1/4 Air'
+  });
+
   const factors = {
     windows: {
-      rEff: effR.windows,
-      hlFactor: getHLFactor(effR.windows),
+      rEff: globalWindowLookup.rValue,
+      hlFactor: getHLFactor(globalWindowLookup.rValue),
       sc: scValues.windows,
       hgFactor: {}, // Will use THGM logic or (HGDT+SC)/R
     },
@@ -220,13 +266,12 @@ export const calculateComponentFactors = (state) => {
   };
 
   // Special case for windows: directional THGM
-  // We'll compute these based on a default window assembly for the component table display
-  const defaultWindow = library.assemblies.find(a => a.type === 'window') || { uFactor: 0.28, shgc: 0.4, glazingType: 'Double' };
+  // We'll compute these based on the global window lookup for the component table display
   const isf = 1.0; // Default for table display
 
   ['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].forEach(dir => {
     const solar = getSolarValue(latitude, dir);
-    factors.windows.hgFactor[dir] = calculateTHGM(1/factors.windows.rEff, hg_delta_t, defaultWindow.shgc, solar, isf);
+    factors.windows.hgFactor[dir] = calculateTHGM(1/factors.windows.rEff, hg_delta_t, globalWindowLookup.shgc, solar, isf);
   });
 
   return factors;

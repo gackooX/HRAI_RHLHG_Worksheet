@@ -10,7 +10,7 @@ import {
   convertVolume,
   convertLength
 } from '../utils/unitConverter';
-import { calculateDetailedAreas, calculateComponentFactors } from '../utils/calculations';
+import { calculateDetailedAreas, calculateComponentFactors, lookupGlazingData } from '../utils/calculations';
 
 const ReportGenerator = ({ state }) => {
   const isMetric = state.displayUnits === 'METRIC';
@@ -222,15 +222,16 @@ const ReportGenerator = ({ state }) => {
                   const area = typeof data === 'object' ? data.area : (data || 0);
                   if (area <= 0) return null;
 
-                  const assemblyId = (typeof data === 'object' && data.assemblyId) ? data.assemblyId : room.windowAssembly;
                   const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
-                  const windowAssembly = library.assemblies.find(a => a.id === assemblyId) || { uFactor: 0.32, shgc: 0.4, glazingType: 'Double' };
+
+                  const windowConfig = (typeof data === 'object') ? data : state.globalWindowConfig || {};
+                  const lookup = lookupGlazingData(windowConfig);
 
                   // Recalculate precise THGM for report
                   const hg_dt = state.environmental.hg_odt - state.environmental.hg_idt;
                   const solarVal = library.solarTable[Math.min(Math.max(Math.round(state.environmental.hg_north_latitude), 40), 48).toString()][dir]?.imp || 0;
-                  const isf = library.isfTable[shadingType]?.[windowAssembly.glazingType || 'Double'] || 1.0;
-                  const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (windowAssembly.shgc * solarVal * isf);
+                  const isf = library.isfTable[shadingType]?.[windowConfig.type || 'Double'] || 1.0;
+                  const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (lookup.shgc * solarVal * isf);
 
                   return (
                     <Row
