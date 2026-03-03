@@ -20,9 +20,18 @@ function App() {
         [key]: { ...prev[key], ...value }
       };
 
-      // If compliance package changes, reset manualHLFactors
+      // If compliance package changes, reset effRValues
       if (key === 'compliance' && value.selectedPackage && value.selectedPackage !== prev.compliance.selectedPackage) {
-        newState.compliance.manualHLFactors = {};
+        const pkg = complianceData[value.selectedPackage];
+        newState.compliance.effRValues = {
+          windows: pkg.windows.effectiveR,
+          doors: pkg.doors.effectiveR,
+          bgw: pkg.basementWalls.effectiveR,
+          agw: pkg.wallsAboveGrade.effectiveR,
+          header: pkg.wallsAboveGrade.effectiveR,
+          ceiling: pkg.ceilingWithoutAttic.effectiveR,
+          floor: pkg.exposedFloor.effectiveR
+        };
       }
 
       return newState;
@@ -112,8 +121,39 @@ function App() {
 
       {view === 'wizard' && (
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Dashboard Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Dashboard Summary & Global Design */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded-lg shadow-sm border md:col-span-3">
+              <h2 className="text-sm font-black uppercase mb-4 text-blue-900 border-b pb-2">Global Design & General Info</h2>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">City Selection</label>
+                  <input
+                    className="w-full border p-1 rounded font-bold text-sm"
+                    value={state.header.city}
+                    onChange={(e) => handleUpdateProject('header', { city: e.target.value })}
+                    placeholder="Enter City..."
+                  />
+                </div>
+                <TempInput
+                  id="global-hl-odt" label="ODTH" isMetric={isMetric}
+                  value={state.environmental.hl_odt} onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
+                />
+                <TempInput
+                  id="global-hl-idt" label="IDTH" isMetric={isMetric}
+                  value={state.environmental.hl_idt} onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
+                />
+                <TempInput
+                  id="global-hg-odt" label="ODTC" isMetric={isMetric}
+                  value={state.environmental.hg_odt} onChange={(v) => handleUpdateProject('environmental', { hg_odt: v })}
+                />
+                <TempInput
+                  id="global-hg-idt" label="IDTC" isMetric={isMetric}
+                  value={state.environmental.hg_idt} onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
+                />
+              </div>
+            </div>
+
             <div className="bg-blue-900 text-white p-4 rounded-lg shadow-md flex justify-between items-center">
               <div>
                 <div className="text-xs font-bold uppercase opacity-70">Building Conditioned Area</div>
@@ -148,14 +188,6 @@ function App() {
                   className="w-full border p-2 rounded font-bold"
                   value={state.header.streetAddress}
                   onChange={(e) => handleUpdateProject('header', { streetAddress: e.target.value })}
-                />
-              </div>
-              <div className="md:col-span-1">
-                <label className="block text-[10px] font-bold uppercase text-gray-500">City</label>
-                <input
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.header.city}
-                  onChange={(e) => handleUpdateProject('header', { city: e.target.value })}
                 />
               </div>
               <div className="md:col-span-1">
@@ -263,14 +295,6 @@ function App() {
             <h2 className="text-xl font-black mb-4 border-b pb-2 text-red-700">Heat Loss</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <TempInput
-                id="hl-odt" label="Outdoor Design Temperature Heating (ODTH)" isMetric={isMetric}
-                value={state.environmental.hl_odt} onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
-              />
-              <TempInput
-                id="hl-idt" label="Indoor Design Temperature Heating (IDTH)" isMetric={isMetric}
-                value={state.environmental.hl_idt} onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
-              />
-              <TempInput
                 id="soil-temp" label="Mean Soil Temp" isMetric={isMetric}
                 value={state.environmental.hl_mean_soil_temp} onChange={(v) => handleUpdateProject('environmental', { hl_mean_soil_temp: v })}
               />
@@ -309,14 +333,6 @@ function App() {
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-black mb-4 border-b pb-2 text-blue-700">Heat Gain</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <TempInput
-                id="hg-odt" label="Outdoor Design Temperature Cooling" isMetric={isMetric}
-                value={state.environmental.hg_odt} onChange={(v) => handleUpdateProject('environmental', { hg_odt: v })}
-              />
-              <TempInput
-                id="hg-idt" label="Indoor Design Temperature Cooling" isMetric={isMetric}
-                value={state.environmental.hg_idt} onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
-              />
               <div>
                 <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Daily Range (ΔT)</label>
                 <div className="flex items-center gap-1">

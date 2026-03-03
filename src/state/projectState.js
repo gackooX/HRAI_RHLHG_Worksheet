@@ -33,9 +33,15 @@ export const initialState = {
   },
   compliance: {
     selectedPackage: 'A1',
-    windowREff: 3.57,
-    doorREff: 4.00,
-    manualHLFactors: {}, // { componentKey: value }
+    effRValues: {
+      windows: 3.57,
+      doors: 4.00,
+      bgw: 21.12,
+      agw: 17.03,
+      header: 17.03,
+      ceiling: 27.65,
+      floor: 29.80
+    },
     solarCorrection: {
       windows: 0,
       doors: 0,
