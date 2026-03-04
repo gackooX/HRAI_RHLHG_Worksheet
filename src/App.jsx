@@ -145,30 +145,8 @@ function App() {
 
       {view === 'wizard' && (
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Dashboard Summary & Global Design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded-lg shadow-sm border md:col-span-3">
-              <h2 className="text-sm font-black uppercase mb-4 text-blue-900 border-b pb-2">Global Design & General Info</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <TempInput
-                  id="global-hl-odt" label="ODTH" isMetric={isMetric}
-                  value={state.environmental.hl_odt} onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
-                />
-                <TempInput
-                  id="global-hl-idt" label="IDTH" isMetric={isMetric}
-                  value={state.environmental.hl_idt} onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
-                />
-                <TempInput
-                  id="global-hg-odt" label="ODTC" isMetric={isMetric}
-                  value={state.environmental.hg_odt} onChange={(v) => handleUpdateProject('environmental', { hg_odt: v })}
-                />
-                <TempInput
-                  id="global-hg-idt" label="IDTC" isMetric={isMetric}
-                  value={state.environmental.hg_idt} onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
-                />
-              </div>
-            </div>
-
+          {/* Dashboard Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-blue-900 text-white p-4 rounded-lg shadow-md flex justify-between items-center">
               <div>
                 <div className="text-xs font-bold uppercase opacity-70">Building Conditioned Area</div>
@@ -340,6 +318,44 @@ function App() {
                   <option value="Slab on Grade">Slab on Grade</option>
                 </select>
               </div>
+              {state.foundation.foundationType === 'Basement' && (
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-500">Basement Below Grade Height (ft)</label>
+                  <input
+                    type="number" step="0.1" className="w-full border p-2 rounded font-bold"
+                    value={state.foundation.basementBelowGradeHeight}
+                    onChange={(e) => handleUpdateProject('foundation', { basementBelowGradeHeight: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+               <div className="col-span-3 text-[10px] font-black uppercase text-gray-400 mb-2">Global Geometry Defaults</div>
+               <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-500">Header Height (ft)</label>
+                  <input
+                    type="number" step="0.01" className="w-full border p-2 rounded font-bold"
+                    value={state.designMultipliers.header_height}
+                    onChange={(e) => handleUpdateProject('designMultipliers', { header_height: parseFloat(e.target.value) || 0 })}
+                  />
+               </div>
+               <div className="flex items-center gap-2 pt-4">
+                  <input
+                    type="checkbox" className="w-4 h-4"
+                    checked={state.designMultipliers.includeExposedFloor}
+                    onChange={(e) => handleUpdateProject('designMultipliers', { includeExposedFloor: e.target.checked })}
+                  />
+                  <label className="text-xs font-bold uppercase text-gray-700">Include Exposed Floor Loss/Gain</label>
+               </div>
+               <div className="flex items-center gap-2 pt-4">
+                  <input
+                    type="checkbox" className="w-4 h-4"
+                    checked={state.designMultipliers.includeDuctLoss}
+                    onChange={(e) => handleUpdateProject('designMultipliers', { includeDuctLoss: e.target.checked })}
+                  />
+                  <label className="text-xs font-bold uppercase text-gray-700">Include Duct Loss/Gain (Global)</label>
+               </div>
             </div>
 
             <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">

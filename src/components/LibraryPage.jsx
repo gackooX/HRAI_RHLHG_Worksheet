@@ -27,8 +27,8 @@ const LibraryPage = () => {
             <tbody className="text-[12px] font-medium">
               {library.designConditions.locations.map((loc, i) => (
                 <tr key={i} className="border-b hover:bg-gray-50">
-                  <td className="p-2 border font-bold">---</td>
-                  <td className="p-2 border font-black">{loc.city}</td>
+                  <td className="p-2 border font-bold">{loc.city.split(', ')[1] || '---'}</td>
+                  <td className="p-2 border font-black">{loc.city.split(', ')[0]}</td>
                   <td className="p-2 border text-red-600 font-bold">{loc.odtHeating}&deg;F</td>
                   <td className="p-2 border text-blue-600 font-bold">{loc.odtCooling}&deg;F</td>
                   <td className="p-2 border">{loc.summerRange}&deg;F</td>
