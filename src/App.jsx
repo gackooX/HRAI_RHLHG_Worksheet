@@ -338,7 +338,8 @@ function App() {
                   </div>
                 </div>
 
-                <div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label>Foundation Strategy</label>
                     <select
                       className="w-full"
@@ -348,6 +349,17 @@ function App() {
                       <option value="Basement">Basement Scenario</option>
                       <option value="Slab on Grade">Slab on Grade Scenario</option>
                     </select>
+                  </div>
+                  <div>
+                    <label>Basement Floor Height (ft)</label>
+                    <input
+                      type="number" className="w-full"
+                      value={state.foundation.floorHeights['Basement'] || 8}
+                      onChange={(e) => handleUpdateProject('foundation', {
+                        floorHeights: { ...state.foundation.floorHeights, 'Basement': parseFloat(e.target.value) || 0 }
+                      })}
+                    />
+                  </div>
                 </div>
               </div>
 
