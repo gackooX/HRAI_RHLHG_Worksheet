@@ -7,13 +7,14 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
   const getLevelOptions = () => {
     const options = [];
     if (foundationType === 'Basement') {
+      // Basement scenario: 1 storey with basement has 2 levels
       options.push('Level 1 (Basement)');
-      if (numStoreys >= 2) options.push('Level 2 (Main)');
-      if (numStoreys >= 3) options.push('Level 3 (Second)');
+      options.push('Level 2 (Main)');
+      if (numStoreys >= 2) options.push('Level 3 (Second)');
     } else {
       options.push('Level 1 (Ground)');
-      if (numStoreys >= 2) options.push('Level 2 (Second)');
-      if (numStoreys >= 3) options.push('Level 3 (Third)');
+      if (numStoreys >= 1) options.push('Level 2 (Second)');
+      if (numStoreys >= 2) options.push('Level 3 (Third)');
     }
     return options;
   };
