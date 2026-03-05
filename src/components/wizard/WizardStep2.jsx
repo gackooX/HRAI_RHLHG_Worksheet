@@ -141,7 +141,7 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                loss={Math.round(areas.netAGW * factors.agw.hlFactor)}
                gain={Math.round(areas.netAGW * factors.agw.hgFactor)}
             />
-            {room.level === 'Basement' && (
+            {room.level?.includes('Level 1') && projectState.foundation.foundationType === 'Basement' && (
                 <Row
                    label="Net BGW (Sub-grade portion)" struct="BGW" area={areas.netBGW.toFixed(1)}
                    lossFactor={factors.bgw.hlFactor.toFixed(3)}

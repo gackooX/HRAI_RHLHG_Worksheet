@@ -23,6 +23,7 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
 
 
   const isLevel1 = room.level?.includes('Level 1');
+  const isBasement = foundationType === 'Basement' && isLevel1;
 
   return (
     <div className="space-y-6">
@@ -85,6 +86,13 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
           id="height" label="Height (H)" type="length" isMetric={isMetric}
           value={room.height || 0} onChange={(v) => updateRoom({ height: v })}
         />
+        {isBasement && (
+          <DimensionInput
+            id="bg-height" label="Wall Below Grade Height (ft)" type="length" isMetric={isMetric}
+            value={room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : projectState.foundation.basementBelowGradeHeight}
+            onChange={(v) => updateRoom({ wallBelowGradeHeight: v })}
+          />
+        )}
       </div>
     </div>
   );

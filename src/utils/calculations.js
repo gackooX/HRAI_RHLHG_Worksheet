@@ -104,14 +104,15 @@ export const calculateDetailedAreas = (room, state) => {
 
   if (isBasementRoom) {
     const basementHeight = state.foundation.floorHeights['Basement'] || 8;
-    grossBGW = h_bg * p;
-    grossAGW = (basementHeight - h_bg) * p;
+    const roomBGHeight = room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : state.foundation.basementBelowGradeHeight;
 
-    // Net Calculations
+    grossBGW = roomBGHeight * p;
+    grossAGW = (basementHeight - roomBGHeight) * p;
+
+    // Automated Net Area Logic (3.1 & 3.2)
     netAGW = Math.max(0, grossAGW - windowArea - doorArea - headerArea);
-    netBGW = Math.max(0, (basementHeight - h_bg) * p); // Re-evaluating BGW formula per requirement 2.2.2
-    // Requirement 2.2.2: Net BGW = (Basement Floor Height - Wall Below Grade Height) * Perimeter
-    netBGW = Math.max(0, (basementHeight - h_bg) * p);
+    // Requirement 3.2: Net BGW = (Basement Floor Height - Wall Below Grade Height) * Perimeter
+    netBGW = Math.max(0, (basementHeight - roomBGHeight) * p);
   } else {
     grossAGW = p * h;
     netAGW = Math.max(0, grossAGW - windowArea - doorArea - headerArea);
