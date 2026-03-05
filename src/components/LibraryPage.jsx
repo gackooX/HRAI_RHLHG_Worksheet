@@ -37,7 +37,7 @@ const LibraryPage = () => {
               </select>
            </div>
         </div>
-        <div className="overflow-x-auto border border-gray-700 rounded-b-xl max-h-[600px]">
+        <div className="overflow-x-auto border border-gray-700 rounded-b-xl max-h-[400px]">
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-800 text-[10px] font-black uppercase border-b border-gray-700 sticky top-0 z-10 text-gray-400">
               <tr>
@@ -65,6 +65,89 @@ const LibraryPage = () => {
         </div>
       </section>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* SOLAR Table */}
+        <section>
+          <h2 className="text-xl font-black uppercase text-white tracking-tighter mb-4 border-l-4 border-orange-500 pl-4">Table B: Solar Heat Gain Factors (BTU/ft²)</h2>
+          <div className="overflow-x-auto border border-gray-700 rounded-xl">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-800 text-[10px] font-black uppercase border-b border-gray-700 text-gray-400">
+                <tr>
+                  <th className="p-3 border-r border-gray-700">Latitude</th>
+                  <th className="p-3 border-r border-gray-700 text-center">N/S</th>
+                  <th className="p-3 border-r border-gray-700 text-center">S</th>
+                  <th className="p-3 border-r border-gray-700 text-center">E/W</th>
+                  <th className="p-3 border-r border-gray-700 text-center">NE/NW</th>
+                  <th className="p-3 border-r border-gray-700 text-center">SE/SW</th>
+                  <th className="p-3 text-center">H</th>
+                </tr>
+              </thead>
+              <tbody className="text-[10px] font-bold divide-y divide-gray-800">
+                {Object.entries(library.solarTable).map(([lat, dirs]) => (
+                  <tr key={lat} className="hover:bg-gray-800/40">
+                    <td className="p-3 border-r border-gray-800 text-white">{lat}&deg;N</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{dirs.N_S.imp}</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{dirs.S.imp}</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{dirs.E_W.imp}</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{dirs.NE_NW.imp}</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{dirs.SE_SW.imp}</td>
+                    <td className="p-3 text-center">{dirs.H.imp}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* ISF Table */}
+        <section>
+          <h2 className="text-xl font-black uppercase text-white tracking-tighter mb-4 border-l-4 border-indigo-500 pl-4">Table C: Internal Shade Factors (ISF)</h2>
+          <div className="overflow-x-auto border border-gray-700 rounded-xl">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-800 text-[10px] font-black uppercase border-b border-gray-700 text-gray-400">
+                <tr>
+                  <th className="p-3 border-r border-gray-700">Shade Type</th>
+                  <th className="p-3 border-r border-gray-700 text-center">Single</th>
+                  <th className="p-3 border-r border-gray-700 text-center">Double</th>
+                  <th className="p-3 border-r border-gray-700 text-center">Triple</th>
+                  <th className="p-3 text-center">Heat Mirror</th>
+                </tr>
+              </thead>
+              <tbody className="text-[10px] font-bold divide-y divide-gray-800">
+                {Object.entries(library.isfTable).map(([type, vals]) => (
+                  <tr key={type} className="hover:bg-gray-800/40">
+                    <td className="p-3 border-r border-gray-800 text-white">{type}</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{vals.Single}</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{vals.Double}</td>
+                    <td className="p-3 border-r border-gray-800 text-center">{vals.Triple}</td>
+                    <td className="p-3 text-center">{vals['Heat Mirror']}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      {/* Assembly R-Values */}
+      <section>
+        <h2 className="text-xl font-black uppercase text-white tracking-tighter mb-4 border-l-4 border-green-500 pl-4">Table D: Typical Assembly U-Factors</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {library.assemblies.map(asm => (
+            <div key={asm.id} className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex justify-between items-center group hover:border-green-500/50 transition-colors">
+              <div>
+                <div className="text-[8px] font-black text-gray-500 uppercase">{asm.type}</div>
+                <div className="text-[11px] font-black text-white pr-4">{asm.description}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-[8px] font-black text-gray-500 uppercase">U-Factor</div>
+                <div className="text-lg font-black text-green-500">{asm.uFactor}</div>
+                <div className="text-[8px] font-bold text-gray-600">R-{Math.round(1/asm.uFactor)} EFF</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="pt-8 border-t border-gray-800 text-center text-[10px] font-black uppercase text-gray-600 tracking-widest">
         End of Engineering Library &bull; CSA F280-12 Digital Reference
