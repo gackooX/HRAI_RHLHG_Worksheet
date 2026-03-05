@@ -113,7 +113,7 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
 
                             return (
                                 <div key={dir} className="flex flex-col gap-1 border-b border-blue-100 pb-2 last:border-0">
-                                    <div className="grid grid-cols-3 gap-2 items-center">
+                                    <div className="grid grid-cols-2 gap-2 items-center">
                                         <span className="text-[10px] font-black text-blue-800 w-12">{dir.replace('_', '/')}</span>
                                         <div className="flex flex-col">
                                             <span className="text-[7px] font-bold uppercase text-gray-400">Area</span>
@@ -122,16 +122,6 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                                                 value={area || ''}
                                                 onChange={(e) => handleWindowChange(dir, 'area', e.target.value)}
                                             />
-                                        </div>
-                                        <div className="col-span-2 flex flex-col">
-                                            <span className="text-[7px] font-bold uppercase text-gray-400">Internal Shading</span>
-                                            <select
-                                                className="w-full border rounded p-1 text-[9px] bg-white font-bold"
-                                                value={shadingType}
-                                                onChange={(e) => handleWindowChange(dir, 'shadingType', e.target.value)}
-                                            >
-                                                {Object.keys(library.isfTable).map(t => <option key={t} value={t}>{t}</option>)}
-                                            </select>
                                         </div>
                                     </div>
                                     {/* Additional frame/storm overrides can be added if needed, but currently global config is preferred */}
@@ -221,6 +211,42 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                loss={projectState.designMultipliers.includeExposedFloor ? Math.round(areas.floorArea * factors.floor.hlFactor) : 0}
                gain={projectState.designMultipliers.includeExposedFloor ? Math.round(areas.floorArea * factors.floor.hgFactor) : 0}
             />
+
+            {/* CUSTOM COMPONENTS */}
+            {projectState.compliance.customComponents.length > 0 && (
+                <>
+                  <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
+                    <td colSpan="7" className="p-1 px-2">8. Custom Components</td>
+                  </tr>
+                  {projectState.compliance.customComponents.map((comp, idx) => {
+                    const area = room.customComponentAreas?.[idx] || 0;
+                    const hlFactor = (projectState.environmental.hl_idt - projectState.environmental.hl_odt) / comp.rValue;
+                    const hgFactor = ( (projectState.environmental.hg_odt - projectState.environmental.hg_idt) + (comp.sc || 0) ) / comp.rValue;
+
+                    return (
+                        <tr key={idx} className="border-b border-gray-200 text-xs">
+                           <td className="p-2 border-r font-bold">{comp.label}</td>
+                           <td className="p-2 border-r text-center text-blue-600 font-bold">{comp.structure}</td>
+                           <td className="p-2 border-r text-right font-mono bg-yellow-50">
+                             <input
+                               type="number"
+                               className="w-16 bg-transparent text-right font-mono"
+                               value={area}
+                               onChange={(e) => {
+                                 const customComponentAreas = { ...room.customComponentAreas, [idx]: parseFloat(e.target.value) || 0 };
+                                 updateRoom({ customComponentAreas });
+                               }}
+                             />
+                           </td>
+                           <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">{hlFactor.toFixed(3)}</td>
+                           <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">{hgFactor.toFixed(3)}</td>
+                           <td className="p-2 border-r text-right font-black text-red-600">{Math.round(area * hlFactor)}</td>
+                           <td className="p-2 text-right font-black text-blue-600">{Math.round(area * hgFactor)}</td>
+                        </tr>
+                    );
+                  })}
+                </>
+            )}
 
             {/* TOTALS */}
             <tr className="bg-gray-900 text-white font-black text-sm uppercase">

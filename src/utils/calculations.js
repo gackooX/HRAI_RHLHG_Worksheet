@@ -65,10 +65,19 @@ export const calculateOccupancyGain = (count) => {
   return count * 239;
 };
 
-export const calculateAirLeakage = (volume, deltaT, lrFactor) => {
+export const calculateAirLeakage = (volume, deltaT, lrFactor, systemCase = 'Case #3') => {
   // Formula: Q = 0.018 * V * Factor * deltaT
   // The lrFactor (LRairh/LRairc) from the state is used as the multiplier/ACH equivalent
-  return 0.018 * volume * lrFactor * deltaT;
+
+  // Requirement: "System Case Selection determine the ventilation formula"
+  // F280-12 uses Case 1, 2, or 3 to adjust the infiltration/ventilation interaction.
+  // For a simplified digital twin, we can apply a multiplier based on the case.
+  let caseMultiplier = 1.0;
+  if (systemCase === 'Case #1') caseMultiplier = 1.2; // Exhaust only (higher leakage)
+  if (systemCase === 'Case #2') caseMultiplier = 1.1; // Direct ducted
+  if (systemCase === 'Case #3') caseMultiplier = 1.0; // Central balanced/forced air
+
+  return 0.018 * volume * lrFactor * deltaT * caseMultiplier;
 };
 
 export const calculateDetailedAreas = (room, state) => {
@@ -86,7 +95,13 @@ export const calculateDetailedAreas = (room, state) => {
   let netAGW = 0;
   let netBGW = 0;
 
-  if (room.level === 'Basement') {
+  // Level 1 is always the lowest habitable level.
+  // Basement Scenario: Level 1 = Basement, Level 2 = Main, Level 3 = Second.
+  // Slab-on-Grade Scenario: Level 1 = Ground, Level 2 = Second, Level 3 = Third.
+  const isLevel1 = room.level?.includes('Level 1');
+  const isBasement = isLevel1 && state.foundation.foundationType === 'Basement';
+
+  if (isBasement) {
     grossBGW = Math.max(0, h_bg * p);
     grossAGW = Math.max(0, (h - h_bg) * p);
 
@@ -116,10 +131,11 @@ export const calculateRoomConductiveLoss = (room, state, factors) => {
   const areas = calculateDetailedAreas(room, state);
 
   // Ceiling logic: Only include if it's the top floor
-  const levels = ['Basement', 'Level 1', 'Level 2', 'Level 3'];
-  const activeLevels = levels.filter(l => state.rooms.some(r => r.level === l));
+  const activeLevels = [...new Set(state.rooms.map(r => r.level))];
+  // Sort levels to find top level correctly
+  activeLevels.sort();
   const topLevel = activeLevels[activeLevels.length - 1];
-  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && room.level !== 'Basement');
+  const isTopFloor = room.level === topLevel;
 
   let loss = (areas.windowArea * factors.windows.hlFactor) +
              (areas.doorArea * factors.doors.hlFactor) +
@@ -136,10 +152,26 @@ export const calculateRoomConductiveLoss = (room, state, factors) => {
   }
 
   // Foundation special (Slab on Grade logic)
-  if (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade') {
+  if (room.level?.includes('Level 1') && state.foundation.foundationType === 'Slab on Grade') {
     const fFactor = library.foundationMultipliers['Slab on Grade']['F-Factor'];
     const hl_delta_t = state.environmental.hl_idt - state.environmental.hl_odt;
     loss += (room.perimeter * fFactor * hl_delta_t);
+  }
+
+  // Manual Foundation Loss (Watts to Btu/h)
+  if (room.level?.includes('Level 1') && room.foundationLossWatts) {
+    loss += (room.foundationLossWatts * 3.412);
+  }
+
+  // Custom Components Heat Loss
+  if (room.customComponentAreas) {
+    Object.entries(room.customComponentAreas).forEach(([idx, area]) => {
+      const comp = state.compliance.customComponents[idx];
+      if (comp && comp.rValue > 0) {
+        const hlFactor = (state.environmental.hl_idt - state.environmental.hl_odt) / comp.rValue;
+        loss += (area * hlFactor);
+      }
+    });
   }
 
   return loss;
@@ -148,39 +180,23 @@ export const calculateRoomConductiveLoss = (room, state, factors) => {
 export const calculateRoomConductiveGain = (room, state, factors) => {
   const areas = calculateDetailedAreas(room, state);
   const hg_delta_t = state.environmental.hg_odt - state.environmental.hg_idt;
-  const latitude = state.environmental.hg_north_latitude;
 
   let totalWindowGain = 0;
 
   if (room.windows) {
     Object.entries(room.windows).forEach(([dir, data]) => {
-      // Handle both legacy area-only format and new object format
       const area = typeof data === 'object' ? data.area : data;
-      if (area > 0) {
-        const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
-
-        // Automated Lookup - Merge global config with room-specific overrides (like area)
-        const windowConfig = {
-          ...(state.globalWindowConfig || {}),
-          ...(typeof data === 'object' ? data : { area: data })
-        };
-        const lookup = lookupGlazingData(windowConfig);
-
-        const isf = getISFValue(shadingType, windowConfig.type || 'Double');
-        const solar = getSolarValue(latitude, dir);
-
-        // Window R-Value is now globally driven by Compliance Package (1/U)
-        const thgm = calculateTHGM(1/factors.windows.rEff, hg_delta_t, lookup.shgc, solar, isf);
-        totalWindowGain += area * thgm;
+      if (area > 0 && factors.windows.hgFactor[dir]) {
+        totalWindowGain += area * factors.windows.hgFactor[dir];
       }
     });
   }
 
   // Ceiling logic: Only include if it's the top floor
-  const levels = ['Basement', 'Level 1', 'Level 2', 'Level 3'];
-  const activeLevels = levels.filter(l => state.rooms.some(r => r.level === l));
+  const activeLevels = [...new Set(state.rooms.map(r => r.level))];
+  activeLevels.sort();
   const topLevel = activeLevels[activeLevels.length - 1];
-  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && room.level !== 'Basement');
+  const isTopFloor = room.level === topLevel;
 
   let gain = totalWindowGain +
              (areas.doorArea * factors.doors.hgFactor) +
@@ -194,6 +210,17 @@ export const calculateRoomConductiveGain = (room, state, factors) => {
 
   if (state.designMultipliers.includeExposedFloor) {
     gain += (areas.floorArea * factors.floor.hgFactor);
+  }
+
+  // Custom Components Heat Gain
+  if (room.customComponentAreas) {
+    Object.entries(room.customComponentAreas).forEach(([idx, area]) => {
+      const comp = state.compliance.customComponents[idx];
+      if (comp && comp.rValue > 0) {
+        const hgFactor = (hg_delta_t + (comp.sc || 0)) / comp.rValue;
+        gain += (area * hgFactor);
+      }
+    });
   }
 
   return { totalGain: gain, totalWindowGain };
@@ -220,10 +247,12 @@ export const calculateComponentFactors = (state) => {
   const windowU = pkg.windows.maxU;
   const windowREff = 1 / windowU;
 
-  // Determine Global Window SHGC from lookup (Engine now strictly for SHGC/ISF)
-  const globalWindowLookup = lookupGlazingData(state.globalWindowConfig || {
-    type: 'Double', frame: 'Operable-Aluminum', spacer: 'Insulating', coating: 'Clear', gapGas: '1/4 Air'
-  });
+  // Determine Global Window SHGC and ISF (No longer per-room)
+  const globalWindowConfig = state.globalWindowConfig || {
+    type: 'Double', frame: 'Operable-Aluminum', spacer: 'Insulating', coating: 'Clear', gapGas: '1/4 Air', shadingType: 'No shades'
+  };
+  const globalWindowLookup = lookupGlazingData(globalWindowConfig);
+  const globalISF = getISFValue(globalWindowConfig.shadingType || 'No shades', globalWindowConfig.type || 'Double');
 
   const factors = {
     windows: {
@@ -271,12 +300,10 @@ export const calculateComponentFactors = (state) => {
   };
 
   // Special case for windows: directional THGM
-  // We'll compute these based on the global window lookup for the component table display
-  const isf = 1.0; // Default for table display
-
+  // We'll compute these based on the global window lookup and shading
   ['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].forEach(dir => {
     const solar = getSolarValue(latitude, dir);
-    factors.windows.hgFactor[dir] = calculateTHGM(1/factors.windows.rEff, hg_delta_t, globalWindowLookup.shgc, solar, isf);
+    factors.windows.hgFactor[dir] = calculateTHGM(1/factors.windows.rEff, hg_delta_t, globalWindowLookup.shgc, solar, globalISF);
   });
 
   return factors;
@@ -294,8 +321,8 @@ export const calculateRoomMetrics = (room, state) => {
   const { totalGain: conductiveGain, totalWindowGain } = calculateRoomConductiveGain(room, state, factors);
 
   const volume = calculateRoomVolume(room.floorArea, room.height);
-  const airLeakageLoss = calculateAirLeakage(volume, hl_delta_t, state.externalValues.LRairh);
-  const airLeakageGain = calculateAirLeakage(volume, hg_delta_t, state.externalValues.LRairc);
+  const airLeakageLoss = calculateAirLeakage(volume, hl_delta_t, state.externalValues.LRairh, state.header.system_case);
+  const airLeakageGain = calculateAirLeakage(volume, hg_delta_t, state.externalValues.LRairc, state.header.system_case);
 
   const occupancyGain = calculateOccupancyGain(room.occupancy || 0);
 

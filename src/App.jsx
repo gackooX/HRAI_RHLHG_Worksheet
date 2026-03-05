@@ -1,12 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import WizardContainer from './components/wizard/WizardContainer';
 import ReportGenerator from './components/ReportGenerator';
 import THGMWorksheet from './components/THGMWorksheet';
 import LibraryPage from './components/LibraryPage';
-import TempInput from './components/TempInput';
+import RoomManagement from './components/RoomManagement';
 import { initialState } from './state/projectState';
 import { calculateRoomMetrics } from './utils/calculations';
-import { convertTemp, convertTempDelta } from './utils/unitConverter';
 import { complianceData } from './data/complianceData';
 import ComponentTable from './components/ComponentTable';
 import library from './data/library.json';
@@ -16,7 +15,8 @@ function App() {
   const [citySearch, setCitySearch] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [activeRoomIndex, setActiveRoomIndex] = useState(null);
-  const [view, setView] = useState('wizard'); // 'wizard', 'thgm', 'report', or 'library'
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [view, setView] = useState('rooms'); // 'rooms', 'thgm', 'report', or 'library'
 
   const handleUpdateProject = (key, value) => {
     setState(prev => {
@@ -25,7 +25,6 @@ function App() {
         [key]: { ...prev[key], ...value }
       };
 
-      // If compliance package changes, reset effRValues
       if (key === 'compliance' && value.selectedPackage && value.selectedPackage !== prev.compliance.selectedPackage) {
         const pkg = complianceData[value.selectedPackage];
         newState.compliance.effRValues = {
@@ -51,15 +50,33 @@ function App() {
     });
   };
 
+  const handleRemoveRoom = (index) => {
+    setState(prev => ({
+      ...prev,
+      rooms: prev.rooms.filter((_, i) => i !== index)
+    }));
+    if (activeRoomIndex === index) setActiveRoomIndex(null);
+  };
+
+  const handleDuplicateRoom = (index) => {
+    setState(prev => {
+      const roomToCopy = { ...prev.rooms[index], name: prev.rooms[index].name + ' (Copy)' };
+      return { ...prev, rooms: [...prev.rooms, roomToCopy] };
+    });
+  };
+
   const addNewRoom = () => {
-    const defaultLevel = state.foundation.foundationType === 'Basement' ? 'Basement' : 'Level 1';
-    const defaultHeight = state.foundation.floorHeights[defaultLevel] || 8;
+    const isBasement = state.foundation.foundationType === 'Basement';
+    const defaultLevel = isBasement ? 'Level 1 (Basement)' : 'Level 1 (Ground)';
+    const defaultHeight = state.foundation.floorHeights[isBasement ? 'Basement' : 'Level 1'] || 8;
     const newRoom = {
       name: '',
       level: defaultLevel,
       perimeter: 0,
       floorArea: 0,
       height: defaultHeight,
+      foundationLossWatts: 0,
+      customComponentAreas: {}, // { [index]: area }
       windows: {
         'N_S': { area: 0, ...state.globalWindowConfig },
         'S': { area: 0, ...state.globalWindowConfig },
@@ -74,6 +91,7 @@ function App() {
     };
     setState(prev => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
     setActiveRoomIndex(state.rooms.length);
+    setIsWizardOpen(true);
   };
 
   const processedRooms = useMemo(() => {
@@ -91,497 +109,321 @@ function App() {
   const processedState = { ...state, rooms: processedRooms };
   const isMetric = state.displayUnits === 'METRIC';
 
+  const c_to_f = (c) => Math.round((c * 1.8) + 32);
+
+  const handleSaveProject = () => {
+    const dataStr = JSON.stringify(state, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `project-${state.header.streetAddress || 'new'}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoadProject = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const loaded = JSON.parse(evt.target.result);
+        setState(loaded);
+      } catch (err) {
+        alert('Failed to load project file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // Provinces sourced from weather library
+  const provinces = useMemo(() => {
+    const pSet = new Set(library.designConditions.locations.map(l => l.province));
+    return Array.from(pSet).sort();
+  }, []);
+
+  const filteredCities = useMemo(() => {
+    if (!state.header.province) return [];
+    return library.designConditions.locations.filter(l =>
+      l.province === state.header.province &&
+      l.cityName.toLowerCase().includes(citySearch.toLowerCase())
+    );
+  }, [state.header.province, citySearch]);
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+    <div className="min-h-screen bg-[#121212] text-white font-sans p-4 md:p-8">
       {/* Navigation / Header */}
-      <div className="no-print mb-8 flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex gap-4">
-          <button
-            onClick={() => setView('wizard')}
-            className={`px-4 py-2 rounded font-bold ${view === 'wizard' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
-          >
-            Input Wizard
-          </button>
-          <button
-            onClick={() => setView('thgm')}
-            className={`px-4 py-2 rounded font-bold ${view === 'thgm' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
-          >
-            THGM Worksheet
-          </button>
-          <button
-            onClick={() => setView('report')}
-            className={`px-4 py-2 rounded font-bold ${view === 'report' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
-          >
-            Report Generator
-          </button>
-          <button
-            onClick={() => setView('library')}
-            className={`px-4 py-2 rounded font-bold ${view === 'library' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
-          >
-            Library
-          </button>
+      <div className="no-print mb-8 flex flex-col md:flex-row justify-between items-center bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-2xl gap-6">
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: 'rooms', label: 'Room Manager', icon: '🏠' },
+            { id: 'thgm', label: 'THGM Engine', icon: '☀️' },
+            { id: 'report', label: 'Final Report', icon: '📄' },
+            { id: 'library', label: 'Library', icon: '📚' }
+          ].map(btn => (
+            <button
+              key={btn.id}
+              onClick={() => setView(btn.id)}
+              className={`px-6 py-2 rounded-full font-black uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${view === btn.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+            >
+              <span>{btn.icon}</span> {btn.label}
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="text-sm font-bold">
-            Units:
-            <select
-              className="ml-2 border rounded p-1"
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col items-end">
+             <label className="text-gray-500 mb-0">Measurement System</label>
+             <select
+              className="bg-gray-800 border-gray-700 text-white font-black text-xs p-1 rounded uppercase"
               value={state.displayUnits}
               onChange={(e) => setState(prev => ({ ...prev, displayUnits: e.target.value }))}
             >
-              <option value="IMPERIAL">Imperial (F)</option>
-              <option value="METRIC">Metric (C)</option>
+              <option value="IMPERIAL">Imperial (F/BTU)</option>
+              <option value="METRIC">Metric (C/Watts)</option>
             </select>
           </div>
-          <button
-            onClick={() => window.print()}
-            className="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700"
-          >
-            Print Report
-          </button>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleSaveProject}
+              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] border border-gray-700 transition-colors"
+            >
+              💾 Save
+            </button>
+            <label className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] border border-gray-700 transition-colors cursor-pointer">
+              📂 Load
+              <input type="file" className="hidden" onChange={handleLoadProject} accept=".json" />
+            </label>
+            <button
+              onClick={() => window.print()}
+              className="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] shadow-lg transition-transform active:scale-95"
+            >
+              🖨️ Print
+            </button>
+          </div>
         </div>
       </div>
 
-      {view === 'wizard' && (
-        <div className="max-w-6xl mx-auto space-y-8">
+      {view === 'rooms' && (
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Dashboard Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-blue-900 text-white p-4 rounded-lg shadow-md flex justify-between items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-blue-500/50 transition-colors">
               <div>
-                <div className="text-xs font-bold uppercase opacity-70">Building Conditioned Area</div>
-                <div className="text-2xl font-black">{totalArea.toLocaleString()} <span className="text-sm font-normal">{isMetric ? 'm²' : 'sq ft'}</span></div>
+                <label>Total Conditioned Area</label>
+                <div className="text-4xl font-black text-white tracking-tighter">{totalArea.toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">{isMetric ? 'm²' : 'sq ft'}</span></div>
               </div>
-              <div className="text-4xl opacity-20">🏠</div>
+              <div className="text-5xl opacity-10 group-hover:opacity-20 transition-opacity">🏢</div>
             </div>
-            <div className="bg-indigo-900 text-white p-4 rounded-lg shadow-md flex justify-between items-center">
+            <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-indigo-500/50 transition-colors">
               <div>
-                <div className="text-xs font-bold uppercase opacity-70">Total Building Volume (Vb)</div>
-                <div className="text-2xl font-black">{totalVolume.toLocaleString()} <span className="text-sm font-normal">{isMetric ? 'm³' : 'ft³'}</span></div>
+                <label>Total Volume (Vb)</label>
+                <div className="text-4xl font-black text-white tracking-tighter">{totalVolume.toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">{isMetric ? 'm³' : 'ft³'}</span></div>
               </div>
-              <div className="text-4xl opacity-20">📦</div>
+              <div className="text-5xl opacity-10 group-hover:opacity-20 transition-opacity">📦</div>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-red-500/50 transition-colors">
+              <div>
+                <label>Total Heating Load</label>
+                <div className="text-4xl font-black text-red-500 tracking-tighter">{processedRooms.reduce((sum, r) => sum + r.totalRoomLoss, 0).toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">BTU/H</span></div>
+              </div>
+              <div className="text-5xl opacity-10 group-hover:opacity-20 transition-opacity">🔥</div>
             </div>
           </div>
 
-          {/* Building Info */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-black mb-4 border-b pb-2 text-gray-800">Building Info</h2>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-              <div className="md:col-span-1">
-                <label className="block text-[10px] font-bold uppercase text-gray-500">Street #</label>
-                <input
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.header.streetNumber}
-                  onChange={(e) => handleUpdateProject('header', { streetNumber: e.target.value })}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase text-gray-500">Street Address</label>
-                <input
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.header.streetAddress}
-                  onChange={(e) => handleUpdateProject('header', { streetAddress: e.target.value })}
-                />
-              </div>
-              <div className="md:col-span-1">
-                <label className="block text-[10px] font-bold uppercase text-gray-500">Province</label>
-                <select
-                  className="w-full border p-2 rounded font-bold bg-white"
-                  value={state.header.province}
-                  onChange={(e) => handleUpdateProject('header', { province: e.target.value })}
-                >
-                  <option value="">Select Province</option>
-                  {["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"].map(p => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="md:col-span-1">
-                <label className="block text-[10px] font-bold uppercase text-gray-500">Postal Code</label>
-                <input
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.header.postalCode}
-                  onChange={(e) => handleUpdateProject('header', { postalCode: e.target.value })}
-                />
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Building Info Panel */}
+            <div className="lg:col-span-1 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl h-fit sticky top-8">
+              <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-blue-600 pl-4">Project Identity</h2>
 
-              {/* City selection relocated and fixed */}
-              <div className="md:col-span-1 relative">
-                <label className="block text-[10px] font-bold uppercase text-gray-500">City Selection</label>
-                <input
-                  className="w-full border p-2 rounded font-bold"
-                  value={citySearch || state.header.city}
-                  onChange={(e) => {
-                    setCitySearch(e.target.value);
-                    setShowCityDropdown(true);
-                    // Allow custom name while typing
-                    handleUpdateProject('header', { city: e.target.value });
-                  }}
-                  onFocus={() => setShowCityDropdown(true)}
-                  onBlur={() => {
-                    // Slight delay to allow onClick to register
-                    setTimeout(() => setShowCityDropdown(false), 200);
-                  }}
-                  placeholder="Enter City..."
-                />
-                {showCityDropdown && (
-                  <div className="absolute z-50 w-full bg-white border rounded shadow-lg max-h-48 overflow-y-auto mt-1">
-                    {library.designConditions.locations
-                      .filter(l => l.city.toLowerCase().includes((citySearch || '').toLowerCase()))
-                      .map(loc => (
-                        <div
-                          key={loc.city}
-                          className="p-2 hover:bg-blue-50 cursor-pointer text-xs font-bold"
-                          onClick={() => {
-                            handleUpdateProject('header', { city: loc.city });
-                            handleUpdateProject('environmental', {
-                              hl_odt: loc.odtHeating,
-                              hg_odt: loc.odtCooling,
-                              hg_daily_range: loc.summerRange,
-                              hg_north_latitude: loc.latitude
-                            });
-                            setCitySearch(loc.city);
-                            setShowCityDropdown(false);
-                          }}
-                        >
-                          {loc.city}
-                        </div>
-                      ))
-                    }
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-500">Front Facing</label>
-                <select
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.header.front_facing_direction}
-                  onChange={(e) => handleUpdateProject('header', { front_facing_direction: e.target.value })}
-                >
-                  {['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'].map(d => <option key={d}>{d}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-500">Number of Storeys (Max 3)</label>
-                <input
-                  type="number" min={1} max={3}
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.foundation.numStoreys}
-                  onChange={(e) => {
-                    let val = parseInt(e.target.value) || 1;
-                    if (val > 3) val = 3;
-                    if (val < 1) val = 1;
-                    handleUpdateProject('foundation', { numStoreys: val });
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-               <div className="col-span-4 text-[10px] font-black uppercase text-gray-400 mb-2">Floor Heights</div>
-               {['Basement', 'Level 1', 'Level 2', 'Level 3']
-                .filter(lvl => {
-                  if (lvl === 'Basement') return state.foundation.foundationType === 'Basement';
-                  const levelNum = parseInt(lvl.split(' ')[1]);
-                  return levelNum <= state.foundation.numStoreys;
-                })
-                .map(lvl => (
-                 <div key={lvl}>
-                    <label className="block text-[10px] font-bold uppercase text-gray-500">{lvl} Height</label>
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number" className="w-full border p-2 rounded font-bold"
-                        value={state.foundation.floorHeights[lvl]}
-                        onChange={(e) => {
-                          const floorHeights = { ...state.foundation.floorHeights, [lvl]: parseFloat(e.target.value) || 0 };
-                          handleUpdateProject('foundation', { floorHeights });
-                        }}
-                      />
-                      <span className="text-xs font-bold text-gray-400">ft</span>
-                    </div>
-                 </div>
-               ))}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-500">Foundation Type</label>
-                <select
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.foundation.foundationType}
-                  onChange={(e) => handleUpdateProject('foundation', { foundationType: e.target.value })}
-                >
-                  <option value="Basement">Basement</option>
-                  <option value="Slab on Grade">Slab on Grade</option>
-                </select>
-              </div>
-              {state.foundation.foundationType === 'Basement' && (
-                <div>
-                  <label className="block text-xs font-bold uppercase text-gray-500">Basement Below Grade Height (ft)</label>
-                  <input
-                    type="number" step="0.1" className="w-full border p-2 rounded font-bold"
-                    value={state.foundation.basementBelowGradeHeight}
-                    onChange={(e) => handleUpdateProject('foundation', { basementBelowGradeHeight: parseFloat(e.target.value) || 0 })}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-               <div className="col-span-3 text-[10px] font-black uppercase text-gray-400 mb-2">Global Geometry Defaults</div>
-               <div>
-                  <label className="block text-[10px] font-bold uppercase text-gray-500">Header Height (ft)</label>
-                  <input
-                    type="number" step="0.01" className="w-full border p-2 rounded font-bold"
-                    value={state.designMultipliers.header_height}
-                    onChange={(e) => handleUpdateProject('designMultipliers', { header_height: parseFloat(e.target.value) || 0 })}
-                  />
-               </div>
-               <div className="flex items-center gap-2 pt-4">
-                  <input
-                    type="checkbox" className="w-4 h-4"
-                    checked={state.designMultipliers.includeExposedFloor}
-                    onChange={(e) => handleUpdateProject('designMultipliers', { includeExposedFloor: e.target.checked })}
-                  />
-                  <label className="text-xs font-bold uppercase text-gray-700">Include Exposed Floor Loss/Gain</label>
-               </div>
-               <div className="flex items-center gap-2 pt-4">
-                  <input
-                    type="checkbox" className="w-4 h-4"
-                    checked={state.designMultipliers.includeDuctLoss}
-                    onChange={(e) => handleUpdateProject('designMultipliers', { includeDuctLoss: e.target.checked })}
-                  />
-                  <label className="text-xs font-bold uppercase text-gray-700">Include Duct Loss/Gain (Global)</label>
-               </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <label className="block text-xs font-black uppercase text-gray-700 mb-3">Ventilation System Case Selection</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { id: 'Case #1', label: 'Case #1: Exhaust Only System' },
-                  { id: 'Case #2', label: 'Case #2: Direct Ducted System' },
-                  { id: 'Case #3', label: 'Case #3: Central Forced Air System' }
-                ].map(c => (
-                  <label key={c.id} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded transition border border-transparent hover:border-gray-200">
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-1">
+                    <label>Street #</label>
                     <input
-                      type="radio" name="system_case" className="w-4 h-4"
-                      checked={state.header.system_case === c.id}
-                      onChange={() => handleUpdateProject('header', { system_case: c.id })}
+                      className="w-full"
+                      value={state.header.streetNumber}
+                      onChange={(e) => handleUpdateProject('header', { streetNumber: e.target.value })}
                     />
-                    <span className="text-sm font-bold text-gray-900">{c.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Heat Loss Section */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-black mb-4 border-b pb-2 text-red-700">Heat Loss</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="flex items-center justify-start p-2 bg-red-50 rounded border border-red-100">
-                <span className="text-red-600 font-black text-sm">
-                  HL ΔT: {isMetric
-                    ? Math.round(convertTempDelta(state.environmental.hl_idt - state.environmental.hl_odt) * 10) / 10
-                    : state.environmental.hl_idt - state.environmental.hl_odt}
-                </span>
-              </div>
-              <TempInput
-                id="global-hl-odt" label="ODTH" isMetric={isMetric}
-                value={state.environmental.hl_odt} onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
-              />
-              <TempInput
-                id="global-hl-idt" label="IDTH" isMetric={isMetric}
-                value={state.environmental.hl_idt} onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
-              />
-              <TempInput
-                id="soil-temp" label="Mean Soil Temp" isMetric={isMetric}
-                value={state.environmental.hl_mean_soil_temp} onChange={(v) => handleUpdateProject('environmental', { hl_mean_soil_temp: v })}
-              />
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-gray-500">Building Air Leakage Heat Loss (LRairh)</label>
-                <input
-                  type="number" step="0.001" className="w-full border p-2 rounded font-bold"
-                  value={state.externalValues.LRairh}
-                  onChange={(e) => handleUpdateProject('externalValues', { LRairh: parseFloat(e.target.value) })}
-                />
-              </div>
-              <div>
-                <label htmlFor="hrv" className="block text-xs font-bold uppercase text-gray-500 mb-1">HRV Sensible Effectiveness</label>
-                <input
-                  id="hrv" type="number" step="0.1" max="1.0" min="0"
-                  className="w-full border p-2 rounded font-bold"
-                  value={state.system.hrv_effectiveness}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    if (val > 1.0) return;
-                    handleUpdateProject('system', { hrv_effectiveness: val || 0 });
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Heat Gain Section */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-black mb-4 border-b pb-2 text-blue-700">Heat Gain</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="flex items-center justify-start p-2 bg-blue-50 rounded border border-blue-100">
-                <span className="text-blue-600 font-black text-sm">
-                  HG ΔT: {isMetric
-                    ? Math.round(convertTempDelta(state.environmental.hg_odt - state.environmental.hg_idt) * 10) / 10
-                    : state.environmental.hg_odt - state.environmental.hg_idt}
-                </span>
-              </div>
-              <TempInput
-                id="global-hg-odt" label="DCDBT (ODTC)" isMetric={isMetric}
-                value={state.environmental.hg_odt} onChange={(v) => handleUpdateProject('environmental', { hg_odt: v })}
-              />
-              <TempInput
-                id="global-hg-idt" label="IDTC" isMetric={isMetric}
-                value={state.environmental.hg_idt} onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
-              />
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Daily Range (ΔT)</label>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    className="w-full border p-2 rounded font-bold"
-                    value={isMetric ? Math.round(convertTempDelta(state.environmental.hg_daily_range) * 10) / 10 : state.environmental.hg_daily_range}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      handleUpdateProject('environmental', { hg_daily_range: isMetric ? convertTempDelta(val, false) : val });
-                    }}
-                  />
-                  <span className="text-sm font-bold w-8">{isMetric ? '°C' : '°F'}</span>
-                </div>
-              </div>
-              <div>
-                <label htmlFor="latitude" className="block text-[10px] font-bold uppercase text-gray-500">North Latitude</label>
-                <div className="flex items-center gap-1">
-                  <input
-                    id="latitude" type="number" className="w-full border p-2 rounded font-bold"
-                    value={state.environmental.hg_north_latitude}
-                    onChange={(e) => handleUpdateProject('environmental', { hg_north_latitude: parseInt(e.target.value) || 0 })}
-                  />
-                  <span className="text-sm font-bold w-8">°N</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-gray-500">Air Leakage Factor (LRairc)</label>
-                <input
-                  type="number" step="0.001" className="w-full border p-2 rounded font-bold"
-                  value={state.externalValues.LRairc}
-                  onChange={(e) => handleUpdateProject('externalValues', { LRairc: parseFloat(e.target.value) })}
-                />
-              </div>
-              <div className="col-span-2 p-2 bg-blue-50 rounded border border-blue-100 flex items-center">
-                 <span className="text-blue-800 text-[10px] font-bold uppercase">Note: Transparent Assembly Heat Gain Multiplier (THGM) is calculated per window orientation.</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Building Components (Compliance) */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-black mb-4 border-b pb-2 text-gray-800">Building Components (Compliance Package)</h2>
-            <div className="mb-6 flex flex-col md:flex-row gap-8">
-              <div className="flex-1">
-                <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Select Compliance Package (Table 3.1.1.2.A)</label>
-                <select
-                  className="w-full md:w-64 border p-2 rounded font-bold bg-blue-50 border-blue-200"
-                  value={state.compliance.selectedPackage}
-                  onChange={(e) => handleUpdateProject('compliance', { selectedPackage: e.target.value })}
-                >
-                  {Object.keys(complianceData).map(pkg => <option key={pkg} value={pkg}>{pkg}</option>)}
-                </select>
-              </div>
-              <div className="flex-1">
-                 <div className="text-[10px] font-bold text-gray-400 uppercase mb-2">Package Requirements Summary</div>
-                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-[10px] border-collapse">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="p-1 border">Component</th>
-                          <th className="p-1 border">Min. Nominal R</th>
-                          <th className="p-1 border">Min. Effective R</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          { label: 'Ceiling (No Attic)', key: 'ceilingWithoutAttic' },
-                          { label: 'Exposed Floor', key: 'exposedFloor' },
-                          { label: 'Above Grade Wall', key: 'wallsAboveGrade' },
-                          { label: 'Basement Wall', key: 'basementWalls' },
-                        ].map(item => {
-                          const data = complianceData[state.compliance.selectedPackage][item.key];
-                          return (
-                            <tr key={item.key}>
-                              <td className="p-1 border font-bold">{item.label}</td>
-                              <td className="p-1 border">{data.nominalR}</td>
-                              <td className="p-1 border">{data.effectiveR}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
                   </div>
+                  <div className="col-span-2">
+                    <label>Street Address</label>
+                    <input
+                      className="w-full"
+                      value={state.header.streetAddress}
+                      onChange={(e) => handleUpdateProject('header', { streetAddress: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label>Province Filter</label>
+                    <select
+                      className="w-full"
+                      value={state.header.province}
+                      onChange={(e) => {
+                         handleUpdateProject('header', { province: e.target.value, city: '' });
+                         setCitySearch('');
+                      }}
+                    >
+                      <option value="">Select Province</option>
+                      {provinces.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  <div className="relative">
+                    <label>City Search</label>
+                    <input
+                      className="w-full"
+                      disabled={!state.header.province}
+                      value={citySearch || state.header.city}
+                      onChange={(e) => {
+                        setCitySearch(e.target.value);
+                        setShowCityDropdown(true);
+                      }}
+                      onFocus={() => setShowCityDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowCityDropdown(false), 200)}
+                      placeholder={state.header.province ? "Start typing..." : "Select province first"}
+                    />
+                    {showCityDropdown && filteredCities.length > 0 && (
+                      <div className="absolute z-50 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto mt-1 divide-y divide-gray-700">
+                        {filteredCities.map(loc => (
+                            <div
+                              key={loc.city}
+                              className="p-3 hover:bg-blue-900/40 cursor-pointer text-[10px] font-black uppercase transition-colors"
+                              onClick={() => {
+                                handleUpdateProject('header', { city: loc.cityName });
+                                handleUpdateProject('environmental', {
+                                  hl_odt: c_to_f(loc.odtHeating),
+                                  hg_odt: c_to_f(loc.odtCooling),
+                                  hg_daily_range: loc.summerRange * 1.8,
+                                  hg_north_latitude: loc.latitude,
+                                  hl_mean_soil_temp: c_to_f(loc.soilTemp || 10)
+                                });
+                                setCitySearch(loc.cityName);
+                                setShowCityDropdown(false);
+                              }}
+                            >
+                              {loc.cityName}
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                   <div>
+                    <label>Postal Code</label>
+                    <input
+                      className="w-full"
+                      value={state.header.postalCode}
+                      onChange={(e) => handleUpdateProject('header', { postalCode: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label>Number of Storeys</label>
+                    <select
+                      className="w-full"
+                      value={state.foundation.numStoreys}
+                      onChange={(e) => handleUpdateProject('foundation', { numStoreys: parseInt(e.target.value) })}
+                    >
+                      {[1, 2, 3].map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                    <label>Foundation Strategy</label>
+                    <select
+                      className="w-full"
+                      value={state.foundation.foundationType}
+                      onChange={(e) => handleUpdateProject('foundation', { foundationType: e.target.value })}
+                    >
+                      <option value="Basement">Basement Scenario</option>
+                      <option value="Slab on Grade">Slab on Grade Scenario</option>
+                    </select>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-gray-800 grid grid-cols-2 gap-4">
+                 <div className="bg-gray-900/50 p-3 rounded border border-gray-800">
+                    <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Heating ODT</div>
+                    <div className="text-xl font-black text-red-500">{state.environmental.hl_odt}&deg;F</div>
+                 </div>
+                 <div className="bg-gray-900/50 p-3 rounded border border-gray-800">
+                    <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Cooling ODT</div>
+                    <div className="text-xl font-black text-blue-500">{state.environmental.hg_odt}&deg;F</div>
+                 </div>
               </div>
             </div>
 
-            <div className="mt-8 space-y-4">
-               <h3 className="text-sm font-black uppercase text-gray-700">Dynamic Component Lookup Engine</h3>
-               <ComponentTable state={state} onUpdate={handleUpdateProject} />
-            </div>
+            {/* Room Management Area */}
+            <div className="lg:col-span-2 space-y-8">
+              <RoomManagement
+                rooms={processedRooms}
+                activeIndex={activeRoomIndex}
+                onSelect={(idx, openWizard = false) => {
+                  setActiveRoomIndex(idx);
+                  if (openWizard) setIsWizardOpen(true);
+                }}
+                onAdd={addNewRoom}
+                onRemove={handleRemoveRoom}
+                onDuplicate={handleDuplicateRoom}
+              />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-               <div className="p-3 bg-gray-50 rounded border">
-                  <div className="text-[10px] font-bold text-gray-500 uppercase">Windows & Doors</div>
-                  <div className="text-sm">Max U: <strong>{complianceData[state.compliance.selectedPackage].windows.maxU}</strong></div>
-                  <div className="text-sm">Energy Rating: <strong>{complianceData[state.compliance.selectedPackage].windows.energyRating}</strong></div>
-               </div>
-               <div className="p-3 bg-gray-50 rounded border">
-                  <div className="text-[10px] font-bold text-gray-500 uppercase">Space Heating Equipment</div>
-                  <div className="text-sm">Min AFUE: <strong>{complianceData[state.compliance.selectedPackage].heating.minAFUE}</strong></div>
-               </div>
-               <div className="p-3 bg-gray-50 rounded border">
-                  <div className="text-[10px] font-bold text-gray-500 uppercase">HRV / Domestic Water</div>
-                  <div className="text-sm">HRV SRE: <strong>{complianceData[state.compliance.selectedPackage].hrv.minSRE}</strong></div>
-                  <div className="text-sm">DWH EF: <strong>{complianceData[state.compliance.selectedPackage].dwh.minEF}</strong></div>
-               </div>
+              {/* Compliance & Global Logic */}
+              <div className="bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl">
+                <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-indigo-600 pl-4">Engineering Overrides</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div>
+                     <label>Compliance Package (CSA F280-12)</label>
+                     <select
+                        className="w-full bg-indigo-900/20 border-indigo-500/30 font-black text-indigo-400"
+                        value={state.compliance.selectedPackage}
+                        onChange={(e) => handleUpdateProject('compliance', { selectedPackage: e.target.value })}
+                      >
+                        {Object.keys(complianceData).map(pkg => <option key={pkg} value={pkg}>{pkg}</option>)}
+                      </select>
+                   </div>
+
+                   <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="checkbox" className="w-4 h-4 rounded bg-gray-800 border-gray-700"
+                          checked={state.designMultipliers.includeDuctLoss}
+                          onChange={(e) => handleUpdateProject('designMultipliers', { includeDuctLoss: e.target.checked })}
+                        />
+                        <label className="mb-0">Apply Global Duct Loss/Gain (10%)</label>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="checkbox" className="w-4 h-4 rounded bg-gray-800 border-gray-700"
+                          checked={state.designMultipliers.includeExposedFloor}
+                          onChange={(e) => handleUpdateProject('designMultipliers', { includeExposedFloor: e.target.checked })}
+                        />
+                        <label className="mb-0">Global Exposed Floor Calculation</label>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="mt-8 overflow-x-auto">
+                   <ComponentTable state={state} onUpdate={handleUpdateProject} />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Room List / Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {processedRooms.map((r, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveRoomIndex(i)}
-                className={`p-4 rounded-lg border-2 text-left transition-all ${activeRoomIndex === i ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-              >
-                <div className="font-black text-blue-900">{r.name || `Room ${i+1}`}</div>
-                <div className="text-[10px] text-gray-500 font-bold uppercase">{r.level} • {r.totalRoomLoss} / {r.totalRoomGain}</div>
-              </button>
-            ))}
-            <button
-              onClick={addNewRoom}
-              className="p-4 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 font-bold hover:border-gray-400 hover:text-gray-500 bg-white"
-            >
-              + Add New Room
-            </button>
-          </div>
-
-          {activeRoomIndex !== null && (
+          {isWizardOpen && activeRoomIndex !== null && (
             <WizardContainer
               room={state.rooms[activeRoomIndex]}
               projectState={state}
               onUpdate={handleUpdateRoom}
-              onComplete={() => setActiveRoomIndex(null)}
-              onCancel={() => setActiveRoomIndex(null)}
+              onComplete={() => setIsWizardOpen(false)}
+              onCancel={() => setIsWizardOpen(false)}
               onUpdateProject={handleUpdateProject}
             />
           )}

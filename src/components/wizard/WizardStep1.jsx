@@ -7,14 +7,13 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
   const getLevelOptions = () => {
     const options = [];
     if (foundationType === 'Basement') {
-      options.push('Basement');
-      if (numStoreys >= 1) options.push('Level 1 (Ground)');
-      if (numStoreys >= 2) options.push('Level 2');
-      if (numStoreys >= 3) options.push('Level 3');
+      options.push('Level 1 (Basement)');
+      if (numStoreys >= 2) options.push('Level 2 (Main)');
+      if (numStoreys >= 3) options.push('Level 3 (Second)');
     } else {
-      if (numStoreys >= 1) options.push('Level 1 (Ground)');
-      if (numStoreys >= 2) options.push('Level 2');
-      if (numStoreys >= 3) options.push('Level 3');
+      options.push('Level 1 (Ground)');
+      if (numStoreys >= 2) options.push('Level 2 (Second)');
+      if (numStoreys >= 3) options.push('Level 3 (Third)');
     }
     return options;
   };
@@ -22,10 +21,33 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
   const isMetric = projectState.displayUnits === 'METRIC';
 
 
+  const isLevel1 = room.level?.includes('Level 1');
+
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-bold">Step 1: Room Dimensions</h3>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-bold uppercase text-gray-400">Step 1: Room Dimensions</h3>
+        {isLevel1 && (
+           <div className="bg-blue-900/30 border border-blue-500/50 p-4 rounded-lg flex items-center gap-6">
+              <div>
+                <label className="text-blue-400">Foundation Loss (Watts)</label>
+                <input
+                  type="number"
+                  className="w-32 bg-gray-800 border-gray-700 text-white font-black"
+                  value={room.foundationLossWatts || 0}
+                  onChange={(e) => updateRoom({ foundationLossWatts: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-black text-gray-500 uppercase">Converted Loss</div>
+                <div className="text-xl font-black text-white">
+                  {Math.round((room.foundationLossWatts || 0) * 3.412)} <span className="text-[10px] font-normal text-gray-400 uppercase">BTU/H</span>
+                </div>
+              </div>
+           </div>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-8">
         <div>
           <label htmlFor="room-name" className="block text-sm font-medium">Room Name (Max 8 chars)</label>
           <input
