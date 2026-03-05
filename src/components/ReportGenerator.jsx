@@ -212,7 +212,7 @@ const ReportGenerator = ({ state }) => {
 
                <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">1. Gross Exposed Walls</div>
                <Row label="Above Grade Wall" struct="AGW" area={fmtA(areas.grossAGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
-               {room.level === 'Basement' && (
+               {(room.level?.includes('Basement') || room.level === 'Basement') && (
                  <Row label="Below Grade Wall" struct="BGW" area={fmtA(areas.grossBGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
                )}
 
@@ -256,7 +256,7 @@ const ReportGenerator = ({ state }) => {
                   factorHL={factors.agw.hlFactor.toFixed(3)} factorHG={factors.agw.hgFactor.toFixed(3)}
                   loss={fmtP(areas.netAGW * factors.agw.hlFactor)} gain={fmtP(areas.netAGW * factors.agw.hgFactor)}
                />
-               {room.level === 'Basement' && (
+               {(room.level?.includes('Basement') || room.level === 'Basement') && (
                  <Row
                    label="Net BGW" struct="BGW" area={fmtA(areas.netBGW)}
                    factorHL={factors.bgw.hlFactor.toFixed(3)} factorHG={factors.bgw.hgFactor.toFixed(3)}
@@ -283,6 +283,36 @@ const ReportGenerator = ({ state }) => {
                     factorHL={factors.floor.hlFactor.toFixed(3)} factorHG={factors.floor.hgFactor.toFixed(3)}
                     loss={fmtP(areas.floorArea * factors.floor.hlFactor)} gain={fmtP(areas.floorArea * factors.floor.hgFactor)}
                  />
+               )}
+
+               {/* Custom Components */}
+               {state.compliance.customComponents.length > 0 && (
+                 <>
+                   <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">8. Custom Components</div>
+                   {state.compliance.customComponents.map((comp, cIdx) => {
+                     const area = room.customComponentAreas?.[cIdx] || 0;
+                     if (area <= 0) return null;
+                     const hlFactor = (state.environmental.hl_idt - state.environmental.hl_odt) / comp.rValue;
+                     const hgFactor = ( (state.environmental.hg_odt - state.environmental.hg_idt) + (comp.sc || 0) ) / comp.rValue;
+                     return (
+                        <Row
+                          key={cIdx} label={comp.label} struct={comp.structure} area={fmtA(area)}
+                          factorHL={hlFactor.toFixed(3)} factorHG={hgFactor.toFixed(3)}
+                          loss={fmtP(area * hlFactor)} gain={fmtP(area * hgFactor)}
+                        />
+                     );
+                   })}
+                 </>
+               )}
+
+               {/* Manual Foundation Loss */}
+               {room.foundationLossWatts > 0 && (
+                 <div className="grid grid-cols-10 border-b border-gray-300 h-6 items-center bg-red-50 text-[8px]">
+                    <div className="col-span-4 px-2 border-r border-gray-300 font-bold uppercase text-red-800">Manual Foundation Heat Loss</div>
+                    <div className="col-span-3 px-2 border-r border-gray-300 text-right italic font-bold text-red-600">{room.foundationLossWatts} W Input</div>
+                    <div className="col-span-2 text-right px-2 border-r border-gray-300 font-black text-red-700">{fmtP(room.foundationLossWatts * 3.412)}</div>
+                    <div className="text-right px-2 font-bold text-blue-700">---</div>
+                 </div>
                )}
 
                <div className="grid grid-cols-10 border-t-2 border-black h-8 items-center bg-gray-100">
