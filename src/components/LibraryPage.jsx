@@ -65,63 +65,6 @@ const LibraryPage = () => {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* 2. SOLAR Table */}
-        <section>
-          <h2 className="text-lg font-black uppercase bg-gray-800 text-white p-4 rounded-t-xl border-x border-t border-gray-700 tracking-tighter">Table B: Solar Radiation (Btu/h/ft&sup2;)</h2>
-          <div className="overflow-x-auto border border-gray-700 rounded-b-xl">
-            <table className="w-full text-center border-collapse">
-              <thead className="bg-gray-800 text-[8px] font-black uppercase border-b border-gray-700 text-gray-400">
-                <tr>
-                  <th className="p-3 border-r border-gray-700 text-left">Latitude</th>
-                  <th className="p-3 border-r border-gray-700">N / Shaded</th>
-                  <th className="p-3 border-r border-gray-700">S</th>
-                  <th className="p-3 border-r border-gray-700">E / W</th>
-                  <th className="p-3">Horizontal</th>
-                </tr>
-              </thead>
-              <tbody className="text-[10px] font-black divide-y divide-gray-800">
-                {Object.entries(library.solarTable).map(([lat, data]) => (
-                  <tr key={lat} className="hover:bg-gray-800/40">
-                    <td className="p-3 border-r border-gray-800 text-left text-blue-500 font-black">{lat}&deg;N</td>
-                    <td className="p-3 border-r border-gray-800 text-white">{data.N_S?.imp}</td>
-                    <td className="p-3 border-r border-gray-800 text-white">{data.S?.imp}</td>
-                    <td className="p-3 border-r border-gray-800 text-white">{data.E_W?.imp}</td>
-                    <td className="p-3 text-white">{data.H?.imp}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* 3. ISF Table */}
-        <section>
-          <h2 className="text-lg font-black uppercase bg-gray-800 text-white p-4 rounded-t-xl border-x border-t border-gray-700 tracking-tighter">Table C: Internal Shading (ISF)</h2>
-          <div className="border border-gray-700 rounded-b-xl overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-800 text-[8px] font-black uppercase border-b border-gray-700 text-gray-400">
-                <tr>
-                  <th className="p-3 border-r border-gray-700">Shading Type</th>
-                  <th className="p-3 border-r border-gray-700 text-center">Single</th>
-                  <th className="p-3 border-r border-gray-700 text-center">Double</th>
-                  <th className="p-3 text-center">Triple</th>
-                </tr>
-              </thead>
-              <tbody className="text-[10px] font-black divide-y divide-gray-800">
-                {Object.entries(library.isfTable).map(([type, vals]) => (
-                  <tr key={type} className="hover:bg-gray-800/40">
-                    <td className="p-3 border-r border-gray-800 text-white uppercase">{type}</td>
-                    <td className="p-3 border-r border-gray-800 text-center text-blue-500">{vals.Single.toFixed(2)}</td>
-                    <td className="p-3 border-r border-gray-800 text-center text-blue-500">{vals.Double.toFixed(2)}</td>
-                    <td className="p-3 text-center text-blue-500">{vals.Triple.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
 
       <div className="pt-8 border-t border-gray-800 text-center text-[10px] font-black uppercase text-gray-600 tracking-widest">
         End of Engineering Library &bull; CSA F280-12 Digital Reference

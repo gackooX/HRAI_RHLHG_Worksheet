@@ -9,6 +9,8 @@ import { calculateRoomMetrics } from './utils/calculations';
 import { complianceData } from './data/complianceData';
 import ComponentTable from './components/ComponentTable';
 import library from './data/library.json';
+import DimensionInput from './components/DimensionInput';
+import TempInput from './components/TempInput';
 
 function App() {
   const [state, setState] = useState(initialState);
@@ -408,6 +410,47 @@ function App() {
                         <label className="mb-0">Global Exposed Floor Calculation</label>
                       </div>
                    </div>
+                </div>
+
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-800">
+                  <TempInput
+                    label="Outdoor Design Temp (Heating)"
+                    value={state.environmental.hl_odt}
+                    id="hl_odt" isMetric={isMetric}
+                    onChange={(v) => handleUpdateProject('environmental', { hl_odt: v })}
+                  />
+                  <TempInput
+                    label="Indoor Design Temp (Heating)"
+                    value={state.environmental.hl_idt}
+                    id="hl_idt" isMetric={isMetric}
+                    onChange={(v) => handleUpdateProject('environmental', { hl_idt: v })}
+                  />
+                  <TempInput
+                    label="Mean Soil Temp (DG TEMP)"
+                    value={state.environmental.hl_mean_soil_temp}
+                    id="hl_mean_soil_temp" isMetric={isMetric}
+                    onChange={(v) => handleUpdateProject('environmental', { hl_mean_soil_temp: v })}
+                  />
+                  <TempInput
+                    label="Outdoor Design Temp (Cooling)"
+                    value={state.environmental.hg_odt}
+                    id="hg_odt" isMetric={isMetric}
+                    onChange={(v) => handleUpdateProject('environmental', { hg_odt: v })}
+                  />
+                  <TempInput
+                    label="Indoor Design Temp (Cooling)"
+                    value={state.environmental.hg_idt}
+                    id="hg_idt" isMetric={isMetric}
+                    onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
+                  />
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500">Summer Daily Range</label>
+                    <input
+                      type="number" className="w-full border p-2 rounded font-bold bg-gray-800 text-white"
+                      value={state.environmental.hg_daily_range}
+                      onChange={(e) => handleUpdateProject('environmental', { hg_daily_range: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-8 overflow-x-auto">

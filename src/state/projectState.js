@@ -3,7 +3,7 @@ export const initialState = {
     streetNumber: '',
     streetAddress: '',
     city: '',
-    province: '',
+    province: 'ON',
     postalCode: '',
     front_facing_direction: 'N', // N, NE, E, SE, S, SW, W, NW
     system_case: 'Case #3', // Case #1, #2, #3

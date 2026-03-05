@@ -95,21 +95,23 @@ export const calculateDetailedAreas = (room, state) => {
   let netAGW = 0;
   let netBGW = 0;
 
-  // Level 1 is always the lowest habitable level.
-  // Basement Scenario: Level 1 = Basement, Level 2 = Main, Level 3 = Second.
-  // Slab-on-Grade Scenario: Level 1 = Ground, Level 2 = Second, Level 3 = Third.
-  const isLevel1 = room.level?.includes('Level 1');
-  const isBasement = isLevel1 && state.foundation.foundationType === 'Basement';
+  // Level Logic (Bug Fix):
+  // Basement: L1 = Basement, L2 = Main, L3 = Second.
+  // Slab: L1 = Main, L2 = Second, L3 = Third.
+  const isBasementScenario = state.foundation.foundationType === 'Basement';
+  const isL1 = room.level?.includes('Level 1');
+  const isBasementRoom = isL1 && isBasementScenario;
 
-  if (isBasement) {
-    grossBGW = Math.max(0, h_bg * p);
-    grossAGW = Math.max(0, (h - h_bg) * p);
+  if (isBasementRoom) {
+    const basementHeight = state.foundation.floorHeights['Basement'] || 8;
+    grossBGW = h_bg * p;
+    grossAGW = (basementHeight - h_bg) * p;
 
-    // In HRAI, windows in basements are typically subtracted from AGW portion first
-    // if AGW portion is smaller than windows, the remainder goes to BGW
+    // Net Calculations
     netAGW = Math.max(0, grossAGW - windowArea - doorArea - headerArea);
-    const remainingToSubtract = Math.max(0, (windowArea + doorArea + headerArea) - grossAGW);
-    netBGW = Math.max(0, grossBGW - remainingToSubtract);
+    netBGW = Math.max(0, (basementHeight - h_bg) * p); // Re-evaluating BGW formula per requirement 2.2.2
+    // Requirement 2.2.2: Net BGW = (Basement Floor Height - Wall Below Grade Height) * Perimeter
+    netBGW = Math.max(0, (basementHeight - h_bg) * p);
   } else {
     grossAGW = p * h;
     netAGW = Math.max(0, grossAGW - windowArea - doorArea - headerArea);
@@ -159,7 +161,8 @@ export const calculateRoomConductiveLoss = (room, state, factors) => {
   }
 
   // Manual Foundation Loss (Watts to Btu/h)
-  if (room.level?.includes('Level 1') && room.foundationLossWatts) {
+  const isL1 = room.level?.includes('Level 1');
+  if (isL1 && room.foundationLossWatts) {
     loss += (room.foundationLossWatts * 3.412);
   }
 
