@@ -5,7 +5,7 @@ import THGMWorksheet from './components/THGMWorksheet';
 import LibraryPage from './components/LibraryPage';
 import TempInput from './components/TempInput';
 import { initialState } from './state/projectState';
-import { calculateRoomMetrics } from './utils/calculations';
+import { calculateRoomMetrics, getInternalLevelKey } from './utils/calculations';
 import { convertTemp, convertTempDelta } from './utils/unitConverter';
 import { complianceData } from './data/complianceData';
 import ComponentTable from './components/ComponentTable';
@@ -52,8 +52,9 @@ function App() {
   };
 
   const addNewRoom = () => {
-    const defaultLevel = state.foundation.foundationType === 'Basement' ? 'Basement' : 'Level 1';
-    const defaultHeight = state.foundation.floorHeights[defaultLevel] || 8;
+    const defaultLevel = 1;
+    const internalKey = getInternalLevelKey(defaultLevel, state);
+    const defaultHeight = state.foundation.floorHeights[internalKey] || 8;
     const newRoom = {
       name: '',
       level: defaultLevel,
@@ -70,7 +71,8 @@ function App() {
       },
       wallType: 'AGW',
       hasDuctLoss: false,
-      occupancy: 0
+      occupancy: 0,
+      foundationConductiveLoss: 0
     };
     setState(prev => ({ ...prev, rooms: [...prev.rooms, newRoom] }));
     setActiveRoomIndex(state.rooms.length);
@@ -564,7 +566,7 @@ function App() {
                 className={`p-4 rounded-lg border-2 text-left transition-all ${activeRoomIndex === i ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
               >
                 <div className="font-black text-blue-900">{r.name || `Room ${i+1}`}</div>
-                <div className="text-[10px] text-gray-500 font-bold uppercase">{r.level} • {r.totalRoomLoss} / {r.totalRoomGain}</div>
+                <div className="text-[10px] text-gray-500 font-bold uppercase">{r.levelLabel} • {r.totalRoomLoss} / {r.totalRoomGain}</div>
               </button>
             ))}
             <button

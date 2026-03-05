@@ -66,7 +66,7 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                label="Above Grade Wall" struct="AGW" area={areas.grossAGW.toFixed(1)}
                lossFactor="---" gainFactor="---" loss="---" gain="---"
             />
-            {room.level === 'Basement' && (
+            {metrics.levelLabel === 'Basement' && (
                 <Row
                   label="Below Grade Wall" struct="BGW" area={areas.grossBGW.toFixed(1)}
                   lossFactor="---" gainFactor="---" loss="---" gain="---"
@@ -175,7 +175,7 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                loss={Math.round(areas.netAGW * factors.agw.hlFactor)}
                gain={Math.round(areas.netAGW * factors.agw.hgFactor)}
             />
-            {room.level === 'Basement' && (
+            {metrics.levelLabel === 'Basement' && (
                 <Row
                    label="Net BGW (Sub-grade portion)" struct="BGW" area={areas.netBGW.toFixed(1)}
                    lossFactor={factors.bgw.hlFactor.toFixed(3)}
@@ -221,6 +221,29 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                loss={projectState.designMultipliers.includeExposedFloor ? Math.round(areas.floorArea * factors.floor.hlFactor) : 0}
                gain={projectState.designMultipliers.includeExposedFloor ? Math.round(areas.floorArea * factors.floor.hgFactor) : 0}
             />
+
+            {/* 9. FOUNDATION CONDUCTIVE LOSS */}
+            {room.level === 1 && (
+                <tr className="border-b border-gray-200 text-xs">
+                    <td className="p-2 border-r font-bold text-[10px] uppercase">9. FOUNDATION CONDUCTIVE LOSS</td>
+                    <td className="p-2 border-r text-center text-blue-600 font-bold italic opacity-60">F/C</td>
+                    <td className="p-2 border-r text-right font-mono bg-blue-50">
+                        <div className="flex items-center justify-end gap-1">
+                            <input
+                                type="number"
+                                className="w-20 border rounded p-1 text-right font-black"
+                                value={room.foundationConductiveLoss || 0}
+                                onChange={(e) => updateRoom({ foundationConductiveLoss: parseFloat(e.target.value) || 0 })}
+                            />
+                            <span className="text-[10px] font-black opacity-40">W</span>
+                        </div>
+                    </td>
+                    <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">3.412</td>
+                    <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">---</td>
+                    <td className="p-2 border-r text-right font-black text-red-600">{metrics.foundationLossBTU}</td>
+                    <td className="p-2 text-right font-black text-blue-600">---</td>
+                </tr>
+            )}
 
             {/* TOTALS */}
             <tr className="bg-gray-900 text-white font-black text-sm uppercase">

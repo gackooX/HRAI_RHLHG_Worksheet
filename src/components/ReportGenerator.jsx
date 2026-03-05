@@ -111,7 +111,7 @@ const ReportGenerator = ({ state }) => {
             {state.rooms.map((room, i) => (
               <tr key={i} className="border-b border-black">
                 <td className="border-r border-black p-2 font-bold">{room.name}</td>
-                <td className="border-r border-black p-2 text-center uppercase">{room.level}</td>
+                <td className="border-r border-black p-2 text-center uppercase">{room.levelLabel}</td>
                 <td className="border-r border-black p-2 text-right px-4 font-black text-red-900">{fmtP(room.totalRoomLoss)}</td>
                 <td className="p-2 text-right px-4 font-black text-blue-900">{fmtP(room.totalRoomGain)}</td>
               </tr>
@@ -183,7 +183,7 @@ const ReportGenerator = ({ state }) => {
               </div>
               <div className="border-r border-black px-1">
                 <div className="font-bold uppercase text-[6px] text-gray-500">Level</div>
-                <div className="text-[10px] font-bold uppercase">{room.level}</div>
+                <div className="text-[10px] font-bold uppercase">{room.levelLabel}</div>
               </div>
               <div className="border-r border-black px-1">
                 <div className="font-bold uppercase text-[6px] text-gray-500">P / H</div>
@@ -212,7 +212,7 @@ const ReportGenerator = ({ state }) => {
 
                <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">1. Gross Exposed Walls</div>
                <Row label="Above Grade Wall" struct="AGW" area={fmtA(areas.grossAGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
-               {room.level === 'Basement' && (
+               {room.levelLabel === 'Basement' && (
                  <Row label="Below Grade Wall" struct="BGW" area={fmtA(areas.grossBGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
                )}
 
@@ -256,7 +256,7 @@ const ReportGenerator = ({ state }) => {
                   factorHL={factors.agw.hlFactor.toFixed(3)} factorHG={factors.agw.hgFactor.toFixed(3)}
                   loss={fmtP(areas.netAGW * factors.agw.hlFactor)} gain={fmtP(areas.netAGW * factors.agw.hgFactor)}
                />
-               {room.level === 'Basement' && (
+               {room.levelLabel === 'Basement' && (
                  <Row
                    label="Net BGW" struct="BGW" area={fmtA(areas.netBGW)}
                    factorHL={factors.bgw.hlFactor.toFixed(3)} factorHG={factors.bgw.hgFactor.toFixed(3)}
@@ -296,6 +296,14 @@ const ReportGenerator = ({ state }) => {
                   <div className="col-span-2 border-r border-black text-right px-2 text-red-600">{fmtP(room.airLeakageLoss)}</div>
                   <div className="text-right px-2 text-blue-600">{fmtP(room.airLeakageGain)}</div>
                </div>
+
+               {room.level === 1 && (
+                 <div className="grid grid-cols-10 border-t border-black h-6 items-center">
+                    <div className="col-span-7 px-2 border-r border-black text-right uppercase text-[7px] font-bold">9. FOUNDATION CONDUCTIVE LOSS</div>
+                    <div className="col-span-2 border-r border-black text-right px-2 text-red-700 font-black">{fmtP(room.foundationLossBTU)}</div>
+                    <div className="text-right px-2 text-blue-700 font-black">---</div>
+                 </div>
+               )}
 
                <div className="grid grid-cols-10 border-t border-black h-6 items-center bg-blue-50">
                   <div className="col-span-7 px-2 font-bold border-r border-black text-right uppercase text-[7px]">Sec 13: Occupancy</div>

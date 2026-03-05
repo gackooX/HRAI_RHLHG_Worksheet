@@ -1,20 +1,15 @@
 import React from 'react';
 import DimensionInput from '../DimensionInput';
+import { getLevelLabel } from '../../utils/calculations';
 
 const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
   const { foundationType, numStoreys } = projectState.foundation;
 
   const getLevelOptions = () => {
     const options = [];
-    if (foundationType === 'Basement') {
-      options.push('Basement');
-      if (numStoreys >= 1) options.push('Level 1 (Ground)');
-      if (numStoreys >= 2) options.push('Level 2');
-      if (numStoreys >= 3) options.push('Level 3');
-    } else {
-      if (numStoreys >= 1) options.push('Level 1 (Ground)');
-      if (numStoreys >= 2) options.push('Level 2');
-      if (numStoreys >= 3) options.push('Level 3');
+    const maxLevel = foundationType === 'Basement' ? numStoreys + 1 : numStoreys;
+    for (let i = 1; i <= maxLevel; i++) {
+        options.push({ value: i, label: getLevelLabel(i, projectState) });
     }
     return options;
   };
@@ -42,11 +37,18 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
           <select
             id="level"
             className="w-full border p-2 rounded bg-white"
-            value={room.level || (foundationType === 'Basement' ? 'Basement' : 'Level 1 (Ground)')}
-            onChange={(e) => updateRoom({ level: e.target.value })}
+            value={room.level || 1}
+            onChange={(e) => {
+              const newLevel = parseInt(e.target.value);
+              const updates = { level: newLevel };
+              if (newLevel !== 1) {
+                updates.foundationConductiveLoss = 0;
+              }
+              updateRoom(updates);
+            }}
           >
             {getLevelOptions().map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>

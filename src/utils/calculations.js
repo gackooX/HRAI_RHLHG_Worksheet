@@ -21,6 +21,28 @@ const getISFValue = (shadingType, glazingType) => {
   return library.isfTable[shadingType]?.[glazingType] || 1.0;
 };
 
+export const getLevelLabel = (level, state) => {
+  const { foundationType } = state.foundation;
+  if (foundationType === 'Basement') {
+    if (level === 1) return 'Basement';
+    if (level === 2) return 'Level 1 (Ground)';
+    return `Level ${level - 1}`;
+  } else {
+    if (level === 1) return 'Level 1 (Ground)';
+    return `Level ${level}`;
+  }
+};
+
+export const getInternalLevelKey = (level, state) => {
+  const { foundationType } = state.foundation;
+  if (foundationType === 'Basement') {
+    if (level === 1) return 'Basement';
+    return `Level ${level - 1}`;
+  } else {
+    return `Level ${level}`;
+  }
+};
+
 export const lookupGlazingData = (config) => {
   const { type, frame, spacer, coating, gapGas, hasStorm } = config;
   const table = library.glazingRValueTable;
@@ -86,7 +108,9 @@ export const calculateDetailedAreas = (room, state) => {
   let netAGW = 0;
   let netBGW = 0;
 
-  if (room.level === 'Basement') {
+  const isBasement = room.level === 1 && state.foundation.foundationType === 'Basement';
+
+  if (isBasement) {
     grossBGW = Math.max(0, h_bg * p);
     grossAGW = Math.max(0, (h - h_bg) * p);
 
@@ -116,10 +140,10 @@ export const calculateRoomConductiveLoss = (room, state, factors) => {
   const areas = calculateDetailedAreas(room, state);
 
   // Ceiling logic: Only include if it's the top floor
-  const levels = ['Basement', 'Level 1', 'Level 2', 'Level 3'];
-  const activeLevels = levels.filter(l => state.rooms.some(r => r.level === l));
+  const activeLevels = [...new Set(state.rooms.map(r => r.level))].sort((a, b) => a - b);
   const topLevel = activeLevels[activeLevels.length - 1];
-  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && room.level !== 'Basement');
+  const isBasement = room.level === 1 && state.foundation.foundationType === 'Basement';
+  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && !isBasement);
 
   let loss = (areas.windowArea * factors.windows.hlFactor) +
              (areas.doorArea * factors.doors.hlFactor) +
@@ -136,7 +160,7 @@ export const calculateRoomConductiveLoss = (room, state, factors) => {
   }
 
   // Foundation special (Slab on Grade logic)
-  if (room.level === 'Level 1 (Ground)' && state.foundation.foundationType === 'Slab on Grade') {
+  if (room.level === 1 && state.foundation.foundationType === 'Slab on Grade') {
     const fFactor = library.foundationMultipliers['Slab on Grade']['F-Factor'];
     const hl_delta_t = state.environmental.hl_idt - state.environmental.hl_odt;
     loss += (room.perimeter * fFactor * hl_delta_t);
@@ -177,10 +201,10 @@ export const calculateRoomConductiveGain = (room, state, factors) => {
   }
 
   // Ceiling logic: Only include if it's the top floor
-  const levels = ['Basement', 'Level 1', 'Level 2', 'Level 3'];
-  const activeLevels = levels.filter(l => state.rooms.some(r => r.level === l));
+  const activeLevels = [...new Set(state.rooms.map(r => r.level))].sort((a, b) => a - b);
   const topLevel = activeLevels[activeLevels.length - 1];
-  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && room.level !== 'Basement');
+  const isBasement = room.level === 1 && state.foundation.foundationType === 'Basement';
+  const isTopFloor = room.level === topLevel || (!state.rooms.some(r => r.level !== room.level) && !isBasement);
 
   let gain = totalWindowGain +
              (areas.doorArea * factors.doors.hgFactor) +
@@ -299,7 +323,9 @@ export const calculateRoomMetrics = (room, state) => {
 
   const occupancyGain = calculateOccupancyGain(room.occupancy || 0);
 
-  const netLoss = conductiveLoss + airLeakageLoss;
+  const foundationLossBTU = room.level === 1 ? (room.foundationConductiveLoss || 0) * 3.412 : 0;
+
+  const netLoss = conductiveLoss + airLeakageLoss + foundationLossBTU;
   let netGain = conductiveGain + airLeakageGain + occupancyGain;
 
   const ductLossPercent = state.designMultipliers.includeDuctLoss ? (state.designMultipliers.ductLossPercentage / 100) : 0;
@@ -316,6 +342,8 @@ export const calculateRoomMetrics = (room, state) => {
     airLeakageLoss: Math.round(airLeakageLoss),
     airLeakageGain: Math.round(airLeakageGain),
     occupancyGain,
+    foundationLossBTU: Math.round(foundationLossBTU),
+    levelLabel: getLevelLabel(room.level, state),
     netLoss: Math.round(netLoss),
     netGain: Math.round(netGain),
     totalRoomLoss,
