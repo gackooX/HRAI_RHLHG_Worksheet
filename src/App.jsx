@@ -227,24 +227,32 @@ function App() {
                 {showCityDropdown && (
                   <div className="absolute z-50 w-full bg-white border rounded shadow-lg max-h-48 overflow-y-auto mt-1">
                     {library.designConditions.locations
-                      .filter(l => l.city.toLowerCase().includes((citySearch || '').toLowerCase()))
-                      .map(loc => (
+                      .filter(l => {
+                        const search = (citySearch || '').toLowerCase();
+                        const combined = `${l.city}, ${l.region}`.toLowerCase();
+                        return combined.includes(search);
+                      })
+                      .map((loc, idx) => (
                         <div
-                          key={loc.city}
-                          className="p-2 hover:bg-blue-50 cursor-pointer text-xs font-bold"
+                          key={`${loc.city}-${loc.region}-${idx}`}
+                          className="p-2 hover:bg-blue-50 cursor-pointer text-xs font-bold border-b last:border-0"
                           onClick={() => {
-                            handleUpdateProject('header', { city: loc.city });
-                            handleUpdateProject('environmental', {
-                              hl_odt: loc.odtHeating,
-                              hg_odt: loc.odtCooling,
-                              hg_daily_range: loc.summerRange,
-                              hg_north_latitude: loc.latitude
+                            handleUpdateProject('header', {
+                              city: loc.city,
+                              province: loc.region
                             });
-                            setCitySearch(loc.city);
+                            handleUpdateProject('environmental', {
+                              hl_odt: loc.dhdbt,
+                              hg_odt: loc.dcdbt,
+                              hl_mean_soil_temp: loc.dgTemp,
+                              hg_daily_range: loc.summerRange,
+                              hg_north_latitude: Math.round(loc.latitude)
+                            });
+                            setCitySearch(`${loc.city}, ${loc.region}`);
                             setShowCityDropdown(false);
                           }}
                         >
-                          {loc.city}
+                          {loc.city}, {loc.region}
                         </div>
                       ))
                     }
