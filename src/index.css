@@ -2,9 +2,33 @@
 
 @layer base {
   body {
-    background-color: #f3f4f6;
-    color: #111827;
+    background-color: #121212;
+    color: #ffffff;
     font-size: 14px;
+  }
+
+  /* Typography Precision: Input Box Titles (Labels) set strictly to 10 */
+  label {
+    font-size: 10px !important;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #9ca3af; /* gray-400 */
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+
+  /* High contrast for inputs in dark mode */
+  input, select, textarea {
+    background-color: #1f2937;
+    color: #ffffff;
+    border: 1px solid #374151;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+  }
+
+  input:focus, select:focus {
+    outline: 2px solid #3b82f6;
+    border-color: transparent;
   }
 
   /* Remove number input arrows */
@@ -24,7 +48,18 @@
   padding: 0.5in;
   margin: 0.5in auto;
   background: white;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  color: black;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+.print-page label {
+  color: #4b5563; /* gray-600 for print */
+}
+
+.print-page input, .print-page select {
+  background-color: white;
+  color: black;
+  border: 1px solid #000;
 }
 
 .worksheet-table {
@@ -40,15 +75,15 @@
 }
 
 .loss-cell {
-  color: #dc2626;
+  color: #ef4444; /* red-500 */
   font-weight: bold;
-  background-color: #fef2f2;
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
 .gain-cell {
-  color: #2563eb;
+  color: #3b82f6; /* blue-500 */
   font-weight: bold;
-  background-color: #eff6ff;
+  background-color: rgba(59, 130, 246, 0.1);
 }
 
 @media print {
@@ -58,6 +93,7 @@
   }
   body {
     background: white !important;
+    color: black !important;
     margin: 0;
     padding: 0;
   }

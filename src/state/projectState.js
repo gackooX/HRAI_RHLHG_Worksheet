@@ -51,6 +51,7 @@ export const initialState = {
       ceiling: 27,
       floor: -6
     },
+    customComponents: [],
   },
   designMultipliers: {
     header_height: 0.75, // ft
