@@ -1,7 +1,7 @@
 import React from 'react';
 import { calculateComponentFactors } from '../utils/calculations';
 
-const ComponentTable = ({ state, onUpdate }) => {
+const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
   const factors = calculateComponentFactors(state);
   const hl_dt = state.environmental.hl_idt - state.environmental.hl_odt;
   const hg_dt = state.environmental.hg_odt - state.environmental.hg_idt;
@@ -46,9 +46,9 @@ const ComponentTable = ({ state, onUpdate }) => {
 
   const renderRow = (label, structure, rEff, hlFactor, sc, hgFactor, key, isCustom = false) => {
     return (
-      <tr className="border-b text-[10px]">
-        <td className="p-2 border font-bold uppercase flex justify-between items-center group">
-          {isCustom ? (
+      <tr className={`border-b text-[10px] ${readOnly ? 'border-black' : 'border-gray-800'}`}>
+        <td className="p-2 border-r font-bold uppercase flex justify-between items-center group">
+          {isCustom && !readOnly ? (
             <input
               className="bg-transparent border-none p-0 w-full focus:ring-0 uppercase font-black"
               value={label}
@@ -60,7 +60,7 @@ const ComponentTable = ({ state, onUpdate }) => {
               }}
             />
           ) : label}
-          {isCustom && (
+          {isCustom && !readOnly && (
             <button
               onClick={() => removeCustomComponent(key)}
               className="opacity-0 group-hover:opacity-100 text-red-500 ml-2"
@@ -69,8 +69,8 @@ const ComponentTable = ({ state, onUpdate }) => {
             </button>
           )}
         </td>
-        <td className="p-2 border text-center font-bold text-green-700 uppercase w-16">
-          {isCustom ? (
+        <td className="p-2 border-r text-center font-bold text-green-700 uppercase w-16">
+          {isCustom && !readOnly ? (
              <input
               className="bg-transparent border-none p-0 w-full text-center focus:ring-0 uppercase font-black"
               value={structure}
@@ -84,26 +84,34 @@ const ComponentTable = ({ state, onUpdate }) => {
             />
           ) : structure}
         </td>
-        <td className="p-2 border text-center w-24">
-            <input
-              type="number" step="0.01"
-              className="w-16 border rounded p-1 font-bold text-center text-red-600 bg-red-900/20"
-              value={rEff}
-              onChange={(e) => handleREffChange(key, e.target.value, isCustom)}
-            />
+        <td className="p-2 border-r text-center w-24">
+            {readOnly ? (
+               <span className="font-bold text-red-700">{rEff.toFixed(2)}</span>
+            ) : (
+              <input
+                type="number" step="0.01"
+                className="w-16 border border-gray-700 rounded p-1 font-bold text-center text-red-600 bg-red-900/20"
+                value={rEff}
+                onChange={(e) => handleREffChange(key, e.target.value, isCustom)}
+              />
+            )}
         </td>
-        <td className="p-2 border text-center font-bold text-red-600 w-24">
+        <td className="p-2 border-r text-center font-bold text-red-600 w-24">
             {hlFactor.toFixed(2)}
         </td>
-        <td className="p-2 border text-center w-16">
-            <input
-              type="number" step="0.1"
-              className="w-12 border rounded p-1 font-bold text-center text-gray-300 bg-gray-800"
-              value={sc}
-              onChange={(e) => handleSCChange(key, e.target.value, isCustom)}
-            />
+        <td className="p-2 border-r text-center w-16">
+            {readOnly ? (
+               <span className="font-bold">{sc}</span>
+            ) : (
+              <input
+                type="number" step="0.1"
+                className="w-12 border border-gray-700 rounded p-1 font-bold text-center text-gray-300 bg-gray-800"
+                value={sc}
+                onChange={(e) => handleSCChange(key, e.target.value, isCustom)}
+              />
+            )}
         </td>
-        <td className="p-2 border text-center font-bold text-blue-600 w-24">
+        <td className="p-2 text-center font-bold text-blue-600 w-24">
           {typeof hgFactor === 'number' ? hgFactor.toFixed(2) : hgFactor}
         </td>
       </tr>
@@ -111,11 +119,11 @@ const ComponentTable = ({ state, onUpdate }) => {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-2xl">
+    <div className={`${readOnly ? 'bg-white text-black border-2 border-black' : 'bg-gray-900 border border-gray-700 shadow-2xl'} rounded-xl overflow-hidden`}>
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-gray-800 border-b border-gray-700 font-black text-center text-[10px] uppercase text-gray-400">
-            <th className="p-4 border-r border-gray-700 text-left">ENGINEERING COMPONENTS</th>
+          <tr className={`${readOnly ? 'bg-gray-100 border-b-2 border-black text-black' : 'bg-gray-800 border-b border-gray-700 text-gray-400'} font-black text-center text-[10px] uppercase`}>
+            <th className={`p-4 border-r ${readOnly ? 'border-black' : 'border-gray-700'} text-left`}>ENGINEERING COMPONENTS</th>
             <th className="p-4 border-r border-gray-700 w-16">
                <span className="text-[8px] rotate-180 [writing-mode:vertical-lr] inline-block">STRUCTURE</span>
             </th>
@@ -147,25 +155,25 @@ const ComponentTable = ({ state, onUpdate }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-800">
-          <tr className="bg-gray-800/30 text-[10px] uppercase font-black text-gray-500">
-             <td className="p-3 border-r border-gray-800">1. Gross Exposed Walls</td>
-             <td className="p-3 border-r border-gray-800 text-center text-green-500 w-16">AGW</td>
-             <td colSpan="4" className="bg-gray-800/50"></td>
+          <tr className={`${readOnly ? 'bg-gray-200 text-black border-b border-black' : 'bg-gray-800/30 text-gray-500'} text-[10px] uppercase font-black`}>
+             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'}`}>1. Gross Exposed Walls</td>
+             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center text-green-500 w-16`}>AGW</td>
+             <td colSpan="4" className={readOnly ? '' : 'bg-gray-800/50'}></td>
           </tr>
 
           {/* Windows (Row 2) */}
           {Object.entries(factors.windows.hgFactor).map(([dir, hgf], i) => (
-            <tr key={dir} className="text-[10px] hover:bg-gray-800/20 transition-colors">
-              {i === 0 && <td rowSpan="6" className="p-4 border-r border-gray-800 font-bold uppercase align-top text-gray-300">2. Windows & Skylights</td>}
-              <td className="p-3 border-r border-gray-800 text-center font-black text-green-500 uppercase w-16">{dir.replace('_', '/')}</td>
-              <td className="p-3 border-r border-gray-800 text-center w-24">
-                <span className="font-bold text-red-500">{factors.windows.rEff.toFixed(2)}</span>
+            <tr key={dir} className={`text-[10px] ${readOnly ? 'border-b border-black' : 'hover:bg-gray-800/20 transition-colors'}`}>
+              {i === 0 && <td rowSpan="6" className={`p-4 border-r ${readOnly ? 'border-black text-black' : 'border-gray-800 text-gray-300'} font-bold uppercase align-top`}>2. Windows & Skylights</td>}
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center font-black text-green-500 uppercase w-16`}>{dir.replace('_', '/')}</td>
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center w-24`}>
+                <span className={`font-bold ${readOnly ? 'text-red-700' : 'text-red-500'}`}>{factors.windows.rEff.toFixed(2)}</span>
               </td>
-              <td className="p-3 border-r border-gray-800 text-center font-bold text-red-500 w-24">
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center font-bold ${readOnly ? 'text-red-700' : 'text-red-500'} w-24`}>
                 {factors.windows.hlFactor.toFixed(2)}
               </td>
-              <td className="p-3 border-r border-gray-800 text-center w-16">
-                {i === 0 ? (
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center w-16`}>
+                {i === 0 && !readOnly ? (
                     <input
                         type="number" step="0.1"
                         className="w-12 border border-gray-700 rounded p-1 font-bold text-center text-gray-300 bg-gray-800"
@@ -173,10 +181,10 @@ const ComponentTable = ({ state, onUpdate }) => {
                         onChange={(e) => handleSCChange('windows', e.target.value)}
                     />
                 ) : (
-                    <span className="font-bold text-gray-700">{factors.windows.sc}</span>
+                    <span className={`font-bold ${readOnly ? 'text-black' : 'text-gray-700'}`}>{factors.windows.sc}</span>
                 )}
               </td>
-              <td className="p-3 text-center font-bold text-blue-500 bg-blue-900/10 w-24">
+              <td className={`p-3 text-center font-bold text-blue-500 ${readOnly ? '' : 'bg-blue-900/10'} w-24`}>
                 {hgf.toFixed(2)}
               </td>
             </tr>
@@ -199,16 +207,18 @@ const ComponentTable = ({ state, onUpdate }) => {
              return renderRow(comp.label, comp.structure, comp.rValue, hlFactor, comp.sc, hgFactor, idx, true);
           })}
 
-          <tr className="bg-gray-800/30">
-            <td colSpan="6" className="p-2 text-center">
-              <button
-                onClick={addCustomComponent}
-                className="text-[9px] font-black uppercase text-blue-500 hover:text-blue-400 tracking-widest"
-              >
-                + Add Custom Component Entry
-              </button>
-            </td>
-          </tr>
+          {!readOnly && (
+            <tr className="bg-gray-800/30">
+              <td colSpan="6" className="p-2 text-center">
+                <button
+                  onClick={addCustomComponent}
+                  className="text-[9px] font-black uppercase text-blue-500 hover:text-blue-400 tracking-widest"
+                >
+                  + Add Custom Component Entry
+                </button>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
