@@ -18,7 +18,7 @@ function App() {
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [activeRoomIndex, setActiveRoomIndex] = useState(null);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [view, setView] = useState('rooms'); // 'rooms', 'thgm', 'report', or 'library'
+  const [view, setView] = useState('building'); // 'building', 'rooms', 'thgm', 'report', or 'library'
 
   const handleUpdateProject = (key, value) => {
     setState(prev => {
@@ -159,6 +159,7 @@ function App() {
       <div className="no-print mb-8 flex flex-col md:flex-row justify-between items-center bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-2xl gap-6">
         <div className="flex flex-wrap gap-2">
           {[
+            { id: 'building', label: 'Building Manager', icon: '🏢' },
             { id: 'rooms', label: 'Room Manager', icon: '🏠' },
             { id: 'thgm', label: 'THGM Engine', icon: '☀️' },
             { id: 'report', label: 'Final Report', icon: '📄' },
@@ -208,7 +209,7 @@ function App() {
         </div>
       </div>
 
-      {view === 'rooms' && (
+      {view === 'building' && (
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Dashboard Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -276,18 +277,22 @@ function App() {
                     </select>
                   </div>
                   <div className="relative">
-                    <label>City Search</label>
+                    <label>City / Location</label>
                     <input
                       className="w-full"
                       disabled={!state.header.province}
                       value={citySearch || state.header.city}
                       onChange={(e) => {
-                        setCitySearch(e.target.value);
+                        const val = e.target.value;
+                        setCitySearch(val);
+                        handleUpdateProject('header', { city: val });
                         setShowCityDropdown(true);
                       }}
                       onFocus={() => setShowCityDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowCityDropdown(false), 200)}
-                      placeholder={state.header.province ? "Start typing..." : "Select province first"}
+                      onBlur={() => {
+                        setTimeout(() => setShowCityDropdown(false), 200);
+                      }}
+                      placeholder={state.header.province ? "Type city name..." : "Select province first"}
                     />
                     {showCityDropdown && filteredCities.length > 0 && (
                       <div className="absolute z-50 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto mt-1 divide-y divide-gray-700">
@@ -375,20 +380,8 @@ function App() {
               </div>
             </div>
 
-            {/* Room Management Area */}
+            {/* Global Engineering Area */}
             <div className="lg:col-span-2 space-y-8">
-              <RoomManagement
-                rooms={processedRooms}
-                activeIndex={activeRoomIndex}
-                onSelect={(idx, openWizard = false) => {
-                  setActiveRoomIndex(idx);
-                  if (openWizard) setIsWizardOpen(true);
-                }}
-                onAdd={addNewRoom}
-                onRemove={handleRemoveRoom}
-                onDuplicate={handleDuplicateRoom}
-              />
-
               {/* Compliance & Global Logic */}
               <div className="bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl">
                 <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-indigo-600 pl-4">Engineering Overrides</h2>
@@ -471,6 +464,22 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {view === 'rooms' && (
+        <div className="max-w-7xl mx-auto space-y-8">
+          <RoomManagement
+            rooms={processedRooms}
+            activeIndex={activeRoomIndex}
+            onSelect={(idx, openWizard = false) => {
+              setActiveRoomIndex(idx);
+              if (openWizard) setIsWizardOpen(true);
+            }}
+            onAdd={addNewRoom}
+            onRemove={handleRemoveRoom}
+            onDuplicate={handleDuplicateRoom}
+          />
 
           {isWizardOpen && activeRoomIndex !== null && (
             <WizardContainer
