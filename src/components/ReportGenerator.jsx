@@ -152,15 +152,15 @@ const ReportGenerator = ({ state }) => {
         const areas = calculateDetailedAreas(room, state);
         const factors = calculateComponentFactors(state);
 
-        const Row = ({ label, struct, area, factorHL, factorHG, loss, gain, isSubhead = false }) => (
+        const Row = ({ label, struct, area, factorHL, loss, factorHG, gain, isSubhead = false }) => (
             <div className={`grid grid-cols-10 border-b border-gray-300 h-6 items-center ${isSubhead ? 'bg-gray-100 font-black text-[7px]' : 'text-[8px]'}`}>
-                <div className="col-span-3 px-2 border-r border-gray-300 truncate">{label}</div>
-                <div className="text-center border-r border-gray-300">{struct}</div>
-                <div className="text-right px-2 border-r border-gray-300 font-mono">{area}</div>
+                <div className="col-span-3 px-2 border-r border-gray-300 truncate font-bold">{label}</div>
+                <div className="text-center border-r border-gray-300 font-bold text-blue-600">{struct}</div>
+                <div className="text-right px-2 border-r border-gray-300 font-mono bg-green-50">{area}</div>
                 <div className="text-right px-2 border-r border-gray-300 italic opacity-50">{factorHL}</div>
+                <div className={`col-span-2 text-right px-2 border-r border-gray-300 font-black ${parseFloat(loss) > 0 ? 'bg-red-50 text-red-700' : 'text-red-700'}`}>{loss}</div>
                 <div className="text-right px-2 border-r border-gray-300 italic opacity-50">{factorHG}</div>
-                <div className="col-span-2 text-right px-2 border-r border-gray-300 font-bold text-red-700">{loss}</div>
-                <div className="text-right px-2 font-bold text-blue-700">{gain}</div>
+                <div className={`text-right px-2 font-black ${parseFloat(gain) > 0 ? 'bg-blue-50 text-blue-700' : 'text-blue-700'}`}>{gain}</div>
             </div>
         );
 
@@ -205,84 +205,96 @@ const ReportGenerator = ({ state }) => {
                   <div className="border-r border-white">Struct</div>
                   <div className="border-r border-white">Area</div>
                   <div className="border-r border-white">HL Fac</div>
-                  <div className="border-r border-white">HG Fac</div>
                   <div className="col-span-2 border-r border-white">Heat Loss</div>
+                  <div className="border-r border-white">HG Fac</div>
                   <div>Heat Gain</div>
                </div>
 
-               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">1. Gross Exposed Walls</div>
-               <Row label="Above Grade Wall" struct="AGW" area={fmtA(areas.grossAGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
-               {(room.level?.includes('Basement') || room.level === 'Basement') && (
-                 <Row label="Below Grade Wall" struct="BGW" area={fmtA(areas.grossBGW)} factorHL="---" factorHG="---" loss="---" gain="---" />
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">1. Gross Walls</div>
+               <Row label="Above Grade Wall" struct="AGW" area={fmtA(areas.grossAGW)} factorHL="---" loss="---" factorHG="---" gain="---" />
+               {(room.level?.includes('Level 1') && state.foundation.foundationType === 'Basement') && (
+                 <Row label="Below Grade Wall" struct="BGW" area={fmtA(areas.grossBGW)} factorHL="---" loss="---" factorHG="---" gain="---" />
                )}
 
-               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">2. Windows & Glass</div>
-               {['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].map(dir => {
-                  const data = room.windows[dir];
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">2. Exposed Doors</div>
+               <Row
+                  label="Main Entrance / Exterior" struct="D" area={fmtA(areas.doorArea)}
+                  factorHL={factors.doors.hlFactor.toFixed(3)} loss={fmtP(areas.doorArea * factors.doors.hlFactor)}
+                  factorHG={factors.doors.hgFactor.toFixed(3)} gain={fmtP(areas.doorArea * factors.doors.hgFactor)}
+               />
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">3. Net Exposed Walls</div>
+               <Row
+                  label="Net AGW" struct="AGW" area={fmtA(areas.netAGW)}
+                  factorHL={factors.agw.hlFactor.toFixed(3)} loss={fmtP(areas.netAGW * factors.agw.hlFactor)}
+                  factorHG={factors.agw.hgFactor.toFixed(3)} gain={fmtP(areas.netAGW * factors.agw.hgFactor)}
+               />
+               {(room.level?.includes('Level 1') && state.foundation.foundationType === 'Basement') && (
+                 <Row
+                   label="Net BGW" struct="BGW" area={fmtA(areas.netBGW)}
+                   factorHL={((state.environmental.hl_idt - state.environmental.hl_mean_soil_temp) / factors.bgw.rEff).toFixed(3)}
+                   loss={fmtP(areas.netBGW * ((state.environmental.hl_idt - state.environmental.hl_mean_soil_temp) / factors.bgw.rEff))}
+                   factorHG={factors.bgw.hgFactor.toFixed(3)} gain={fmtP(areas.netBGW * factors.bgw.hgFactor)}
+                 />
+               )}
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">4. Header Areas</div>
+               <Row
+                  label="Rim Joist / Headers" struct="H" area={fmtA(areas.headerArea)}
+                  factorHL={factors.header.hlFactor.toFixed(3)} loss={fmtP(areas.headerArea * factors.header.hlFactor)}
+                  factorHG={factors.header.hgFactor.toFixed(3)} gain={fmtP(areas.headerArea * factors.header.hgFactor)}
+               />
+
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">5. Exposed Ceilings</div>
+               {room.hasExposedCeiling !== false ? (
+                 <Row
+                    label="Ceiling / Roof Assembly" struct="C" area={fmtA(areas.floorArea)}
+                    factorHL={factors.ceiling.hlFactor.toFixed(3)} loss={fmtP(areas.floorArea * factors.ceiling.hlFactor)}
+                    factorHG={factors.ceiling.hgFactor.toFixed(3)} gain={fmtP(areas.floorArea * factors.ceiling.hgFactor)}
+                 />
+               ) : (
+                 <Row label="Ceiling / Roof Assembly" struct="C" area="0.0" factorHL="---" loss="0" factorHG="---" gain="0" />
+               )}
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">6. Windows, Glass Doors & Skylights</div>
+               {[
+                  { id: 'N_S', label: 'NORTH' },
+                  { id: 'NE_NW', label: 'NE / NW' },
+                  { id: 'E_W', label: 'E / W' },
+                  { id: 'SE_SW', label: 'SE / SW' },
+                  { id: 'S', label: 'SOUTH' },
+                  { id: 'H', label: 'HORIZ' }
+               ].map(({ id, label }) => {
+                  const data = room.windows[id];
                   const area = typeof data === 'object' ? data.area : (data || 0);
-                  if (area <= 0) return null;
 
                   const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
-
                   const windowConfig = (typeof data === 'object') ? data : state.globalWindowConfig || {};
                   const lookup = lookupGlazingData(windowConfig);
 
                   // Recalculate precise THGM for report
                   const hg_dt = state.environmental.hg_odt - state.environmental.hg_idt;
-                  const solarVal = library.solarTable[Math.min(Math.max(Math.round(state.environmental.hg_north_latitude), 40), 48).toString()][dir]?.imp || 0;
+                  const solarVal = library.solarTable[Math.min(Math.max(Math.round(state.environmental.hg_north_latitude), 40), 48).toString()][id]?.imp || 0;
                   const isf = library.isfTable[shadingType]?.[windowConfig.type || 'Double'] || 1.0;
-                  const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (lookup.shgc * solarVal * isf);
+                  const hg_factor = factors.windows.hgFactor[id] || 0;
 
                   return (
                     <Row
-                       key={dir} label={`Exposure: ${dir}`} struct={dir} area={fmtA(area)}
-                       factorHL={factors.windows.hlFactor.toFixed(3)} factorHG={preciseThgm.toFixed(3)}
-                       loss={fmtP(area * factors.windows.hlFactor)}
-                       gain={fmtP(area * preciseThgm)}
+                       key={id} label={label} struct={id} area={fmtA(area)}
+                       factorHL={factors.windows.hlFactor.toFixed(3)} loss={fmtP(area * factors.windows.hlFactor)}
+                       factorHG={hg_factor.toFixed(3)} gain={fmtP(area * hg_factor)}
                     />
                   );
                })}
 
-               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">3. Exposed Doors</div>
-               <Row
-                  label="Exterior Doors" struct="D" area={fmtA(areas.doorArea)}
-                  factorHL={factors.doors.hlFactor.toFixed(3)} factorHG={factors.doors.hgFactor.toFixed(3)}
-                  loss={fmtP(areas.doorArea * factors.doors.hlFactor)} gain={fmtP(areas.doorArea * factors.doors.hgFactor)}
-               />
-
-               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">4. Net Exposed Walls</div>
-               <Row
-                  label="Net AGW" struct="AGW" area={fmtA(areas.netAGW)}
-                  factorHL={factors.agw.hlFactor.toFixed(3)} factorHG={factors.agw.hgFactor.toFixed(3)}
-                  loss={fmtP(areas.netAGW * factors.agw.hlFactor)} gain={fmtP(areas.netAGW * factors.agw.hgFactor)}
-               />
-               {(room.level?.includes('Basement') || room.level === 'Basement') && (
-                 <Row
-                   label="Net BGW" struct="BGW" area={fmtA(areas.netBGW)}
-                   factorHL={factors.bgw.hlFactor.toFixed(3)} factorHG={factors.bgw.hgFactor.toFixed(3)}
-                   loss={fmtP(areas.netBGW * factors.bgw.hlFactor)} gain={fmtP(areas.netBGW * factors.bgw.hgFactor)}
-                 />
-               )}
-
-               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">5. Header Areas</div>
-               <Row
-                  label="Rim Joists" struct="H" area={fmtA(areas.headerArea)}
-                  factorHL={factors.header.hlFactor.toFixed(3)} factorHG={factors.header.hgFactor.toFixed(3)}
-                  loss={fmtP(areas.headerArea * factors.header.hlFactor)} gain={fmtP(areas.headerArea * factors.header.hgFactor)}
-               />
-
-               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">6. Exposed Ceiling & 7. Floors</div>
-               <Row
-                  label="Ceiling Assembly" struct="C" area={fmtA(areas.floorArea)}
-                  factorHL={factors.ceiling.hlFactor.toFixed(3)} factorHG={factors.ceiling.hgFactor.toFixed(3)}
-                  loss={fmtP(areas.floorArea * factors.ceiling.hlFactor)} gain={fmtP(areas.floorArea * factors.ceiling.hgFactor)}
-               />
-               {state.designMultipliers.includeExposedFloor && (
+               <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">7. Exposed Floors</div>
+               {room.hasExposedFloor ? (
                  <Row
                     label="Exposed Floor" struct="EXF" area={fmtA(areas.floorArea)}
-                    factorHL={factors.floor.hlFactor.toFixed(3)} factorHG={factors.floor.hgFactor.toFixed(3)}
-                    loss={fmtP(areas.floorArea * factors.floor.hlFactor)} gain={fmtP(areas.floorArea * factors.floor.hgFactor)}
+                    factorHL={factors.floor.hlFactor.toFixed(3)} loss={fmtP(areas.floorArea * factors.floor.hlFactor)}
+                    factorHG={factors.floor.hgFactor.toFixed(3)} gain={fmtP(areas.floorArea * factors.floor.hgFactor)}
                  />
+               ) : (
+                 <Row label="Exposed Floor" struct="EXF" area="0.0" factorHL="---" loss="0" factorHG="---" gain="0" />
                )}
 
                {/* Custom Components */}
@@ -297,8 +309,8 @@ const ReportGenerator = ({ state }) => {
                      return (
                         <Row
                           key={cIdx} label={comp.label} struct={comp.structure} area={fmtA(area)}
-                          factorHL={hlFactor.toFixed(3)} factorHG={hgFactor.toFixed(3)}
-                          loss={fmtP(area * hlFactor)} gain={fmtP(area * hgFactor)}
+                          factorHL={hlFactor.toFixed(3)} loss={fmtP(area * hlFactor)}
+                          factorHG={hgFactor.toFixed(3)} gain={fmtP(area * hgFactor)}
                         />
                      );
                    })}

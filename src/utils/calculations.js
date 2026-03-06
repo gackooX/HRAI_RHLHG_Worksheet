@@ -133,24 +133,31 @@ export const calculateDetailedAreas = (room, state) => {
 export const calculateRoomConductiveLoss = (room, state, factors) => {
   const areas = calculateDetailedAreas(room, state);
 
-  // Ceiling logic: Only include if it's the top floor
+  // Ceiling logic: Only include if explicitly marked or if it's the top floor (heuristic)
   const activeLevels = [...new Set(state.rooms.map(r => r.level))];
-  // Sort levels to find top level correctly
   activeLevels.sort();
   const topLevel = activeLevels[activeLevels.length - 1];
-  const isTopFloor = room.level === topLevel;
+  const isTopFloorHeuristic = room.level === topLevel;
+  const hasExposedCeiling = room.hasExposedCeiling !== undefined ? room.hasExposedCeiling : isTopFloorHeuristic;
+
+  // Floor logic: Only include if explicitly marked or global toggle is on
+  const hasExposedFloor = room.hasExposedFloor !== undefined ? room.hasExposedFloor : state.designMultipliers.includeExposedFloor;
+
+  // Below Grade Wall Loss (Heating) uses IDTH - Mean Soil Temp
+  const bgw_dt_heating = state.environmental.hl_idt - state.environmental.hl_mean_soil_temp;
+  const bgw_hl_factor = factors.bgw.rEff > 0 ? bgw_dt_heating / factors.bgw.rEff : 0;
 
   let loss = (areas.windowArea * factors.windows.hlFactor) +
              (areas.doorArea * factors.doors.hlFactor) +
              (areas.headerArea * factors.header.hlFactor) +
              (areas.netAGW * factors.agw.hlFactor) +
-             (areas.netBGW * factors.bgw.hlFactor);
+             (areas.netBGW * bgw_hl_factor);
 
-  if (isTopFloor) {
+  if (hasExposedCeiling) {
     loss += (areas.floorArea * factors.ceiling.hlFactor);
   }
 
-  if (state.designMultipliers.includeExposedFloor) {
+  if (hasExposedFloor) {
     loss += (areas.floorArea * factors.floor.hlFactor);
   }
 
@@ -196,11 +203,13 @@ export const calculateRoomConductiveGain = (room, state, factors) => {
     });
   }
 
-  // Ceiling logic: Only include if it's the top floor
+  // Ceiling/Floor logic
   const activeLevels = [...new Set(state.rooms.map(r => r.level))];
   activeLevels.sort();
   const topLevel = activeLevels[activeLevels.length - 1];
-  const isTopFloor = room.level === topLevel;
+  const isTopFloorHeuristic = room.level === topLevel;
+  const hasExposedCeiling = room.hasExposedCeiling !== undefined ? room.hasExposedCeiling : isTopFloorHeuristic;
+  const hasExposedFloor = room.hasExposedFloor !== undefined ? room.hasExposedFloor : state.designMultipliers.includeExposedFloor;
 
   let gain = totalWindowGain +
              (areas.doorArea * factors.doors.hgFactor) +
@@ -208,11 +217,11 @@ export const calculateRoomConductiveGain = (room, state, factors) => {
              (areas.netAGW * factors.agw.hgFactor) +
              (areas.netBGW * factors.bgw.hgFactor);
 
-  if (isTopFloor) {
+  if (hasExposedCeiling) {
     gain += (areas.floorArea * factors.ceiling.hgFactor);
   }
 
-  if (state.designMultipliers.includeExposedFloor) {
+  if (hasExposedFloor) {
     gain += (areas.floorArea * factors.floor.hgFactor);
   }
 
@@ -247,16 +256,15 @@ export const calculateComponentFactors = (state) => {
   const getHGFactor = (r, scKey) => r > 0 ? (hg_delta_t + (scValues[scKey] || 0)) / r : 0;
   const effR = state.compliance.effRValues;
 
-  // Pull Window U-Value from compliance package and calculate R = 1/U
-  const windowU = pkg.windows.maxU;
-  const windowREff = 1 / windowU;
-
-  // Determine Global Window SHGC and ISF (No longer per-room)
+  // Determine Global Window Config
   const globalWindowConfig = state.globalWindowConfig || {
     type: 'Double', frame: 'Operable-Aluminum', spacer: 'Insulating', coating: 'Clear', gapGas: '1/4 Air', shadingType: 'No shades'
   };
   const globalWindowLookup = lookupGlazingData(globalWindowConfig);
   const globalISF = getISFValue(globalWindowConfig.shadingType || 'No shades', globalWindowConfig.type || 'Double');
+
+  // Use selected window R-value from library selection instead of hardcoded compliance maxU
+  const windowREff = globalWindowLookup.rValue || (1 / pkg.windows.maxU);
 
   const factors = {
     windows: {
