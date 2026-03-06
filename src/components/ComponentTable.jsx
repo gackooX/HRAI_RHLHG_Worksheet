@@ -156,15 +156,24 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
         </thead>
         <tbody className="divide-y divide-gray-800">
           <tr className={`${readOnly ? 'bg-gray-200 text-black border-b border-black' : 'bg-gray-800/30 text-gray-500'} text-[10px] uppercase font-black`}>
-             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'}`}>1. Gross Exposed Walls</td>
-             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center text-green-500 w-16`}>AGW</td>
+             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'}`}>1. Gross Walls</td>
+             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center text-green-500 w-16`}>AGW / BGW</td>
              <td colSpan="4" className={readOnly ? '' : 'bg-gray-800/50'}></td>
           </tr>
 
-          {/* Windows (Row 2) */}
+          {renderRow('2. Exposed Doors', 'D', factors.doors.rEff, factors.doors.hlFactor, factors.doors.sc, factors.doors.hgFactor, 'doors')}
+
+          {/* Net Exposed Walls (Row 3) */}
+          {renderRow('3. Net AGW', 'AGW', factors.agw.rEff, factors.agw.hlFactor, factors.agw.sc, factors.agw.hgFactor, 'agw')}
+          {renderRow('3. Net BGW', 'BGW', factors.bgw.rEff, factors.bgw.hlFactor, factors.bgw.sc, factors.bgw.hgFactor, 'bgw')}
+
+          {renderRow('4. Header Areas', 'H', factors.header.rEff, factors.header.hlFactor, factors.header.sc, factors.header.hgFactor, 'header')}
+          {renderRow('5. Exposed Ceilings', 'C', factors.ceiling.rEff, factors.ceiling.hlFactor, factors.ceiling.sc, factors.ceiling.hgFactor, 'ceiling')}
+
+          {/* Windows (Row 6) */}
           {Object.entries(factors.windows.hgFactor).map(([dir, hgf], i) => (
             <tr key={dir} className={`text-[10px] ${readOnly ? 'border-b border-black' : 'hover:bg-gray-800/20 transition-colors'}`}>
-              {i === 0 && <td rowSpan="6" className={`p-4 border-r ${readOnly ? 'border-black text-black' : 'border-gray-800 text-gray-300'} font-bold uppercase align-top`}>2. Windows & Skylights</td>}
+              {i === 0 && <td rowSpan="6" className={`p-4 border-r ${readOnly ? 'border-black text-black' : 'border-gray-800 text-gray-300'} font-bold uppercase align-top`}>6. Windows, Glass Doors & Skylights</td>}
               <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center font-black text-green-500 uppercase w-16`}>{dir.replace('_', '/')}</td>
               <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center w-24`}>
                 <span className={`font-bold ${readOnly ? 'text-red-700' : 'text-red-500'}`}>{factors.windows.rEff.toFixed(2)}</span>
@@ -190,14 +199,6 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
             </tr>
           ))}
 
-          {renderRow('3. Exposed Doors', 'D', factors.doors.rEff, factors.doors.hlFactor, factors.doors.sc, factors.doors.hgFactor, 'doors')}
-
-          {/* Net Exposed Walls (Row 4) */}
-          {renderRow('4a. Net BGW', 'BGW', factors.bgw.rEff, factors.bgw.hlFactor, factors.bgw.sc, factors.bgw.hgFactor, 'bgw')}
-          {renderRow('4b. Net AGW', 'AGW', factors.agw.rEff, factors.agw.hlFactor, factors.agw.sc, factors.agw.hgFactor, 'agw')}
-
-          {renderRow('5. Header Areas', 'H', factors.header.rEff, factors.header.hlFactor, factors.header.sc, factors.header.hgFactor, 'header')}
-          {renderRow('6. Exposed Ceilings', 'C', factors.ceiling.rEff, factors.ceiling.hlFactor, factors.ceiling.sc, factors.ceiling.hgFactor, 'ceiling')}
           {renderRow('7. Exposed Floors', 'EXF', factors.floor.rEff, factors.floor.hlFactor, factors.floor.sc, factors.floor.hgFactor, 'floor')}
 
           {/* Custom Components */}

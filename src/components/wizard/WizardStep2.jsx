@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import library from '../../data/library.json';
-import DimensionInput from '../DimensionInput';
 import { calculateDetailedAreas, calculateComponentFactors, calculateRoomMetrics, lookupGlazingData } from '../../utils/calculations';
 
 const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
@@ -21,15 +20,15 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
   };
 
 
-  const Row = ({ label, struct, area, lossFactor, gainFactor, loss, gain, isHeader = false }) => (
-    <tr className={`border-b border-gray-200 ${isHeader ? 'bg-gray-50 font-black text-[10px] uppercase' : 'text-xs'}`}>
+  const Row = ({ label, struct, area, hlFactor, loss, hgFactor, gain, isSubhead = false }) => (
+    <tr className={`border-b border-gray-200 ${isSubhead ? 'bg-gray-50 font-black text-[10px] uppercase' : 'text-xs'}`}>
       <td className="p-2 border-r font-bold">{label}</td>
       <td className="p-2 border-r text-center text-blue-600 font-bold">{struct}</td>
-      <td className="p-2 border-r text-right font-mono bg-yellow-50">{area}</td>
-      <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">{lossFactor}</td>
-      <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">{gainFactor}</td>
-      <td className="p-2 border-r text-right font-black text-red-600">{loss}</td>
-      <td className="p-2 text-right font-black text-blue-600">{gain}</td>
+      <td className="p-2 border-r text-right font-mono bg-green-50">{area}</td>
+      <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">{hlFactor}</td>
+      <td className={`p-2 border-r text-right font-black ${loss !== '---' && parseFloat(loss) > 0 ? 'bg-red-50 text-red-600' : 'text-red-600'}`}>{loss}</td>
+      <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">{hgFactor}</td>
+      <td className={`p-2 text-right font-black ${gain !== '---' && parseFloat(gain) > 0 ? 'bg-blue-50 text-blue-600' : 'text-blue-600'}`}>{gain}</td>
     </tr>
   );
 
@@ -52,143 +51,175 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
               <th className="p-2 border-r text-center w-16">Struct</th>
               <th className="p-2 border-r text-right w-24">Area</th>
               <th className="p-2 border-r text-right w-24">HL Factor</th>
-              <th className="p-2 border-r text-right w-24">HG Factor</th>
               <th className="p-2 border-r text-right w-24 text-red-700">Heat Loss</th>
+              <th className="p-2 border-r text-right w-24">HG Factor</th>
               <th className="p-2 text-right w-24 text-blue-700">Heat Gain</th>
             </tr>
           </thead>
           <tbody>
-            {/* 1. GROSS EXPOSED WALLS */}
+            {/* 1. GROSS WALLS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
-              <td colSpan="7" className="p-1 px-2">1. Gross Exposed Walls</td>
+              <td colSpan="7" className="p-1 px-2">1. Gross Walls</td>
             </tr>
             <Row
                label="Above Grade Wall" struct="AGW" area={areas.grossAGW.toFixed(1)}
-               lossFactor="---" gainFactor="---" loss="---" gain="---"
+               hlFactor="---" loss="---" hgFactor="---" gain="---"
             />
-            {room.level === 'Basement' && (
+            {room.level?.includes('Level 1') && projectState.foundation.foundationType === 'Basement' && (
                 <Row
                   label="Below Grade Wall" struct="BGW" area={areas.grossBGW.toFixed(1)}
-                  lossFactor="---" gainFactor="---" loss="---" gain="---"
+                  hlFactor="---" loss="---" hgFactor="---" gain="---"
                 />
             )}
 
-            {/* 2. WINDOWS */}
+            {/* 2. EXPOSED DOORS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
-              <td colSpan="7" className="p-1 px-2">2. Windows, Glass Doors & Skylight</td>
-            </tr>
-            {['N_S', 'S', 'E_W', 'NE_NW', 'SE_SW', 'H'].map(dir => {
-               const data = room.windows[dir];
-               const area = typeof data === 'object' ? data.area : (data || 0);
-               if (area <= 0) return null;
-
-               const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
-               const windowConfig = (typeof data === 'object') ? data : projectState.globalWindowConfig || {};
-               const lookup = lookupGlazingData(windowConfig);
-
-               const hg_dt = projectState.environmental.hg_odt - projectState.environmental.hg_idt;
-               const isf = library.isfTable[shadingType]?.[windowConfig.type || 'Double'] || 1.0;
-               const solarVal = library.solarTable[Math.min(Math.max(Math.round(projectState.environmental.hg_north_latitude), 40), 48).toString()][dir]?.imp || 0;
-               const preciseThgm = ( (1/factors.windows.rEff) * hg_dt) + (lookup.shgc * solarVal * isf);
-
-               return (
-                <tr key={dir} className="border-b border-gray-200 text-xs">
-                    <td className="p-2 border-r font-bold">{`Exposure: ${dir.replace('_', '/')}`}</td>
-                    <td className="p-2 border-r text-center text-blue-600 font-bold">{dir}</td>
-                    <td className="p-2 border-r text-right font-mono bg-yellow-50">
-                        <input
-                            type="number" className="w-full bg-transparent text-right font-mono font-bold"
-                            value={area || ''}
-                            onChange={(e) => handleWindowChange(dir, 'area', e.target.value)}
-                        />
-                    </td>
-                    <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">{factors.windows.hlFactor.toFixed(3)}</td>
-                    <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">{preciseThgm.toFixed(3)}</td>
-                    <td className="p-2 border-r text-right font-black text-red-600">{Math.round(area * factors.windows.hlFactor)}</td>
-                    <td className="p-2 text-right font-black text-blue-600">{Math.round(area * preciseThgm)}</td>
-                </tr>
-               );
-            })}
-
-            {/* 3. EXPOSED DOORS */}
-            <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
-              <td colSpan="7" className="p-1 px-2">3. Exposed Doors</td>
+              <td colSpan="7" className="p-1 px-2">2. Exposed Doors</td>
             </tr>
             <tr className="border-b border-gray-200 text-xs">
                 <td className="p-2 border-r font-bold">Main Entrance / Exterior</td>
                 <td className="p-2 border-r text-center text-blue-600 font-bold">D</td>
-                <td className="p-2 border-r text-right font-mono bg-yellow-50">
+                <td className="p-2 border-r text-right font-mono bg-green-50">
                     <input
-                        type="number" className="w-full bg-transparent text-right font-mono font-bold"
+                        type="number" className="w-full bg-transparent text-right font-mono font-bold outline-none"
                         value={room.doorArea || 0}
                         onChange={(e) => updateRoom({ doorArea: parseFloat(e.target.value) || 0 })}
                     />
                 </td>
                 <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">{factors.doors.hlFactor.toFixed(3)}</td>
+                <td className={`p-2 border-r text-right font-black ${Math.round((room.doorArea || 0) * factors.doors.hlFactor) > 0 ? 'bg-red-50 text-red-600' : 'text-red-600'}`}>{Math.round((room.doorArea || 0) * factors.doors.hlFactor)}</td>
                 <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">{factors.doors.hgFactor.toFixed(3)}</td>
-                <td className="p-2 border-r text-right font-black text-red-600">{Math.round((room.doorArea || 0) * factors.doors.hlFactor)}</td>
-                <td className="p-2 text-right font-black text-blue-600">{Math.round((room.doorArea || 0) * factors.doors.hgFactor)}</td>
+                <td className={`p-2 text-right font-black ${Math.round((room.doorArea || 0) * factors.doors.hgFactor) > 0 ? 'bg-blue-50 text-blue-600' : 'text-blue-600'}`}>{Math.round((room.doorArea || 0) * factors.doors.hgFactor)}</td>
             </tr>
 
-            {/* 4. NET EXPOSED WALLS */}
+            {/* 3. NET EXPOSED WALLS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
-              <td colSpan="7" className="p-1 px-2">4. Net Exposed Walls</td>
+              <td colSpan="7" className="p-1 px-2">3. Net Exposed Walls</td>
             </tr>
             <Row
-               label="Net AGW (Gross - Win - Door - Hdr)" struct="AGW" area={areas.netAGW.toFixed(1)}
-               lossFactor={factors.agw.hlFactor.toFixed(3)}
-               gainFactor={factors.agw.hgFactor.toFixed(3)}
+               label="Net AGW" struct="AGW" area={areas.netAGW.toFixed(1)}
+               hlFactor={factors.agw.hlFactor.toFixed(3)}
                loss={Math.round(areas.netAGW * factors.agw.hlFactor)}
+               hgFactor={factors.agw.hgFactor.toFixed(3)}
                gain={Math.round(areas.netAGW * factors.agw.hgFactor)}
             />
             {room.level?.includes('Level 1') && projectState.foundation.foundationType === 'Basement' && (
                 <Row
-                   label="Net BGW (Sub-grade portion)" struct="BGW" area={areas.netBGW.toFixed(1)}
-                   lossFactor={factors.bgw.hlFactor.toFixed(3)}
-                   gainFactor={factors.bgw.hgFactor.toFixed(3)}
+                   label="Net BGW" struct="BGW" area={areas.netBGW.toFixed(1)}
+                   hlFactor={factors.bgw.hlFactor.toFixed(3)}
                    loss={Math.round(areas.netBGW * factors.bgw.hlFactor)}
+                   hgFactor={factors.bgw.hgFactor.toFixed(3)}
                    gain={Math.round(areas.netBGW * factors.bgw.hgFactor)}
                 />
             )}
 
-            {/* 5. HEADER AREAS */}
+            {/* 4. HEADER AREAS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
-              <td colSpan="7" className="p-1 px-2">5. Header Areas</td>
+              <td colSpan="7" className="p-1 px-2">4. Header Areas</td>
             </tr>
             <Row
                label="Rim Joist / Headers" struct="H" area={areas.headerArea.toFixed(1)}
-               lossFactor={factors.header.hlFactor.toFixed(3)}
-               gainFactor={factors.header.hgFactor.toFixed(3)}
+               hlFactor={factors.header.hlFactor.toFixed(3)}
                loss={Math.round(areas.headerArea * factors.header.hlFactor)}
+               hgFactor={factors.header.hgFactor.toFixed(3)}
                gain={Math.round(areas.headerArea * factors.header.hgFactor)}
             />
 
-            {/* 6. EXPOSED CEILINGS */}
+            {/* 5. EXPOSED CEILINGS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
-              <td colSpan="7" className="p-1 px-2">6. Exposed Ceilings</td>
+              <td colSpan="7" className="p-1 px-2 flex justify-between items-center">
+                <span>5. Exposed Ceilings</span>
+                <label className="flex items-center gap-2 cursor-pointer normal-case">
+                  <input
+                    type="checkbox" className="w-3 h-3"
+                    checked={room.hasExposedCeiling !== undefined ? room.hasExposedCeiling : (room.level?.includes('Level 1') && projectState.foundation.numStoreys === 1)}
+                    onChange={(e) => updateRoom({ hasExposedCeiling: e.target.checked })}
+                  />
+                  <span className="text-[8px]">Include in Load</span>
+                </label>
+              </td>
             </tr>
-            <Row
-               label="Ceiling / Roof Assembly" struct="C" area={areas.floorArea.toFixed(1)}
-               lossFactor={factors.ceiling.hlFactor.toFixed(3)}
-               gainFactor={factors.ceiling.hgFactor.toFixed(3)}
-               loss={Math.round(areas.floorArea * factors.ceiling.hlFactor)}
-               gain={Math.round(areas.floorArea * factors.ceiling.hgFactor)}
-            />
+            {(room.hasExposedCeiling !== undefined ? room.hasExposedCeiling : (room.level?.includes('Level 1') && projectState.foundation.numStoreys === 1)) ? (
+              <Row
+                label="Ceiling / Roof Assembly" struct="C" area={areas.floorArea.toFixed(1)}
+                hlFactor={factors.ceiling.hlFactor.toFixed(3)}
+                loss={Math.round(areas.floorArea * factors.ceiling.hlFactor)}
+                hgFactor={factors.ceiling.hgFactor.toFixed(3)}
+                gain={Math.round(areas.floorArea * factors.ceiling.hgFactor)}
+              />
+            ) : (
+              <Row label="Ceiling / Roof Assembly" struct="C" area="0.0" hlFactor="---" loss="0" hgFactor="---" gain="0" />
+            )}
+
+            {/* 6. WINDOWS, GLASS DOORS & SKYLIGHTS */}
+            <tr className="bg-gray-100 font-bold text-[10px] uppercase border-b border-gray-300">
+              <td colSpan="7" className="p-1 px-2">6. Windows, Glass Doors & Skylights</td>
+            </tr>
+            {[
+               { id: 'N_S', label: 'NORTH' },
+               { id: 'NE_NW', label: 'NE / NW' },
+               { id: 'E_W', label: 'E / W' },
+               { id: 'SE_SW', label: 'SE / SW' },
+               { id: 'S', label: 'SOUTH' },
+               { id: 'H', label: 'HORIZ' }
+            ].map(({ id, label }) => {
+               const data = room.windows[id];
+               const area = typeof data === 'object' ? data.area : (data || 0);
+
+               const shadingType = (typeof data === 'object' && data.shadingType) ? data.shadingType : (room.shadingType || 'No shades');
+               const windowConfig = (typeof data === 'object') ? data : projectState.globalWindowConfig || {};
+               const lookup = lookupGlazingData(windowConfig);
+
+               const hg_factor = factors.windows.hgFactor[id] || 0;
+               const loss = Math.round(area * factors.windows.hlFactor);
+               const gain = Math.round(area * hg_factor);
+
+               return (
+                <tr key={id} className="border-b border-gray-200 text-[10px]">
+                    <td className="p-2 border-r font-bold uppercase">{label}</td>
+                    <td className="p-2 border-r text-center text-blue-600 font-bold">{id}</td>
+                    <td className="p-1 border-r text-right font-mono bg-green-100">
+                        <input
+                            type="number" className="w-full bg-transparent text-right font-mono font-bold outline-none"
+                            value={area || ''}
+                            onChange={(e) => handleWindowChange(id, 'area', e.target.value)}
+                        />
+                    </td>
+                    <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">{factors.windows.hlFactor.toFixed(3)}</td>
+                    <td className={`p-2 border-r text-right font-black ${loss > 0 ? 'bg-red-50 text-red-600' : 'text-red-600'}`}>{loss}</td>
+                    <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">{hg_factor.toFixed(3)}</td>
+                    <td className={`p-2 text-right font-black ${gain > 0 ? 'bg-blue-50 text-blue-600' : 'text-blue-600'}`}>{gain}</td>
+                </tr>
+               );
+            })}
 
             {/* 7. EXPOSED FLOORS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
-              <td colSpan="7" className="p-1 px-2">7. Exposed Floors</td>
+              <td colSpan="7" className="p-1 px-2 flex justify-between items-center">
+                <span>7. Exposed Floors</span>
+                <label className="flex items-center gap-2 cursor-pointer normal-case">
+                  <input
+                    type="checkbox" className="w-3 h-3"
+                    checked={room.hasExposedFloor !== undefined ? room.hasExposedFloor : projectState.designMultipliers.includeExposedFloor}
+                    onChange={(e) => updateRoom({ hasExposedFloor: e.target.checked })}
+                  />
+                  <span className="text-[8px]">Include in Load</span>
+                </label>
+              </td>
             </tr>
-            <Row
-               label="Floor Over Unconditioned Space" struct="EXF"
-               area={projectState.designMultipliers.includeExposedFloor ? areas.floorArea.toFixed(1) : "0.0"}
-               lossFactor={factors.floor.hlFactor.toFixed(3)}
-               gainFactor={factors.floor.hgFactor.toFixed(3)}
-               loss={projectState.designMultipliers.includeExposedFloor ? Math.round(areas.floorArea * factors.floor.hlFactor) : 0}
-               gain={projectState.designMultipliers.includeExposedFloor ? Math.round(areas.floorArea * factors.floor.hgFactor) : 0}
-            />
+            {(room.hasExposedFloor !== undefined ? room.hasExposedFloor : projectState.designMultipliers.includeExposedFloor) ? (
+              <Row
+                label="Exposed Floor" struct="EXF" area={areas.floorArea.toFixed(1)}
+                hlFactor={factors.floor.hlFactor.toFixed(3)}
+                loss={Math.round(areas.floorArea * factors.floor.hlFactor)}
+                hgFactor={factors.floor.hgFactor.toFixed(3)}
+                gain={Math.round(areas.floorArea * factors.floor.hgFactor)}
+              />
+            ) : (
+              <Row label="Exposed Floor" struct="EXF" area="0.0" hlFactor="---" loss="0" hgFactor="---" gain="0" />
+            )}
 
-            {/* CUSTOM COMPONENTS */}
+            {/* 8. CUSTOM COMPONENTS */}
             {projectState.compliance.customComponents.length > 0 && (
                 <>
                   <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
@@ -203,10 +234,10 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                         <tr key={idx} className="border-b border-gray-200 text-xs">
                            <td className="p-2 border-r font-bold">{comp.label}</td>
                            <td className="p-2 border-r text-center text-blue-600 font-bold">{comp.structure}</td>
-                           <td className="p-2 border-r text-right font-mono bg-yellow-50">
+                           <td className="p-2 border-r text-right font-mono bg-green-50">
                              <input
                                type="number"
-                               className="w-16 bg-transparent text-right font-mono"
+                               className="w-16 bg-transparent text-right font-mono font-bold outline-none"
                                value={area}
                                onChange={(e) => {
                                  const customComponentAreas = { ...room.customComponentAreas, [idx]: parseFloat(e.target.value) || 0 };
@@ -215,9 +246,9 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                              />
                            </td>
                            <td className="p-2 border-r text-right text-red-700 font-bold italic opacity-60">{hlFactor.toFixed(3)}</td>
+                           <td className={`p-2 border-r text-right font-black ${Math.round(area * hlFactor) > 0 ? 'bg-red-50 text-red-600' : 'text-red-600'}`}>{Math.round(area * hlFactor)}</td>
                            <td className="p-2 border-r text-right text-blue-700 font-bold italic opacity-60">{hgFactor.toFixed(3)}</td>
-                           <td className="p-2 border-r text-right font-black text-red-600">{Math.round(area * hlFactor)}</td>
-                           <td className="p-2 text-right font-black text-blue-600">{Math.round(area * hgFactor)}</td>
+                           <td className={`p-2 text-right font-black ${Math.round(area * hgFactor) > 0 ? 'bg-blue-50 text-blue-600' : 'text-blue-600'}`}>{Math.round(area * hgFactor)}</td>
                         </tr>
                     );
                   })}
