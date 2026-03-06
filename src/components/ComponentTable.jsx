@@ -128,27 +128,27 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
                <span className="text-[8px] rotate-180 [writing-mode:vertical-lr] inline-block">STRUCTURE</span>
             </th>
             <th className="border-r border-gray-700 w-24">
-              <div className="p-2 border-b border-gray-700 text-left">HL ΔT = {hl_dt}</div>
+              <div className="p-2 border-b border-gray-700 text-center">&Delta;T = {hl_dt}</div>
               <div className="p-2 text-[8px]">EFF R (COL 1)</div>
             </th>
             <th className="border-r border-gray-700 w-24">
-              <div className="p-2 border-b border-gray-700 text-left">HL ΔT = {hl_dt}</div>
+              <div className="p-2 border-b border-gray-700 text-center">&Delta;T = {hl_dt}</div>
               <div className="p-2 flex flex-col items-center">
-                 <span className="border-b border-gray-700 w-10 leading-tight">HL ΔT / R</span>
+                 <span className="border-b border-gray-700 w-10 leading-tight">1 / R</span>
                  <span className="text-[8px] mt-1">COL 2</span>
               </div>
             </th>
             <th className="border-r border-gray-700 w-16">
-              <div className="p-2 border-b border-gray-700 text-left">HG ΔT = {hg_dt}</div>
+              <div className="p-2 border-b border-gray-700 text-center">&Delta;T = {hg_dt}</div>
               <div className="p-2 flex flex-col items-center justify-center">
                 <span>SC</span>
                 <span className="text-[8px]">COL 3</span>
               </div>
             </th>
             <th className="w-24">
-              <div className="p-2 border-b border-gray-700 text-left">HG ΔT = {hg_dt}</div>
+              <div className="p-2 border-b border-gray-700 text-center">&Delta;T = {hg_dt}</div>
               <div className="p-2 flex flex-col items-center justify-center">
-                <span className="border-b border-gray-700 w-16 text-[8px]">(HGΔT + SC) / R</span>
+                <span className="border-b border-gray-700 w-16 text-[8px]">FAC</span>
                 <span className="text-[8px] mt-1">COL 4</span>
               </div>
             </th>

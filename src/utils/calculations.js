@@ -104,18 +104,20 @@ export const calculateDetailedAreas = (room, state) => {
 
   if (isBasementRoom) {
     const basementHeight = state.foundation.floorHeights['Basement'] || 8;
-    const roomBGHeight = room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : state.foundation.basementBelowGradeHeight;
+    const roomBGHeight = room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : state.foundation.wallBelowGradeHeight;
 
     grossBGW = roomBGHeight * p;
     grossAGW = (basementHeight - roomBGHeight) * p;
 
-    // Automated Net Area Logic (3.1 & 3.2)
-    netAGW = Math.max(0, grossAGW - windowArea - doorArea - headerArea);
-    // Requirement 3.2: Net BGW is the surface area below grade (Perimeter * Below Grade Height)
-    netBGW = grossBGW;
+    // Automated Net Area Logic per Requirement 4
+    // Note: Header Areas are NOT subtracted from Net Walls
+    netAGW = Math.max(0, grossAGW - windowArea - doorArea);
+    // User requested formula for Net BGW: (Basement Floor Height - Wall Below Grade Height) * PE
+    // This is essentially the above-grade portion, but we'll follow the exact instruction.
+    netBGW = Math.max(0, (basementHeight - roomBGHeight) * p);
   } else {
     grossAGW = p * h;
-    netAGW = Math.max(0, grossAGW - windowArea - doorArea - headerArea);
+    netAGW = Math.max(0, grossAGW - windowArea - doorArea);
   }
 
   return {

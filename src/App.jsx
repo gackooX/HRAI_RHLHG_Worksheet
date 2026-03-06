@@ -305,9 +305,11 @@ function App() {
                                 handleUpdateProject('environmental', {
                                   hl_odt: c_to_f(loc.odtHeating),
                                   hg_odt: c_to_f(loc.odtCooling),
-                                  hg_daily_range: loc.summerRange * 1.8,
+                                  hg_daily_range: loc.strange * 1.8,
                                   hg_north_latitude: loc.latitude,
-                                  hl_mean_soil_temp: c_to_f(loc.soilTemp || 10)
+                                  hl_mean_soil_temp: c_to_f(loc.dgTemp || 10),
+                                  degDay: loc.degDay,
+                                  ohr: loc.ohr
                                 });
                                 setCitySearch(loc.cityName);
                                 setShowCityDropdown(false);
@@ -356,12 +358,12 @@ function App() {
                     </select>
                   </div>
                   <div>
-                    <label>Basement Floor Height (ft)</label>
+                    <label>Wall Below Grade Height (ft)</label>
                     <input
                       type="number" className="w-full"
-                      value={state.foundation.floorHeights['Basement'] || 8}
+                      value={state.foundation.wallBelowGradeHeight}
                       onChange={(e) => handleUpdateProject('foundation', {
-                        floorHeights: { ...state.foundation.floorHeights, 'Basement': parseFloat(e.target.value) || 0 }
+                        wallBelowGradeHeight: parseFloat(e.target.value) || 0
                       })}
                     />
                   </div>
@@ -449,11 +451,27 @@ function App() {
                     onChange={(v) => handleUpdateProject('environmental', { hg_idt: v })}
                   />
                   <div>
-                    <label className="block text-[10px] font-bold uppercase text-gray-500">Summer Daily Range</label>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500">Strange (Summer Range)</label>
                     <input
                       type="number" className="w-full border p-2 rounded font-bold bg-gray-800 text-white"
                       value={state.environmental.hg_daily_range}
                       onChange={(e) => handleUpdateProject('environmental', { hg_daily_range: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500">DegDay (Heating)</label>
+                    <input
+                      type="number" className="w-full border p-2 rounded font-bold bg-gray-800 text-white"
+                      value={state.environmental.degDay}
+                      onChange={(e) => handleUpdateProject('environmental', { degDay: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500">OHR (Overhang Ratio)</label>
+                    <input
+                      type="number" step="0.1" className="w-full border p-2 rounded font-bold bg-gray-800 text-white"
+                      value={state.environmental.ohr}
+                      onChange={(e) => handleUpdateProject('environmental', { ohr: parseFloat(e.target.value) || 0 })}
                     />
                   </div>
                 </div>
