@@ -345,7 +345,12 @@ const ReportGenerator = ({ state }) => {
                </div>
 
                <div className="grid grid-cols-10 h-10 items-center bg-black text-white">
-                  <div className="col-span-7 px-4 font-black border-r border-white text-right text-[10px] uppercase">TOTAL ROOM DESIGN LOAD ({unitP})</div>
+                  <div className="col-span-7 px-4 font-black border-r border-white text-right text-[10px] uppercase">
+                    TOTAL ROOM DESIGN LOAD ({unitP})
+                    <span className="ml-4 opacity-60 text-[7px] font-normal lowercase tracking-widest">
+                       hl &Delta;t: {fmtD(room.hl_delta_t)} | hg &Delta;t: {fmtD(room.hg_delta_t)}
+                    </span>
+                  </div>
                   <div className="col-span-2 border-r border-white text-right px-2 text-lg font-black">{fmtP(room.totalRoomLoss)}</div>
                   <div className="text-right px-2 text-lg font-black">{fmtP(room.totalRoomGain)}</div>
                </div>
