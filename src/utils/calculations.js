@@ -82,9 +82,8 @@ export const calculateAirLeakage = (volume, deltaT, lrFactor, systemCase = 'Case
 
 export const calculateDetailedAreas = (room, state) => {
   const p = room.perimeter || 0;
-  const h = room.height || 0;
+  const h = room.height || state.foundation.floorHeights[room.level] || 8;
   const h_header = state.designMultipliers.header_height || 0;
-  const h_bg = state.foundation.basementBelowGradeHeight || 0;
 
   const windowArea = Object.values(room.windows || {}).reduce((a, b) => a + (typeof b === 'object' ? b.area : b), 0);
   const doorArea = room.doorArea || 0;
@@ -95,25 +94,20 @@ export const calculateDetailedAreas = (room, state) => {
   let netAGW = 0;
   let netBGW = 0;
 
-  // Level Logic (Bug Fix):
-  // Basement: L1 = Basement, L2 = Main, L3 = Second.
-  // Slab: L1 = Main, L2 = Second, L3 = Third.
   const isBasementScenario = state.foundation.foundationType === 'Basement';
   const isL1 = room.level?.includes('Level 1');
   const isBasementRoom = isL1 && isBasementScenario;
 
   if (isBasementRoom) {
-    const basementHeight = state.foundation.floorHeights['Basement'] || 8;
+    const basementHeight = h;
     const roomBGHeight = room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : state.foundation.wallBelowGradeHeight;
 
     grossBGW = roomBGHeight * p;
     grossAGW = (basementHeight - roomBGHeight) * p;
 
-    // Automated Net Area Logic per Requirement 4
-    // Note: Header Areas are NOT subtracted from Net Walls
+    // Net AGW: Do NOT subtract headerArea
     netAGW = Math.max(0, grossAGW - windowArea - doorArea);
-    // User requested formula for Net BGW: (Basement Floor Height - Wall Below Grade Height) * PE
-    // This is essentially the above-grade portion, but we'll follow the exact instruction.
+    // Net BGW Formula (User Spec): (Basement Floor Height - Wall Below Grade Height) * Perimeter
     netBGW = Math.max(0, (basementHeight - roomBGHeight) * p);
   } else {
     grossAGW = p * h;
@@ -266,7 +260,8 @@ export const calculateComponentFactors = (state) => {
   const globalISF = getISFValue(globalWindowConfig.shadingType || 'No shades', globalWindowConfig.type || 'Double');
 
   // Use selected window R-value from library selection instead of hardcoded compliance maxU
-  const windowREff = globalWindowLookup.rValue || (1 / pkg.windows.maxU);
+  // Window R-Value always based on the selected Compliance package!
+  const windowREff = pkg.windows.effectiveR;
 
   const factors = {
     windows: {
