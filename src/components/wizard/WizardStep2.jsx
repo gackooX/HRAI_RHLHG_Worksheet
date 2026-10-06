@@ -65,12 +65,6 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                label="Above Grade Wall" struct="AGW" area={areas.grossAGW.toFixed(1)}
                hlFactor="---" loss="---" hgFactor="---" gain="---"
             />
-            {room.level?.includes('Level 1') && projectState.foundation.foundationType === 'Basement' && (
-                <Row
-                  label="Below Grade Wall" struct="BGW" area={areas.grossBGW.toFixed(1)}
-                  hlFactor="---" loss="---" hgFactor="---" gain="---"
-                />
-            )}
 
             {/* 2. EXPOSED DOORS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">

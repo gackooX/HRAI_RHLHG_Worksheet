@@ -107,8 +107,8 @@ export const calculateDetailedAreas = (room, state) => {
 
     // Net AGW: Do NOT subtract headerArea
     netAGW = Math.max(0, grossAGW - windowArea - doorArea);
-    // Net BGW Formula (User Spec): (Basement Floor Height - Wall Below Grade Height) * Perimeter
-    netBGW = Math.max(0, (basementHeight - roomBGHeight) * p);
+    // Net BGW Formula (User Spec): Perimeter * Wall Below Grade Height
+    netBGW = Math.max(0, roomBGHeight * p);
   } else {
     grossAGW = p * h;
     netAGW = Math.max(0, grossAGW - windowArea - doorArea);

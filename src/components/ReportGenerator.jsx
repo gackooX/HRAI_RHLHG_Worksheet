@@ -212,9 +212,6 @@ const ReportGenerator = ({ state }) => {
 
                <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">1. Gross Walls</div>
                <Row label="Above Grade Wall" struct="AGW" area={fmtA(areas.grossAGW)} factorHL="---" loss="---" factorHG="---" gain="---" />
-               {(room.level?.includes('Level 1') && state.foundation.foundationType === 'Basement') && (
-                 <Row label="Below Grade Wall" struct="BGW" area={fmtA(areas.grossBGW)} factorHL="---" loss="---" factorHG="---" gain="---" />
-               )}
 
                <div className="bg-gray-200 font-black text-[6px] uppercase px-2 py-0.5 border-b border-black">2. Exposed Doors</div>
                <Row
