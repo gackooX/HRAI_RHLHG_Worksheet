@@ -157,7 +157,7 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
         <tbody className="divide-y divide-gray-800">
           <tr className={`${readOnly ? 'bg-gray-200 text-black border-b border-black' : 'bg-gray-800/30 text-gray-500'} text-[10px] uppercase font-black`}>
              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'}`}>1. Gross Walls</td>
-             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center text-green-500 w-16`}>AGW / BGW</td>
+             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center text-green-500 w-16`}>AGW</td>
              <td colSpan="4" className={readOnly ? '' : 'bg-gray-800/50'}></td>
           </tr>
 
