@@ -28,8 +28,26 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold uppercase text-gray-600">Step 1: Room Dimensions</h3>
-
+        <h3 className="text-lg font-bold uppercase text-gray-400">Step 1: Room Dimensions</h3>
+        {isLevel1 && (
+           <div className="bg-blue-900/30 border border-blue-500/50 p-4 rounded-lg flex items-center gap-6">
+              <div>
+                <label className="text-blue-400">Foundation Loss (Watts)</label>
+                <input
+                  type="number"
+                  className="w-32 bg-gray-800 border-gray-700 text-white font-black"
+                  value={room.foundationLossWatts || 0}
+                  onChange={(e) => updateRoom({ foundationLossWatts: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-black text-gray-500 uppercase">Converted Loss</div>
+                <div className="text-xl font-black text-white">
+                  {Math.round((room.foundationLossWatts || 0) * 3.412)} <span className="text-[10px] font-normal text-gray-400 uppercase">BTU/H</span>
+                </div>
+              </div>
+           </div>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-8">
         <div>
@@ -78,13 +96,9 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
         </div>
         {isBasement && (
           <DimensionInput
-            id="bg-height"
-            label="Wall Below Grade Height (ft)"
-            type="length"
-            isMetric={isMetric}
-            value={room.wallBelowGradeHeightOverride !== undefined ? room.wallBelowGradeHeightOverride : null}
-            placeholder={projectState.foundation.wallBelowGradeHeight}
-            onChange={(v) => updateRoom({ wallBelowGradeHeightOverride: v })}
+            id="bg-height" label="Wall Below Grade Height (ft)" type="length" isMetric={isMetric}
+            value={room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : projectState.foundation.basementBelowGradeHeight}
+            onChange={(v) => updateRoom({ wallBelowGradeHeight: v })}
           />
         )}
       </div>

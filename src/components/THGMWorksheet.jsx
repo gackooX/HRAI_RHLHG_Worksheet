@@ -272,7 +272,7 @@ const THGMWorksheet = ({ state, onUpdateProject }) => {
         </table>
       </div>
 
-      <div className="mt-8 pt-4 border-t-2 border-black flex justify-between text-[8px] font-bold uppercase italic no-print text-gray-600">
+      <div className="mt-8 pt-4 border-t-2 border-black flex justify-between text-[8px] font-bold uppercase italic no-print text-gray-400">
         <span>Residential Heat Loss and Heat Gain Calculations &bull; 2018</span>
         <span>&copy;HRAI</span>
         <span>215</span>
