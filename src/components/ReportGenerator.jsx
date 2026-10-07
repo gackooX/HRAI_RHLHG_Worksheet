@@ -200,7 +200,7 @@ const ReportGenerator = ({ state }) => {
             </div>
 
             <div className="border-2 border-black">
-               <div className="grid grid-cols-10 bg-gray-800 text-white font-black text-center text-[7px] uppercase h-6 items-center">
+               <div className="grid grid-cols-10 bg-gray-100 text-black font-black text-center text-[7px] uppercase h-6 items-center">
                   <div className="col-span-3 border-r border-white">Components</div>
                   <div className="border-r border-white">Struct</div>
                   <div className="border-r border-white">Area</div>
@@ -353,7 +353,7 @@ const ReportGenerator = ({ state }) => {
                </div>
             </div>
 
-            <div className="mt-4 border border-black p-1 text-[6px] uppercase font-bold text-gray-400 grid grid-cols-3 gap-2">
+            <div className="mt-4 border border-black p-1 text-[6px] uppercase font-bold text-gray-600 grid grid-cols-3 gap-2">
                <div>ΔTh={fmtD(room.hl_delta_t)}{unitT} | ΔTc={fmtD(room.hg_delta_t)}{unitT}</div>
                <div>LRairh={state.externalValues.LRairh} | LRairc={state.externalValues.LRairc}</div>
                <div className="text-right">HdrHt={fmtL(state.designMultipliers.header_height)} | BsmtBG={fmtL(state.foundation.wallBelowGradeHeight)}</div>

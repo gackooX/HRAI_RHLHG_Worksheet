@@ -154,9 +154,9 @@ function App() {
   }, [state.header.province, citySearch]);
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white font-sans p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans p-4 md:p-8">
       {/* Navigation / Header */}
-      <div className="no-print mb-8 flex flex-col md:flex-row justify-between items-center bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-2xl gap-6">
+      <div className="no-print mb-8 flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-xl border border-gray-200 shadow-2xl gap-6">
         <div className="flex flex-wrap gap-2">
           {[
             { id: 'building', label: 'Building Manager', icon: '🏢' },
@@ -168,7 +168,7 @@ function App() {
             <button
               key={btn.id}
               onClick={() => setView(btn.id)}
-              className={`px-6 py-2 rounded-full font-black uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${view === btn.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              className={`px-6 py-2 rounded-full font-black uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${view === btn.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
               <span>{btn.icon}</span> {btn.label}
             </button>
@@ -179,7 +179,7 @@ function App() {
           <div className="flex flex-col items-end">
              <label className="text-gray-500 mb-0">Measurement System</label>
              <select
-              className="bg-gray-800 border-gray-700 text-white font-black text-xs p-1 rounded uppercase"
+              className="bg-gray-100 border-gray-300 text-gray-900 font-black text-xs p-1 rounded uppercase"
               value={state.displayUnits}
               onChange={(e) => setState(prev => ({ ...prev, displayUnits: e.target.value }))}
             >
@@ -191,11 +191,11 @@ function App() {
           <div className="flex gap-2">
             <button
               onClick={handleSaveProject}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] border border-gray-700 transition-colors"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-black uppercase text-[10px] border border-gray-300 transition-colors"
             >
               💾 Save
             </button>
-            <label className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] border border-gray-700 transition-colors cursor-pointer">
+            <label className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-black uppercase text-[10px] border border-gray-300 transition-colors cursor-pointer">
               📂 Load
               <input type="file" className="hidden" onChange={handleLoadProject} accept=".json" />
             </label>
@@ -213,21 +213,21 @@ function App() {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Dashboard Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-blue-500/50 transition-colors">
+            <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-blue-500/50 transition-colors">
               <div>
                 <label>Total Conditioned Area</label>
-                <div className="text-4xl font-black text-white tracking-tighter">{totalArea.toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">{isMetric ? 'm²' : 'sq ft'}</span></div>
+                <div className="text-4xl font-black text-gray-900 tracking-tighter">{totalArea.toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">{isMetric ? 'm²' : 'sq ft'}</span></div>
               </div>
               <div className="text-5xl opacity-10 group-hover:opacity-20 transition-opacity">🏢</div>
             </div>
-            <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-indigo-500/50 transition-colors">
+            <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-indigo-500/50 transition-colors">
               <div>
                 <label>Total Volume (Vb)</label>
-                <div className="text-4xl font-black text-white tracking-tighter">{totalVolume.toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">{isMetric ? 'm³' : 'ft³'}</span></div>
+                <div className="text-4xl font-black text-gray-900 tracking-tighter">{totalVolume.toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">{isMetric ? 'm³' : 'ft³'}</span></div>
               </div>
               <div className="text-5xl opacity-10 group-hover:opacity-20 transition-opacity">📦</div>
             </div>
-            <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-red-500/50 transition-colors">
+            <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xl flex justify-between items-center group hover:border-red-500/50 transition-colors">
               <div>
                 <label>Total Heating Load</label>
                 <div className="text-4xl font-black text-red-500 tracking-tighter">{processedRooms.reduce((sum, r) => sum + r.totalRoomLoss, 0).toLocaleString()} <span className="text-sm font-normal text-gray-500 uppercase">BTU/H</span></div>
@@ -238,7 +238,7 @@ function App() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Building Info Panel */}
-            <div className="lg:col-span-1 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl h-fit sticky top-8">
+            <div className="lg:col-span-1 bg-white p-8 rounded-2xl border border-gray-200 shadow-2xl h-fit sticky top-8">
               <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-blue-600 pl-4">Project Identity</h2>
 
               <div className="space-y-6">
@@ -295,7 +295,7 @@ function App() {
                       placeholder={state.header.province ? "Type city name..." : "Select province first"}
                     />
                     {showCityDropdown && filteredCities.length > 0 && (
-                      <div className="absolute z-50 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto mt-1 divide-y divide-gray-700">
+                      <div className="absolute z-50 w-full bg-gray-100 border border-gray-300 rounded-lg shadow-2xl max-h-48 overflow-y-auto mt-1 divide-y divide-gray-700">
                         {filteredCities.map(loc => (
                             <div
                               key={loc.city}
@@ -370,12 +370,12 @@ function App() {
                 </div>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-gray-800 grid grid-cols-2 gap-4">
-                 <div className="bg-gray-900/50 p-3 rounded border border-gray-800">
+              <div className="mt-8 pt-8 border-t border-gray-200 grid grid-cols-2 gap-4">
+                 <div className="bg-white/50 p-3 rounded border border-gray-200">
                     <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Heating ODT</div>
                     <div className="text-xl font-black text-red-500">{state.environmental.hl_odt}&deg;F</div>
                  </div>
-                 <div className="bg-gray-900/50 p-3 rounded border border-gray-800">
+                 <div className="bg-white/50 p-3 rounded border border-gray-200">
                     <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Cooling ODT</div>
                     <div className="text-xl font-black text-blue-500">{state.environmental.hg_odt}&deg;F</div>
                  </div>
@@ -385,7 +385,7 @@ function App() {
             {/* Global Engineering Area */}
             <div className="lg:col-span-2 space-y-8">
               {/* Compliance & Global Logic */}
-              <div className="bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl">
+              <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-2xl">
                 <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-indigo-600 pl-4">Engineering Overrides</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                    <div>
@@ -402,7 +402,7 @@ function App() {
                    <div className="space-y-4">
                       <div className="flex items-center gap-4">
                         <input
-                          type="checkbox" className="w-4 h-4 rounded bg-gray-800 border-gray-700"
+                          type="checkbox" className="w-4 h-4 rounded bg-gray-100 border-gray-300"
                           checked={state.designMultipliers.includeDuctLoss}
                           onChange={(e) => handleUpdateProject('designMultipliers', { includeDuctLoss: e.target.checked })}
                         />
@@ -410,7 +410,7 @@ function App() {
                       </div>
                       <div className="flex items-center gap-4">
                         <input
-                          type="checkbox" className="w-4 h-4 rounded bg-gray-800 border-gray-700"
+                          type="checkbox" className="w-4 h-4 rounded bg-gray-100 border-gray-300"
                           checked={state.designMultipliers.includeExposedFloor}
                           onChange={(e) => handleUpdateProject('designMultipliers', { includeExposedFloor: e.target.checked })}
                         />
@@ -419,7 +419,7 @@ function App() {
                    </div>
                 </div>
 
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-800">
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-200">
                   <TempInput
                     label="Outdoor Design Temp (Heating)"
                     value={state.environmental.hl_odt}
@@ -453,7 +453,7 @@ function App() {
                   <div>
                     <label className="block text-[10px] font-bold uppercase text-gray-500">Strange (Summer Range)</label>
                     <input
-                      type="number" className="w-full border p-2 rounded font-bold bg-gray-800 text-white"
+                      type="number" className="w-full border p-2 rounded font-bold bg-gray-100 text-gray-900"
                       value={state.environmental.hg_daily_range}
                       onChange={(e) => handleUpdateProject('environmental', { hg_daily_range: parseFloat(e.target.value) || 0 })}
                     />
@@ -461,7 +461,7 @@ function App() {
                   <div>
                     <label className="block text-[10px] font-bold uppercase text-gray-500">DegDay (Heating)</label>
                     <input
-                      type="number" className="w-full border p-2 rounded font-bold bg-gray-800 text-white"
+                      type="number" className="w-full border p-2 rounded font-bold bg-gray-100 text-gray-900"
                       value={state.environmental.degDay}
                       onChange={(e) => handleUpdateProject('environmental', { degDay: parseFloat(e.target.value) || 0 })}
                     />
@@ -469,7 +469,7 @@ function App() {
                   <div>
                     <label className="block text-[10px] font-bold uppercase text-gray-500">OHR (Overhang Ratio)</label>
                     <input
-                      type="number" step="0.1" className="w-full border p-2 rounded font-bold bg-gray-800 text-white"
+                      type="number" step="0.1" className="w-full border p-2 rounded font-bold bg-gray-100 text-gray-900"
                       value={state.environmental.ohr}
                       onChange={(e) => handleUpdateProject('environmental', { ohr: parseFloat(e.target.value) || 0 })}
                     />
