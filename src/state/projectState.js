@@ -17,7 +17,7 @@ export const initialState = {
       'Level 2': 8,
       'Level 3': 8
     },
-    basementBelowGradeHeight: 7, // ft
+    wallBelowGradeHeight: 7, // ft
   },
   environmental: {
     hl_odt: -6,

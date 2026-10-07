@@ -4,12 +4,12 @@ const RoomManagement = ({ rooms, activeIndex, onSelect, onAdd, onRemove, onDupli
   return (
     <div className="flex h-[calc(100vh-200px)] gap-6">
       {/* Left side: Scrollable room list */}
-      <div className="w-1/3 bg-gray-800 rounded-lg shadow-inner overflow-y-auto border border-gray-700">
-        <div className="p-4 border-b border-gray-700 flex justify-between items-center sticky top-0 bg-gray-800 z-10">
-          <h3 className="font-black uppercase text-gray-400 text-xs">Project Rooms</h3>
+      <div className="w-1/3 bg-gray-100 rounded-lg shadow-inner overflow-y-auto border border-gray-300">
+        <div className="p-4 border-b border-gray-300 flex justify-between items-center sticky top-0 bg-gray-100 z-10">
+          <h3 className="font-black uppercase text-gray-600 text-xs">Project Rooms</h3>
           <button
             onClick={onAdd}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-2 py-1 rounded uppercase transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-gray-900 text-[10px] font-black px-2 py-1 rounded uppercase transition-colors"
           >
             + Add Room
           </button>
@@ -19,25 +19,25 @@ const RoomManagement = ({ rooms, activeIndex, onSelect, onAdd, onRemove, onDupli
             <div
               key={index}
               onClick={() => onSelect(index)}
-              className={`p-4 cursor-pointer transition-colors group ${activeIndex === index ? 'bg-blue-900/40 border-l-4 border-blue-500' : 'hover:bg-gray-700'}`}
+              className={`p-4 cursor-pointer transition-colors group ${activeIndex === index ? 'bg-blue-900/40 border-l-4 border-blue-500' : 'hover:bg-gray-200'}`}
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="font-black text-white">{room.name || `Room ${index + 1}`}</div>
+                  <div className="font-black text-gray-900">{room.name || `Room ${index + 1}`}</div>
                   <div className="text-[10px] font-bold text-gray-500 uppercase">{room.level}</div>
                 </div>
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={(e) => { e.stopPropagation(); onDuplicate(index); }}
                     title="Duplicate"
-                    className="text-gray-400 hover:text-green-500"
+                    className="text-gray-600 hover:text-green-500"
                   >
                     👯
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); onRemove(index); }}
                     title="Remove"
-                    className="text-gray-400 hover:text-red-500"
+                    className="text-gray-600 hover:text-red-500"
                   >
                     🗑️
                   </button>
@@ -58,17 +58,17 @@ const RoomManagement = ({ rooms, activeIndex, onSelect, onAdd, onRemove, onDupli
       </div>
 
       {/* Right side: Detailed view / Instruction */}
-      <div className="flex-1 bg-gray-900 rounded-lg border border-gray-700 p-8 overflow-y-auto">
+      <div className="flex-1 bg-white rounded-lg border border-gray-300 p-8 overflow-y-auto">
         {activeIndex !== null && rooms[activeIndex] ? (
           <div>
-            <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+            <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
                <div>
-                 <h2 className="text-3xl font-black text-white tracking-tighter">{rooms[activeIndex].name || `Room ${activeIndex + 1}`}</h2>
+                 <h2 className="text-3xl font-black text-gray-900 tracking-tighter">{rooms[activeIndex].name || `Room ${activeIndex + 1}`}</h2>
                  <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{rooms[activeIndex].level} Configuration</p>
                </div>
                <div className="text-right">
                  <div className="text-xs font-black text-gray-500 uppercase">Total Load</div>
-                 <div className="text-2xl font-black text-white">{(rooms[activeIndex].totalRoomLoss + rooms[activeIndex].totalRoomGain).toLocaleString()} <span className="text-xs font-normal text-gray-400">BTU/H</span></div>
+                 <div className="text-2xl font-black text-gray-900">{(rooms[activeIndex].totalRoomLoss + rooms[activeIndex].totalRoomGain).toLocaleString()} <span className="text-xs font-normal text-gray-600">BTU/H</span></div>
                </div>
             </div>
 
@@ -77,11 +77,11 @@ const RoomManagement = ({ rooms, activeIndex, onSelect, onAdd, onRemove, onDupli
                 <section>
                   <h4 className="text-[10px] font-black text-gray-500 uppercase mb-3 border-l-2 border-blue-500 pl-2">Geometry Metrics</h4>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-800 p-3 rounded border border-gray-700">
+                    <div className="bg-gray-100 p-3 rounded border border-gray-300">
                       <label>Floor Area</label>
                       <div className="text-lg font-black">{rooms[activeIndex].floorArea} <span className="text-[10px] text-gray-500">sq ft</span></div>
                     </div>
-                    <div className="bg-gray-800 p-3 rounded border border-gray-700">
+                    <div className="bg-gray-100 p-3 rounded border border-gray-300">
                       <label>Perimeter</label>
                       <div className="text-lg font-black">{rooms[activeIndex].perimeter} <span className="text-[10px] text-gray-500">ft</span></div>
                     </div>
@@ -91,13 +91,13 @@ const RoomManagement = ({ rooms, activeIndex, onSelect, onAdd, onRemove, onDupli
                 <section>
                   <h4 className="text-[10px] font-black text-gray-500 uppercase mb-3 border-l-2 border-red-500 pl-2">Heat Loss Components</h4>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold border-b border-gray-800 py-1">
-                      <span className="text-gray-400">Conductive Loss</span>
-                      <span className="text-white">{rooms[activeIndex].conductiveLoss} BTU/h</span>
+                    <div className="flex justify-between text-xs font-bold border-b border-gray-200 py-1">
+                      <span className="text-gray-600">Conductive Loss</span>
+                      <span className="text-gray-900">{rooms[activeIndex].conductiveLoss} BTU/h</span>
                     </div>
-                    <div className="flex justify-between text-xs font-bold border-b border-gray-800 py-1">
-                      <span className="text-gray-400">Air Leakage Loss</span>
-                      <span className="text-white">{rooms[activeIndex].airLeakageLoss} BTU/h</span>
+                    <div className="flex justify-between text-xs font-bold border-b border-gray-200 py-1">
+                      <span className="text-gray-600">Air Leakage Loss</span>
+                      <span className="text-gray-900">{rooms[activeIndex].airLeakageLoss} BTU/h</span>
                     </div>
                     <div className="flex justify-between text-sm font-black pt-2">
                       <span className="text-red-500 uppercase">Total Room Loss</span>
@@ -111,17 +111,17 @@ const RoomManagement = ({ rooms, activeIndex, onSelect, onAdd, onRemove, onDupli
                  <section>
                   <h4 className="text-[10px] font-black text-gray-500 uppercase mb-3 border-l-2 border-blue-500 pl-2">Heat Gain Components</h4>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold border-b border-gray-800 py-1">
-                      <span className="text-gray-400">Conductive Gain</span>
-                      <span className="text-white">{rooms[activeIndex].conductiveGain} BTU/h</span>
+                    <div className="flex justify-between text-xs font-bold border-b border-gray-200 py-1">
+                      <span className="text-gray-600">Conductive Gain</span>
+                      <span className="text-gray-900">{rooms[activeIndex].conductiveGain} BTU/h</span>
                     </div>
-                    <div className="flex justify-between text-xs font-bold border-b border-gray-800 py-1">
-                      <span className="text-gray-400">Solar / Window Gain</span>
-                      <span className="text-white">{rooms[activeIndex].totalWindowGain} BTU/h</span>
+                    <div className="flex justify-between text-xs font-bold border-b border-gray-200 py-1">
+                      <span className="text-gray-600">Solar / Window Gain</span>
+                      <span className="text-gray-900">{rooms[activeIndex].totalWindowGain} BTU/h</span>
                     </div>
-                    <div className="flex justify-between text-xs font-bold border-b border-gray-800 py-1">
-                      <span className="text-gray-400">Occupancy Gain</span>
-                      <span className="text-white">{rooms[activeIndex].occupancyGain} BTU/h</span>
+                    <div className="flex justify-between text-xs font-bold border-b border-gray-200 py-1">
+                      <span className="text-gray-600">Occupancy Gain</span>
+                      <span className="text-gray-900">{rooms[activeIndex].occupancyGain} BTU/h</span>
                     </div>
                     <div className="flex justify-between text-sm font-black pt-2">
                       <span className="text-blue-500 uppercase">Total Room Gain</span>

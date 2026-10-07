@@ -46,7 +46,7 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
 
   const renderRow = (label, structure, rEff, hlFactor, sc, hgFactor, key, isCustom = false) => {
     return (
-      <tr className={`border-b text-[10px] ${readOnly ? 'border-black' : 'border-gray-800'}`}>
+      <tr className={`border-b text-[10px] ${readOnly ? 'border-black' : 'border-gray-200'}`}>
         <td className="p-2 border-r font-bold uppercase flex justify-between items-center group">
           {isCustom && !readOnly ? (
             <input
@@ -90,7 +90,7 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
             ) : (
               <input
                 type="number" step="0.01"
-                className="w-16 border border-gray-700 rounded p-1 font-bold text-center text-red-600 bg-red-900/20"
+                className="w-16 border border-gray-300 rounded p-1 font-bold text-center text-red-600 bg-red-900/20"
                 value={rEff}
                 onChange={(e) => handleREffChange(key, e.target.value, isCustom)}
               />
@@ -105,7 +105,7 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
             ) : (
               <input
                 type="number" step="0.1"
-                className="w-12 border border-gray-700 rounded p-1 font-bold text-center text-gray-300 bg-gray-800"
+                className="w-12 border border-gray-300 rounded p-1 font-bold text-center text-gray-700 bg-gray-100"
                 value={sc}
                 onChange={(e) => handleSCChange(key, e.target.value, isCustom)}
               />
@@ -119,46 +119,46 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
   };
 
   return (
-    <div className={`${readOnly ? 'bg-white text-black border-2 border-black' : 'bg-gray-900 border border-gray-700 shadow-2xl'} rounded-xl overflow-hidden`}>
+    <div className={`${readOnly ? 'bg-white text-black border-2 border-black' : 'bg-white border border-gray-300 shadow-2xl'} rounded-xl overflow-hidden`}>
       <table className="w-full border-collapse">
         <thead>
-          <tr className={`${readOnly ? 'bg-gray-100 border-b-2 border-black text-black' : 'bg-gray-800 border-b border-gray-700 text-gray-400'} font-black text-center text-[10px] uppercase`}>
-            <th className={`p-4 border-r ${readOnly ? 'border-black' : 'border-gray-700'} text-left`}>ENGINEERING COMPONENTS</th>
-            <th className="p-4 border-r border-gray-700 w-16">
+          <tr className={`${readOnly ? 'bg-gray-100 border-b-2 border-black text-black' : 'bg-gray-100 border-b border-gray-300 text-gray-600'} font-black text-center text-[10px] uppercase`}>
+            <th className={`p-4 border-r ${readOnly ? 'border-black' : 'border-gray-300'} text-left`}>ENGINEERING COMPONENTS</th>
+            <th className="p-4 border-r border-gray-300 w-16">
                <span className="text-[8px] rotate-180 [writing-mode:vertical-lr] inline-block">STRUCTURE</span>
             </th>
-            <th className="border-r border-gray-700 w-24">
-              <div className="p-2 border-b border-gray-700 text-center font-black text-red-500">{hl_dt}</div>
+            <th className="border-r border-gray-300 w-24">
+              <div className="p-2 border-b border-gray-300 text-center font-black text-red-500">{hl_dt}</div>
               <div className="p-2 text-[8px]">EFF R (COL 1)</div>
             </th>
-            <th className="border-r border-gray-700 w-24">
-              <div className="p-2 border-b border-gray-700 text-center font-black text-red-400">{hl_dt}</div>
+            <th className="border-r border-gray-300 w-24">
+              <div className="p-2 border-b border-gray-300 text-center font-black text-red-400">{hl_dt}</div>
               <div className="p-2 flex flex-col items-center">
-                 <span className="border-b border-gray-700 w-10 leading-tight">1 / R</span>
+                 <span className="border-b border-gray-300 w-10 leading-tight">1 / R</span>
                  <span className="text-[8px] mt-1">COL 2</span>
               </div>
             </th>
-            <th className="border-r border-gray-700 w-16">
-              <div className="p-2 border-b border-gray-700 text-center font-black text-blue-500">{hg_dt}</div>
+            <th className="border-r border-gray-300 w-16">
+              <div className="p-2 border-b border-gray-300 text-center font-black text-blue-500">{hg_dt}</div>
               <div className="p-2 flex flex-col items-center justify-center">
                 <span>SC</span>
                 <span className="text-[8px]">COL 3</span>
               </div>
             </th>
             <th className="w-24">
-              <div className="p-2 border-b border-gray-700 text-center font-black text-blue-400">{hg_dt}</div>
+              <div className="p-2 border-b border-gray-300 text-center font-black text-blue-400">{hg_dt}</div>
               <div className="p-2 flex flex-col items-center justify-center">
-                <span className="border-b border-gray-700 w-16 text-[8px]">FAC</span>
+                <span className="border-b border-gray-300 w-16 text-[8px]">FAC</span>
                 <span className="text-[8px] mt-1">COL 4</span>
               </div>
             </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-800">
-          <tr className={`${readOnly ? 'bg-gray-200 text-black border-b border-black' : 'bg-gray-800/30 text-gray-500'} text-[10px] uppercase font-black`}>
-             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'}`}>1. Gross Walls</td>
-             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center text-green-500 w-16`}>AGW / BGW</td>
-             <td colSpan="4" className={readOnly ? '' : 'bg-gray-800/50'}></td>
+          <tr className={`${readOnly ? 'bg-gray-200 text-black border-b border-black' : 'bg-gray-100/30 text-gray-500'} text-[10px] uppercase font-black`}>
+             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-200'}`}>1. Gross Walls</td>
+             <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-200'} text-center text-green-500 w-16`}>AGW</td>
+             <td colSpan="4" className={readOnly ? '' : 'bg-gray-100/50'}></td>
           </tr>
 
           {renderRow('2. Exposed Doors', 'D', factors.doors.rEff, factors.doors.hlFactor, factors.doors.sc, factors.doors.hgFactor, 'doors')}
@@ -172,20 +172,20 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
 
           {/* Windows (Row 6) */}
           {Object.entries(factors.windows.hgFactor).map(([dir, hgf], i) => (
-            <tr key={dir} className={`text-[10px] ${readOnly ? 'border-b border-black' : 'hover:bg-gray-800/20 transition-colors'}`}>
-              {i === 0 && <td rowSpan="6" className={`p-4 border-r ${readOnly ? 'border-black text-black' : 'border-gray-800 text-gray-300'} font-bold uppercase align-top`}>6. Windows, Glass Doors & Skylights</td>}
-              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center font-black text-green-500 uppercase w-16`}>{dir.replace('_', '/')}</td>
-              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center w-24`}>
+            <tr key={dir} className={`text-[10px] ${readOnly ? 'border-b border-black' : 'hover:bg-gray-100/20 transition-colors'}`}>
+              {i === 0 && <td rowSpan="6" className={`p-4 border-r ${readOnly ? 'border-black text-black' : 'border-gray-200 text-gray-700'} font-bold uppercase align-top`}>6. Windows, Glass Doors & Skylights</td>}
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-200'} text-center font-black text-green-500 uppercase w-16`}>{dir.replace('_', '/')}</td>
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-200'} text-center w-24`}>
                 <span className={`font-bold ${readOnly ? 'text-red-700' : 'text-red-500'}`}>{factors.windows.rEff.toFixed(2)}</span>
               </td>
-              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center font-bold ${readOnly ? 'text-red-700' : 'text-red-500'} w-24`}>
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-200'} text-center font-bold ${readOnly ? 'text-red-700' : 'text-red-500'} w-24`}>
                 {factors.windows.hlFactor.toFixed(2)}
               </td>
-              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-800'} text-center w-16`}>
+              <td className={`p-3 border-r ${readOnly ? 'border-black' : 'border-gray-200'} text-center w-16`}>
                 {i === 0 && !readOnly ? (
                     <input
                         type="number" step="0.1"
-                        className="w-12 border border-gray-700 rounded p-1 font-bold text-center text-gray-300 bg-gray-800"
+                        className="w-12 border border-gray-300 rounded p-1 font-bold text-center text-gray-700 bg-gray-100"
                         value={factors.windows.sc}
                         onChange={(e) => handleSCChange('windows', e.target.value)}
                     />
@@ -209,7 +209,7 @@ const ComponentTable = ({ state, onUpdate, readOnly = false }) => {
           })}
 
           {!readOnly && (
-            <tr className="bg-gray-800/30">
+            <tr className="bg-gray-100/30">
               <td colSpan="6" className="p-2 text-center">
                 <button
                   onClick={addCustomComponent}

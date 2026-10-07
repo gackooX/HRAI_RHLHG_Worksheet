@@ -34,18 +34,18 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center bg-gray-800 text-white p-3 rounded-t-lg">
+      <div className="flex justify-between items-center bg-gray-100 text-gray-900 p-3 rounded-t-lg">
         <h3 className="text-md font-black uppercase tracking-widest">HRAI Worksheet Digital Twin</h3>
         <div className="flex gap-4 text-[10px] font-bold">
-            <div className="flex gap-1"><span>PE:</span> <span className="text-yellow-400">{room.perimeter}</span></div>
-            <div className="flex gap-1"><span>H:</span> <span className="text-yellow-400">{room.height}</span></div>
-            <div className="flex gap-1"><span>AF:</span> <span className="text-yellow-400">{room.floorArea}</span></div>
+            <div className="flex gap-1"><span>PE:</span> <span className="text-gray-900">{room.perimeter}</span></div>
+            <div className="flex gap-1"><span>H:</span> <span className="text-gray-900">{room.height}</span></div>
+            <div className="flex gap-1"><span>AF:</span> <span className="text-gray-900">{room.floorArea}</span></div>
         </div>
       </div>
 
       <div className="overflow-x-auto border-x border-b border-gray-300 rounded-b-lg shadow-xl">
         <table className="w-full border-collapse table-fixed">
-          <thead className="bg-gray-100 text-[10px] uppercase font-black border-b-2 border-gray-800">
+          <thead className="bg-gray-100 text-[10px] uppercase font-black border-b-2 border-gray-200">
             <tr>
               <th className="p-2 border-r text-left w-48">Components</th>
               <th className="p-2 border-r text-center w-16">Struct</th>
@@ -65,12 +65,6 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
                label="Above Grade Wall" struct="AGW" area={areas.grossAGW.toFixed(1)}
                hlFactor="---" loss="---" hgFactor="---" gain="---"
             />
-            {room.level?.includes('Level 1') && projectState.foundation.foundationType === 'Basement' && (
-                <Row
-                  label="Below Grade Wall" struct="BGW" area={areas.grossBGW.toFixed(1)}
-                  hlFactor="---" loss="---" hgFactor="---" gain="---"
-                />
-            )}
 
             {/* 2. EXPOSED DOORS */}
             <tr className="bg-gray-50 font-bold text-[9px] uppercase border-b border-gray-300">
@@ -256,7 +250,7 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
             )}
 
             {/* TOTALS */}
-            <tr className="bg-gray-900 text-white font-black text-sm uppercase">
+            <tr className="bg-gray-100 text-black font-black text-sm uppercase">
                 <td colSpan="5" className="p-3 text-right">Room Total Load (Conductive + Air Leakage + Duct Loss)</td>
                 <td className="p-3 text-right bg-red-900">{metrics.totalRoomLoss}</td>
                 <td className="p-3 text-right bg-blue-900">{metrics.totalRoomGain}</td>
@@ -267,27 +261,43 @@ const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="p-4 bg-gray-50 border rounded-lg">
-            <h4 className="text-xs font-black uppercase text-gray-500 mb-2">Room Settings</h4>
-            <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer text-sm font-bold">
+            <h4 className="text-xs font-black uppercase text-gray-500 mb-4">Internal Loads & Overrides</h4>
+            <div className="grid grid-cols-2 gap-4">
+                <label className="flex items-center gap-2 cursor-pointer text-sm font-bold bg-white p-2 rounded border">
                     <input
-                      type="checkbox" className="w-4 h-4"
+                      type="checkbox" className="w-4 h-4 text-green-600 rounded"
                       checked={room.hasDuctLoss !== false}
                       onChange={(e) => updateRoom({ hasDuctLoss: e.target.checked })}
                     />
                     Apply Duct Loss ({projectState.designMultipliers.ductLossPercentage}%)
                 </label>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-400">Occupancy:</span>
+                <div className="flex items-center justify-between bg-white p-2 rounded border">
+                    <span className="text-xs font-bold text-gray-600">Occupancy:</span>
                     <input
-                        type="number" className="w-16 border rounded p-1 font-black text-center"
+                        type="number" className="w-16 border rounded p-1 font-black text-center outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                         value={room.occupancy || 0}
                         onChange={(e) => updateRoom({ occupancy: parseInt(e.target.value) || 0 })}
                     />
                 </div>
+                {(room.level?.includes('Level 1')) && (
+                  <div className="col-span-2 flex items-center justify-between bg-white p-2 rounded border border-blue-200">
+                      <span className="text-xs font-bold text-gray-600">Foundation Loss (Watts):</span>
+                      <div className="flex items-center gap-4">
+                        <input
+                            type="number" className="w-20 border rounded p-1 font-black text-center outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                            value={room.foundationLossWatts || 0}
+                            onChange={(e) => updateRoom({ foundationLossWatts: parseFloat(e.target.value) || 0 })}
+                        />
+                        <div className="text-right leading-none">
+                            <span className="text-[10px] uppercase text-gray-400 block">BTU/H</span>
+                            <span className="text-sm font-black text-gray-900">{Math.round((room.foundationLossWatts || 0) * 3.412)}</span>
+                        </div>
+                      </div>
+                  </div>
+                )}
             </div>
         </div>
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between h-fit self-start">
             <div className="text-[10px] font-black uppercase text-blue-800">Air Leakage (Sec 12)</div>
             <div className="flex gap-4 font-mono font-black text-blue-900">
                 <div className="flex flex-col items-end">
