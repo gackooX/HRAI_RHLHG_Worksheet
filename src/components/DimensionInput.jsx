@@ -1,10 +1,11 @@
 import React from 'react';
 
-const DimensionInput = ({ label, value, id, isMetric, type, onChange }) => {
+const DimensionInput = ({ label, value, id, isMetric, type, onChange, placeholder }) => {
   // value is always stored in Imperial (ft, sq ft, etc)
   // type: 'length', 'area', 'volume'
 
   const getDisplayValue = () => {
+    if (value === null || value === undefined || value === '') return '';
     if (!isMetric) return value;
     if (type === 'length') return Math.round(value * 0.3048 * 100) / 100;
     if (type === 'area') return Math.round(value * 0.092903 * 100) / 100;
@@ -28,7 +29,7 @@ const DimensionInput = ({ label, value, id, isMetric, type, onChange }) => {
   const handleChange = (e) => {
     const rawVal = e.target.value;
     if (rawVal === '') {
-        onChange(0);
+        onChange(placeholder !== undefined ? null : 0);
         return;
     }
     const newVal = parseFloat(rawVal);
@@ -54,6 +55,7 @@ const DimensionInput = ({ label, value, id, isMetric, type, onChange }) => {
           step="0.01"
           className="w-full border p-2 rounded font-bold"
           value={getDisplayValue()}
+          placeholder={placeholder !== undefined ? placeholder : ''}
           onChange={handleChange}
         />
         <span className="text-sm font-bold w-12">{getUnitLabel()}</span>

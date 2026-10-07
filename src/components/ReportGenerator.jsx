@@ -356,7 +356,7 @@ const ReportGenerator = ({ state }) => {
             <div className="mt-4 border border-black p-1 text-[6px] uppercase font-bold text-gray-400 grid grid-cols-3 gap-2">
                <div>ΔTh={fmtD(room.hl_delta_t)}{unitT} | ΔTc={fmtD(room.hg_delta_t)}{unitT}</div>
                <div>LRairh={state.externalValues.LRairh} | LRairc={state.externalValues.LRairc}</div>
-               <div className="text-right">HdrHt={fmtL(state.designMultipliers.header_height)} | BsmtBG={fmtL(state.foundation.basementBelowGradeHeight)}</div>
+               <div className="text-right">HdrHt={fmtL(state.designMultipliers.header_height)} | BsmtBG={fmtL(state.foundation.wallBelowGradeHeight)}</div>
             </div>
           </div>
         );

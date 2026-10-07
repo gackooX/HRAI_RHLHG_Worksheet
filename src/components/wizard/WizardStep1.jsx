@@ -88,9 +88,13 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
         />
         {isBasement && (
           <DimensionInput
-            id="bg-height" label="Wall Below Grade Height (ft)" type="length" isMetric={isMetric}
-            value={room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : projectState.foundation.basementBelowGradeHeight}
-            onChange={(v) => updateRoom({ wallBelowGradeHeight: v })}
+            id="bg-height"
+            label="Wall Below Grade Height (ft)"
+            type="length"
+            isMetric={isMetric}
+            value={room.wallBelowGradeHeightOverride !== undefined ? room.wallBelowGradeHeightOverride : null}
+            placeholder={projectState.foundation.wallBelowGradeHeight}
+            onChange={(v) => updateRoom({ wallBelowGradeHeightOverride: v })}
           />
         )}
       </div>
