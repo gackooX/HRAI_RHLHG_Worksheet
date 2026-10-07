@@ -238,7 +238,7 @@ function App() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Building Info Panel */}
-            <div className="lg:col-span-1 bg-white p-8 rounded-2xl border border-gray-200 shadow-2xl h-fit sticky top-8">
+            <div className="lg:col-span-1 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl h-fit sticky top-8">
               <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-blue-600 pl-4">Building Information</h2>
 
               <div className="space-y-6">
