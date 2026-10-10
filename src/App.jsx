@@ -3,6 +3,7 @@ import WizardContainer from './components/wizard/WizardContainer';
 import ReportGenerator from './components/ReportGenerator';
 import THGMWorksheet from './components/THGMWorksheet';
 import AirLeakageSheet from './components/AirLeakageSheet';
+import AIM2CalculatorSheet from "./components/AIM2CalculatorSheet";
 import LibraryPage from './components/LibraryPage';
 import RoomManagement from './components/RoomManagement';
 import { initialState } from './state/projectState';
@@ -163,6 +164,7 @@ function App() {
             { id: 'building', label: 'Building Manager', icon: '🏢' },
             { id: 'rooms', label: 'Room Manager', icon: '🏠' },
             { id: 'air', label: 'Air & Vent', icon: '💨' },
+            { id: 'aim2', label: 'AIM-2 Envelope', icon: '🏠' },
             { id: 'thgm', label: 'THGM Engine', icon: '☀️' },
             { id: 'report', label: 'Final Report', icon: '📄' },
             { id: 'library', label: 'Library', icon: '📚' }
@@ -528,6 +530,10 @@ function App() {
 
       {view === 'library' && (
         <LibraryPage />
+      )}
+
+      {view === 'aim2' && (
+        <AIM2CalculatorSheet />
       )}
 
       {view === 'air' && (
