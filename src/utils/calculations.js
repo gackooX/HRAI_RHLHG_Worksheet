@@ -98,22 +98,21 @@ export const calculateDetailedAreas = (room, state) => {
   const isL1 = room.level?.includes('Level 1');
   const isBasementRoom = isL1 && isBasementScenario;
 
-  const effectiveBelowGradeHeight = isBasementRoom
-    ? ((room.wallBelowGradeHeightOverride !== null &&
-       room.wallBelowGradeHeightOverride !== undefined &&
-       room.wallBelowGradeHeightOverride !== "")
-        ? Number(room.wallBelowGradeHeightOverride)
-        : Number(state.foundation.wallBelowGradeHeight || 0))
-    : 0;
+  if (isBasementRoom) {
+    const basementHeight = h;
+    const roomBGHeight = room.wallBelowGradeHeight !== undefined ? room.wallBelowGradeHeight : state.foundation.wallBelowGradeHeight;
 
-  // As per user spec: BGW area is perimeter * wall below grade height
-  netBGW = effectiveBelowGradeHeight * p;
+    grossBGW = roomBGHeight * p;
+    grossAGW = (basementHeight - roomBGHeight) * p;
 
-  // Gross AGW is perimeter * (height - wall below grade height)
-  grossAGW = Math.max(0, p * (h - effectiveBelowGradeHeight));
-
-  // Net AGW is gross AGW minus all windows and doors area
-  netAGW = Math.max(0, grossAGW - windowArea - doorArea);
+    // Net AGW: Do NOT subtract headerArea
+    netAGW = Math.max(0, grossAGW - windowArea - doorArea);
+    // Net BGW Formula (User Spec): Perimeter * Wall Below Grade Height
+    netBGW = Math.max(0, p * roomBGHeight);
+  } else {
+    grossAGW = p * h;
+    netAGW = Math.max(0, grossAGW - windowArea - doorArea);
+  }
 
   return {
     grossAGW,

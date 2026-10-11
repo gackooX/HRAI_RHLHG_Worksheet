@@ -2,8 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import WizardContainer from './components/wizard/WizardContainer';
 import ReportGenerator from './components/ReportGenerator';
 import THGMWorksheet from './components/THGMWorksheet';
-import AirLeakageSheet from './components/AirLeakageSheet';
-import AIM2CalculatorSheet from "./components/AIM2CalculatorSheet";
 import LibraryPage from './components/LibraryPage';
 import RoomManagement from './components/RoomManagement';
 import { initialState } from './state/projectState';
@@ -163,8 +161,6 @@ function App() {
           {[
             { id: 'building', label: 'Building Manager', icon: '🏢' },
             { id: 'rooms', label: 'Room Manager', icon: '🏠' },
-            { id: 'air', label: 'Air & Vent', icon: '💨' },
-            { id: 'aim2', label: 'AIM-2 Envelope', icon: '🏠' },
             { id: 'thgm', label: 'THGM Engine', icon: '☀️' },
             { id: 'report', label: 'Final Report', icon: '📄' },
             { id: 'library', label: 'Library', icon: '📚' }
@@ -243,7 +239,7 @@ function App() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Building Info Panel */}
             <div className="lg:col-span-1 bg-gray-900 p-8 rounded-2xl border border-gray-800 shadow-2xl h-fit sticky top-8">
-              <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-blue-600 pl-4">Building Information</h2>
+              <h2 className="text-xl font-black mb-6 uppercase tracking-tighter border-l-4 border-blue-600 pl-4">Project Identity</h2>
 
               <div className="space-y-6">
                 <div className="grid grid-cols-3 gap-4">
@@ -530,29 +526,6 @@ function App() {
 
       {view === 'library' && (
         <LibraryPage />
-      )}
-
-      {view === 'aim2' && (
-        <AIM2CalculatorSheet />
-      )}
-
-      {view === 'air' && (
-        <AirLeakageSheet
-          state={state}
-          dispatch={(action) => {
-            if (action.type === 'UPDATE_VENTILATION') {
-              setState(prev => ({
-                ...prev,
-                ventilation: { ...prev.ventilation, ...action.payload }
-              }));
-            } else if (action.type === 'UPDATE_EXTERNAL') {
-               setState(prev => ({
-                ...prev,
-                externalValues: { ...prev.externalValues, ...action.payload }
-              }));
-            }
-          }}
-        />
       )}
 
       {/* Print Only View */}

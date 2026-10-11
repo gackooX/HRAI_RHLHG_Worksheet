@@ -86,14 +86,6 @@ const WizardStep1 = ({ room, projectState, updateRoom, onUpdateProject }) => {
           id="height" label="Height (H)" type="length" isMetric={isMetric}
           value={room.height || 0} onChange={(v) => updateRoom({ height: v })}
         />
-        <div className="flex flex-col">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-            Volume (VB)
-          </label>
-          <div className="h-9 px-3 bg-gray-100 border border-gray-200 rounded text-sm text-gray-700 flex items-center shadow-inner cursor-not-allowed">
-            {((room.floorArea || 0) * (room.height || state.foundation.floorHeights[room.level] || 8)).toFixed(1)} {isMetric ? 'm³' : 'ft³'}
-          </div>
-        </div>
         {isBasement && (
           <DimensionInput
             id="bg-height" label="Wall Below Grade Height (ft)" type="length" isMetric={isMetric}

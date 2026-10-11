@@ -63,19 +63,6 @@ export const initialState = {
     LRairh: 0.873, // Heating leakage default
     LRairc: 0.030, // Cooling leakage default
   },
-  ventilation: {
-    systemCase: 'Case #1', // 'Case #1', 'Case #2', 'Case #3'
-    PVC: 0, // Principal Ventilation Capacity (CFM/Lps)
-    sensibleEfficiencyE: 0, // HRV/ERV Sensible Recovery Efficiency
-    totalEfficiencyATRE: 0, // HRV/ERV Total Recovery Efficiency
-    levelFactors: { // For Section 11 Table
-      1: 1, // Storeys = 1 default
-      2: 0,
-      3: 0,
-      4: 0
-    },
-    vbOverride: null // User override for Building Volume
-  },
   globalWindowConfig: {
     type: 'Double',
     frame: 'Operable-Aluminum',
