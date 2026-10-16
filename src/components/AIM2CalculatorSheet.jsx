@@ -1,15 +1,36 @@
 import React, { useState, useMemo } from 'react';
+import library from '../data/library.json' with { type: 'json' };
 import {
   TERRAIN_ROUGHNESS,
   LOCAL_SHIELDING,
   AIR_TIGHTNESS_TYPES,
-  LEAKAGE_DISTRIBUTION,
-  WEATHER_DATA
+  LEAKAGE_DISTRIBUTION
 } from '../data/aim2Data';
 
 const AIM2CalculatorSheet = () => {
+
+  // Generate WEATHER_DATA dynamically from library.json
+  const WEATHER_DATA = useMemo(() => {
+    const locations = library.designConditions?.locations || [];
+    const wd = {};
+    locations.forEach(loc => {
+      const prov = loc.province;
+      const city = loc.cityName;
+      if (!prov || !city) return;
+      if (!wd[prov]) wd[prov] = {};
+      wd[prov][city] = {
+        HDD: loc.degDay || 0,
+        DHDBT: loc.odtHeating || 0,
+        DHWBT: loc.odtCooling || 0,
+        JanWind: 15.0, // Temporary default
+        JulWind: 15.0  // Temporary default
+      };
+    });
+    return wd;
+  }, []);
+
   const [inputs, setInputs] = useState({
-    province: 'Ontario',
+    province: 'ON',
     region: 'Toronto (city hall)',
     wsLocation: 'Open flat terrain, grass',
     hAnem: 10,

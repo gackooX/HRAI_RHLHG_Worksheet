@@ -1,5 +1,5 @@
 import React from 'react';
-import library from '../data/library.json';
+import library from '../data/library.json' with { type: 'json' };
 import { calculateComponentFactors, lookupGlazingData } from '../utils/calculations';
 
 const THGMWorksheet = ({ state, onUpdateProject }) => {

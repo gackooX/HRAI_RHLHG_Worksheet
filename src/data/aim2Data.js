@@ -76,12 +76,3 @@ export const LEAKAGE_DISTRIBUTION = {
   "Semi-Detached|Three|Full": { code: "254", ceiling: 0.20, walls: 0.70, floor: 0.10 }
  };
 
-export const WEATHER_DATA = {
-  "Ontario": {
-    "Toronto (city hall)": { HDD: 3520, DHDBT: -18.0, DHWBT: 31.0, JanWind: 23.0, JulWind: 12.0 }
-  },
-  "Alberta": {
-    "Calgary": { HDD: 5000, DHDBT: -30.0, DHWBT: 28.0, JanWind: 15.0, JulWind: 14.0 },
-    "Edmonton": { HDD: 5120, DHDBT: -30.0, DHWBT: 28.0, JanWind: 11.0, JulWind: 12.0 }
-  }
- };

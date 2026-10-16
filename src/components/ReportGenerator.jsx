@@ -1,5 +1,5 @@
 import React from 'react';
-import library from '../data/library.json';
+import library from '../data/library.json' with { type: 'json' };
 import ComponentTable from './ComponentTable';
 import THGMWorksheet from './THGMWorksheet';
 import {

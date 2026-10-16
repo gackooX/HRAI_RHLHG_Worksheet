@@ -10,7 +10,7 @@ import { initialState } from './state/projectState';
 import { calculateRoomMetrics } from './utils/calculations';
 import { complianceData } from './data/complianceData';
 import ComponentTable from './components/ComponentTable';
-import library from './data/library.json';
+import library from './data/library.json' with { type: 'json' };
 import DimensionInput from './components/DimensionInput';
 import TempInput from './components/TempInput';
 
