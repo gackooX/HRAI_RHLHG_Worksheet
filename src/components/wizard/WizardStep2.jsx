@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import library from '../../data/library.json';
+import library from '../../data/library.json' with { type: 'json' };
 import { calculateDetailedAreas, calculateComponentFactors, calculateRoomMetrics, lookupGlazingData } from '../../utils/calculations';
 
 const WizardStep2 = ({ room, updateRoom, projectState, onUpdateProject }) => {

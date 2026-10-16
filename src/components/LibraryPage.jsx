@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import library from '../data/library.json';
+import library from '../data/library.json' with { type: 'json' };
 
 const LibraryPage = () => {
   const [provinceFilter, setProvinceFilter] = useState('');
