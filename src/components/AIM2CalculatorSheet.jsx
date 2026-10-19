@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import library from '../data/library.json' with { type: 'json' };
+import f280Data from '../data/f280WeatherData.json' with { type: 'json' };
 import {
   TERRAIN_ROUGHNESS,
   LOCAL_SHIELDING,
@@ -11,19 +12,19 @@ const AIM2CalculatorSheet = () => {
 
   // Generate WEATHER_DATA dynamically from library.json
   const WEATHER_DATA = useMemo(() => {
-    const locations = library.designConditions?.locations || [];
+    const locations = f280Data.designConditions?.locations || [];
     const wd = {};
     locations.forEach(loc => {
-      const prov = loc.province;
-      const city = loc.cityName;
+      const prov = loc.Region;
+      const city = loc.City;
       if (!prov || !city) return;
       if (!wd[prov]) wd[prov] = {};
       wd[prov][city] = {
-        HDD: loc.degDay || 0,
-        DHDBT: loc.odtHeating || 0,
-        DHWBT: loc.odtCooling || 0,
-        JanWind: 15.0, // Temporary default
-        JulWind: 15.0  // Temporary default
+        HDD: loc.DegDay || 0,
+        DHDBT: loc.DHDBT || 0,
+        DHWBT: loc.DCDBT || 0,
+        JanWind: loc.JanWind ?? 15.0,
+        JulWind: loc.JulWind ?? 15.0
       };
     });
     return wd;
