@@ -66,28 +66,31 @@ const AIM2CalculatorSheet = () => {
   };
 
   const results = useMemo(() => {
-    // 1. Inputs
+    // 1. Weather & Geometry Setup
     const cityData = WEATHER_DATA[inputs.province]?.[inputs.region];
     if (!cityData) return null;
 
-    const z0_ws = TERRAIN_ROUGHNESS[inputs.wsLocation];
-    const z0_site = TERRAIN_ROUGHNESS[inputs.bldgSite];
-    const Sw_o = LOCAL_SHIELDING[inputs.wallsShielding];
-    const Sw_flue = LOCAL_SHIELDING[inputs.flueShielding];
     const H = parseFloat(inputs.hCeiling) || 0.1;
     const V = parseFloat(inputs.volume) || 1;
     const tightnessType = inputs.tightnessType;
 
-    // Constants
-    const Tin_heat = 22.0;
-    const Tin_cool = 24.0;
+    const Tin_heat_C = 21.0;
+    const Tin_heat_K = Tin_heat_C + 273.15;
+    const Tin_cool_C = 24.0;
+    const Tin_cool_K = Tin_cool_C + 273.15;
+
+    const delta_T_H = Tin_heat_C - (cityData.DHDBT || 0);
+    const delta_T_C = Math.abs((cityData.DCDBT || 0) - Tin_cool_C); // Absolute value for stack effect
+
+    const V_wind_H = (cityData.JanWind || 0) / 3.6;
+    const V_wind_C = (cityData.JulWind || 0) / 3.6;
+
+    // ELA Calculation (same as before for ELA10 in cm^2)
     const rho_ref = 352.981 / (273.15 + 20); // 1.204097
     const C_orifice = 0.611;
-    const g = 9.8;
     const Pref = 10;
+    let n, ach50, ela10;
 
-    // 1. Envelope Flow Coeff
-    let n, C, ach50, ela10;
     if (tightnessType !== "Custom - BDT values") {
       const tightData = AIR_TIGHTNESS_TYPES[tightnessType];
       n = tightData.n;
@@ -98,68 +101,52 @@ const AIM2CalculatorSheet = () => {
       ela10 = parseFloat(inputs.customEla) || 1;
       n = Math.log((ach50 * V / 3600) / (C_orifice * (ela10 / 10000) * Math.sqrt(2 * Pref / rho_ref))) / Math.log(50 / Pref);
     }
-    C = (ach50 * V) / (3600 * Math.pow(50, n));
 
-    // 2. Flue Flow Coeff
-    const Cd = 0.5;
-    const Pref_flue = 4.0;
-    const rho_air = 1.177;
-    let A_flue = 0;
-    const flues = [parseFloat(inputs.flue1)||0, parseFloat(inputs.flue2)||0, parseFloat(inputs.flue3)||0, parseFloat(inputs.flue4)||0];
+    // 2. Stack Factor (f_s)
+    const f_s_H = 0.000145 * Math.pow((H * 9.81) / Tin_heat_K, 0.5);
+    const f_s_C = 0.000145 * Math.pow((H * 9.81) / Tin_cool_K, 0.5);
+
+    const Q_stack_H = f_s_H * ela10 * Math.sqrt(delta_T_H) * 1000;
+    const Q_stack_C = f_s_C * ela10 * Math.sqrt(delta_T_C) * 1000;
+
+    // 3. Wind Factor (f_w)
+    // For "City centre", the Shelter Factor (S_w) must be 0.32 (Do not use 1.0)
+    let S_w = 1.0;
+    if (inputs.bldgSite === "City centre") {
+        S_w = 0.32;
+    }
+    const f_w = 0.000185 * S_w;
+
+    const Q_wind_H = f_w * ela10 * V_wind_H * 1000;
+    const Q_wind_C = f_w * ela10 * V_wind_C * 1000;
+
+    // 4. Flue Draft (Q_flue)
+    let A_flue_m2 = 0;
+    const flues = [
+      parseFloat(inputs.flue1) || 0,
+      parseFloat(inputs.flue2) || 0,
+      parseFloat(inputs.flue3) || 0,
+      parseFloat(inputs.flue4) || 0
+    ];
     flues.forEach(d => {
-      if (d > 0) A_flue += Math.PI * Math.pow((d / 10) / 2, 2); // cm^2
+      if (d > 0) A_flue_m2 += Math.PI * Math.pow(d / 2000, 2);
     });
 
-    const C_flue = Cd * (A_flue / 10000) * Math.sqrt(2 / rho_air) * Math.pow(Pref_flue, 0.5 - n);
-    const C_total = C + C_flue;
-    const Y = C_total === 0 ? 0 : C_flue / C_total;
+    const Q_flue = 120 * A_flue_m2 * Math.sqrt(delta_T_H); // Heating only
 
-    // 3. Leakage Distribution
-    const leakKey = `${inputs.bldgType}|${inputs.stories}|${inputs.foundation}`;
-    const leakData = LEAKAGE_DISTRIBUTION[leakKey] || { ceiling: 0.2, walls: 0.6, floor: 0.2 };
-    const R = (leakData.ceiling + leakData.floor) * (1 - Y);
-    const X = (leakData.ceiling - leakData.floor) * (1 - Y);
-    // 4. Terrain & Shelter
-    const h_anem = parseFloat(inputs.hAnem) || 10;
-        const effective_H = Math.max(H, z0_site * 1.1); // Prevent negative log
-    const C_T = (Math.log(effective_H / z0_site) / Math.log(60 / z0_site)) * (Math.log(60 / z0_ws) / Math.log(h_anem / z0_ws));
-    const S_w = Sw_o * (1 - Y) + 1.5 * Sw_flue * Y;
-    const Ue_heat = (cityData.JanWind / 3.6) * C_T;
-    const Ue_cool = (cityData.JulWind / 3.6) * C_T;
+    // 5. Quadrature Combination (Natural Leakage in L/s)
+    const Q_nat_H = Math.sqrt(Math.pow(Q_stack_H, 2) + Math.pow(Q_wind_H, 2)) + (0.5 * Q_flue);
+    const Q_nat_C = Math.sqrt(Math.pow(Q_stack_C, 2) + Math.pow(Q_wind_C, 2));
 
-    // 5. Stack & Wind Factors & Final Calc
-    const calcInf = (Tin, Tout, Ue) => {
-      const rho_out = 352.981 / (Tout + 273.15);
-      const P_w = 0.5 * rho_out * Math.pow(S_w * Ue, 2);
-      const P_s = rho_out * g * H * (Math.abs(Tin - Tout) / (Tin + 273.15));
-
-      // Calculate beta_f inside calcInf so it can use Tin and Tout
-      // User says: "If your stack factor (f_s) derivation divides by T_indoor, ensure T_indoor is converted to Kelvin"
-      const beta_f = (Tin + 273.15) / Math.max(0.0001, Math.abs(Tin - Tout));
-
-      let f_s, f_w;
-      const S = (1 + n * R) / (n + 1);
-      const M = Math.pow(X, 2) / (2 - R);
-
-      if (Y === 0) {
-        f_s = S * Math.pow(Math.max(0, 0.5 - 0.5 * Math.pow(M, 1.25)), 1.5);
-        f_w = 0.19 * (2 - n) * (1 - Math.pow((X + R) / 2, 1.5));
-      } else {
-        const X_c = R + (2 * (1 - R - Y)) / Math.pow(beta_f + 1, 1 / n);
-        const F = n * Y * Math.pow(Math.max(0, beta_f - 1), (3 * n - 1) / (3 * n)) * (1 - (3 * Math.pow(X_c - X, 2) * Math.pow(R, 1 - n)) / (2 * (beta_f + 1)));
-        f_s = S * Math.pow(Math.max(0, 0.5 - 0.5 * Math.pow(M, 1.25)), 1.5) + F;
-        f_w = 0.19 * (2 - n) * (1 - Math.pow((X + R) / 2, 1.5 - Y)) - (Y / 4) * (1 - R / 2);
-      }
-
-      const Q_w = (3600 / V) * C_total * f_w * Math.pow(P_w, n);
-      const Q_s = (3600 / V) * C_total * f_s * Math.pow(P_s, n);
-      return Math.pow(Math.pow(Q_s, 1/n) + Math.pow(Q_w, 1/n) - (1/3) * Math.pow(Q_s * Q_w, 1/(2*n)), n);
-    };
+    // 6. Final Conversion to ACH
+    const heatingACH = (Q_nat_H * 3.6) / V;
+    const coolingACH = (Q_nat_C * 3.6) / V;
 
     return {
-      heatingACH: calcInf(Tin_heat, cityData.DHDBT, Ue_heat),
-      coolingACH: calcInf(Tin_cool, cityData.DHWBT, Ue_cool),
-      ela10, ach50
+      heatingACH,
+      coolingACH,
+      ela10,
+      ach50
     };
   }, [inputs]);
 
