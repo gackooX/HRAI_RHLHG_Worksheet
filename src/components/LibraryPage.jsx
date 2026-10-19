@@ -1,17 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import library from '../data/library.json' with { type: 'json' };
+import f280Data from '../data/f280WeatherData.json' with { type: 'json' };
 
 const LibraryPage = () => {
   const [provinceFilter, setProvinceFilter] = useState('');
 
   const provinces = useMemo(() => {
-    const pSet = new Set(library.designConditions.locations.map(l => l.province));
+    const pSet = new Set(f280Data.designConditions.locations.map(l => l.Region));
     return Array.from(pSet).sort();
   }, []);
 
   const filteredLocations = useMemo(() => {
-    if (!provinceFilter) return library.designConditions.locations;
-    return library.designConditions.locations.filter(l => l.province === provinceFilter);
+    if (!provinceFilter) return f280Data.designConditions.locations;
+    return f280Data.designConditions.locations.filter(l => l.Region === provinceFilter);
   }, [provinceFilter]);
 
   return (
@@ -52,12 +53,12 @@ const LibraryPage = () => {
             <tbody className="text-[11px] font-bold divide-y divide-gray-800">
               {filteredLocations.map((loc, i) => (
                 <tr key={i} className="hover:bg-gray-800/40 transition-colors">
-                  <td className="p-4 border-r border-gray-800 text-blue-500 font-black">{loc.province}</td>
-                  <td className="p-4 border-r border-gray-800 text-white font-black">{loc.cityName}</td>
-                  <td className="p-4 border-r border-gray-800 text-center text-red-500 font-black">{loc.odtHeating}&deg;C</td>
-                  <td className="p-4 border-r border-gray-800 text-center text-blue-500 font-black">{loc.odtCooling}&deg;C</td>
-                  <td className="p-4 border-r border-gray-800 text-center text-gray-300">{loc.summerRange}&deg;C</td>
-                  <td className="p-4 text-center text-gray-300">{loc.latitude}&deg;N</td>
+                  <td className="p-4 border-r border-gray-800 text-blue-500 font-black">{loc.Region}</td>
+                  <td className="p-4 border-r border-gray-800 text-white font-black">{loc.City}</td>
+                  <td className="p-4 border-r border-gray-800 text-center text-red-500 font-black">{loc.DHDBT}&deg;C</td>
+                  <td className="p-4 border-r border-gray-800 text-center text-blue-500 font-black">{loc.DCDBT}&deg;C</td>
+                  <td className="p-4 border-r border-gray-800 text-center text-gray-300">{loc.Strange}&deg;C</td>
+                  <td className="p-4 text-center text-gray-300">{loc.Latidude}&deg;N</td>
                 </tr>
               ))}
             </tbody>

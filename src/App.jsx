@@ -11,6 +11,7 @@ import { calculateRoomMetrics } from './utils/calculations';
 import { complianceData } from './data/complianceData';
 import ComponentTable from './components/ComponentTable';
 import library from './data/library.json' with { type: 'json' };
+import f280Data from './data/f280WeatherData.json' with { type: 'json' };
 import DimensionInput from './components/DimensionInput';
 import TempInput from './components/TempInput';
 
@@ -143,15 +144,15 @@ function App() {
 
   // Provinces sourced from weather library
   const provinces = useMemo(() => {
-    const pSet = new Set(library.designConditions.locations.map(l => l.province));
+    const pSet = new Set(f280Data.designConditions.locations.map(l => l.Region));
     return Array.from(pSet).sort();
   }, []);
 
   const filteredCities = useMemo(() => {
     if (!state.header.province) return [];
-    return library.designConditions.locations.filter(l =>
-      l.province === state.header.province &&
-      l.cityName.toLowerCase().includes(citySearch.toLowerCase())
+    return f280Data.designConditions.locations.filter(l =>
+      l.Region === state.header.province &&
+      l.City.toLowerCase().includes(citySearch.toLowerCase())
     );
   }, [state.header.province, citySearch]);
 
@@ -302,24 +303,24 @@ function App() {
                       <div className="absolute z-50 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto mt-1 divide-y divide-gray-700">
                         {filteredCities.map(loc => (
                             <div
-                              key={loc.city}
+                              key={loc.City}
                               className="p-3 hover:bg-blue-900/40 cursor-pointer text-[10px] font-black uppercase transition-colors"
                               onClick={() => {
-                                handleUpdateProject('header', { city: loc.cityName });
+                                handleUpdateProject('header', { city: loc.City });
                                 handleUpdateProject('environmental', {
-                                  hl_odt: c_to_f(loc.odtHeating),
-                                  hg_odt: c_to_f(loc.odtCooling),
-                                  hg_daily_range: loc.strange * 1.8,
-                                  hg_north_latitude: loc.latitude,
-                                  hl_mean_soil_temp: c_to_f(loc.dgTemp || 10),
-                                  degDay: loc.degDay,
-                                  ohr: loc.ohr
+                                  hl_odt: c_to_f(loc.DHDBT),
+                                  hg_odt: c_to_f(loc.DCDBT),
+                                  hg_daily_range: loc.Strange * 1.8,
+                                  hg_north_latitude: loc.Latidude,
+                                  hl_mean_soil_temp: c_to_f(loc.DGTEMP || 10),
+                                  degDay: loc.DegDay,
+                                  ohr: loc.OHR
                                 });
-                                setCitySearch(loc.cityName);
+                                setCitySearch(loc.City);
                                 setShowCityDropdown(false);
                               }}
                             >
-                              {loc.cityName}
+                              {loc.City}
                             </div>
                           ))
                         }
