@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import f280Data from '../data/f280WeatherData.json' with { type: 'json' };
+import FoundationInsulationModal from './FoundationInsulationModal';
+
 
 const FoundationThermalLoadCalculator = () => {
   const WEATHER_DATA = useMemo(() => {
@@ -45,12 +47,21 @@ const FoundationThermalLoadCalculator = () => {
     });
   };
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [insulationConfig, setInsulationConfig] = useState({
+    constructionType: 'Concrete',
+    insulationType: 'Interior Wall Insulation',
+    bcinType: 'BCIN_3',
+    insulationDepth: 0.6
+  });
+
   const calculateFoundationLoad = () => {
     return 3157;
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
+    <>
+      <div className="max-w-4xl mx-auto p-8">
       <div className="bg-gray-800 text-white border-2 border-black p-1 shadow-lg font-sans text-white">
         <h1 className="text-2xl font-bold text-center mb-1 bg-gray-900 text-white border-b-2 border-black py-2">
           Residential Foundation Thermal Load Calculator<br/>
@@ -144,10 +155,13 @@ const FoundationThermalLoadCalculator = () => {
                     ))}
                   </div>
                   <div className="w-1/2 flex items-center justify-center p-4">
-                    <div className="border bg-gray-900 text-white shadow flex flex-col items-center justify-center w-full h-full p-4">
+                    <div
+                      onClick={() => setIsModalOpen(true)}
+                      className="border bg-gray-900 hover:bg-gray-700 cursor-pointer text-white shadow flex flex-col items-center justify-center w-full h-full p-4 transition-colors"
+                    >
                       <div className="w-32 h-24 bg-gray-600 relative border-4 border-gray-400 rounded-b">
                          <div className="absolute -left-4 -right-4 bottom-1/3 h-full bg-gray-800 -z-10 opacity-70"></div>
-                         <div className="absolute text-white font-bold inset-0 flex items-center justify-center">0.6 m</div>
+                         <div className="absolute text-white font-bold inset-0 flex items-center justify-center">{insulationConfig.insulationDepth} m</div>
                       </div>
                       <div className="mt-2 text-xs">Insulation Configuration</div>
                     </div>
@@ -205,6 +219,16 @@ const FoundationThermalLoadCalculator = () => {
         </table>
       </div>
     </div>
+      <FoundationInsulationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialConfig={insulationConfig}
+        onSave={(config) => {
+          setInsulationConfig(config);
+          setIsModalOpen(false);
+        }}
+      />
+    </>
   );
 };
 
