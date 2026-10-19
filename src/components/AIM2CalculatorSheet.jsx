@@ -107,10 +107,10 @@ const AIM2CalculatorSheet = () => {
     let A_flue = 0;
     const flues = [parseFloat(inputs.flue1)||0, parseFloat(inputs.flue2)||0, parseFloat(inputs.flue3)||0, parseFloat(inputs.flue4)||0];
     flues.forEach(d => {
-      if (d > 0) A_flue += (Math.PI / 4) * Math.pow(d / 1000, 2);
+      if (d > 0) A_flue += Math.PI * Math.pow((d / 10) / 2, 2); // cm^2
     });
 
-    const C_flue = Cd * A_flue * Math.sqrt(2 / rho_air) * Math.pow(Pref_flue, 0.5 - n);
+    const C_flue = Cd * (A_flue / 10000) * Math.sqrt(2 / rho_air) * Math.pow(Pref_flue, 0.5 - n);
     const C_total = C + C_flue;
     const Y = C_total === 0 ? 0 : C_flue / C_total;
 
@@ -119,35 +119,38 @@ const AIM2CalculatorSheet = () => {
     const leakData = LEAKAGE_DISTRIBUTION[leakKey] || { ceiling: 0.2, walls: 0.6, floor: 0.2 };
     const R = (leakData.ceiling + leakData.floor) * (1 - Y);
     const X = (leakData.ceiling - leakData.floor) * (1 - Y);
-    const beta_f = (H + 1.5) / H;
-
-    // 4. Stack & Wind Factors
-    let f_s, f_w;
-    const S = (1 + n * R) / (n + 1);
-    const M = Math.pow(X, 2) / (2 - R);
-
-    if (Y === 0) {
-      f_s = S * Math.pow(Math.max(0, 0.5 - 0.5 * Math.pow(M, 1.25)), 1.5);
-      f_w = 0.19 * (2 - n) * (1 - Math.pow((X + R) / 2, 1.5));
-    } else {
-      const X_c = R + (2 * (1 - R - Y)) / Math.pow(beta_f + 1, 1 / n);
-      const F = n * Y * Math.pow(beta_f - 1, (3 * n - 1) / (3 * n)) * (1 - (3 * Math.pow(X_c - X, 2) * Math.pow(R, 1 - n)) / (2 * (beta_f + 1)));
-      f_s = S * Math.pow(Math.max(0, 0.5 - 0.5 * Math.pow(M, 1.25)), 1.5) + F;
-      f_w = 0.19 * (2 - n) * (1 - Math.pow((X + R) / 2, 1.5 - Y)) - (Y / 4) * (1 - R / 2);
-    }
-
-    // 5. Terrain & Shelter
+    // 4. Terrain & Shelter
     const h_anem = parseFloat(inputs.hAnem) || 10;
-    const C_T = (Math.log(H / z0_site) / Math.log(60 / z0_site)) * (Math.log(60 / z0_ws) / Math.log(h_anem / z0_ws));
+        const effective_H = Math.max(H, z0_site * 1.1); // Prevent negative log
+    const C_T = (Math.log(effective_H / z0_site) / Math.log(60 / z0_site)) * (Math.log(60 / z0_ws) / Math.log(h_anem / z0_ws));
     const S_w = Sw_o * (1 - Y) + 1.5 * Sw_flue * Y;
     const Ue_heat = (cityData.JanWind / 3.6) * C_T;
     const Ue_cool = (cityData.JulWind / 3.6) * C_T;
 
-    // 6. Final Calculation
+    // 5. Stack & Wind Factors & Final Calc
     const calcInf = (Tin, Tout, Ue) => {
       const rho_out = 352.981 / (Tout + 273.15);
       const P_w = 0.5 * rho_out * Math.pow(S_w * Ue, 2);
       const P_s = rho_out * g * H * (Math.abs(Tin - Tout) / (Tin + 273.15));
+
+      // Calculate beta_f inside calcInf so it can use Tin and Tout
+      // User says: "If your stack factor (f_s) derivation divides by T_indoor, ensure T_indoor is converted to Kelvin"
+      const beta_f = (Tin + 273.15) / Math.max(0.0001, Math.abs(Tin - Tout));
+
+      let f_s, f_w;
+      const S = (1 + n * R) / (n + 1);
+      const M = Math.pow(X, 2) / (2 - R);
+
+      if (Y === 0) {
+        f_s = S * Math.pow(Math.max(0, 0.5 - 0.5 * Math.pow(M, 1.25)), 1.5);
+        f_w = 0.19 * (2 - n) * (1 - Math.pow((X + R) / 2, 1.5));
+      } else {
+        const X_c = R + (2 * (1 - R - Y)) / Math.pow(beta_f + 1, 1 / n);
+        const F = n * Y * Math.pow(Math.max(0, beta_f - 1), (3 * n - 1) / (3 * n)) * (1 - (3 * Math.pow(X_c - X, 2) * Math.pow(R, 1 - n)) / (2 * (beta_f + 1)));
+        f_s = S * Math.pow(Math.max(0, 0.5 - 0.5 * Math.pow(M, 1.25)), 1.5) + F;
+        f_w = 0.19 * (2 - n) * (1 - Math.pow((X + R) / 2, 1.5 - Y)) - (Y / 4) * (1 - R / 2);
+      }
+
       const Q_w = (3600 / V) * C_total * f_w * Math.pow(P_w, n);
       const Q_s = (3600 / V) * C_total * f_s * Math.pow(P_s, n);
       return Math.pow(Math.pow(Q_s, 1/n) + Math.pow(Q_w, 1/n) - (1/3) * Math.pow(Q_s * Q_w, 1/(2*n)), n);
