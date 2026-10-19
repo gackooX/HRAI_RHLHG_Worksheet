@@ -4,6 +4,7 @@ import ReportGenerator from './components/ReportGenerator';
 import THGMWorksheet from './components/THGMWorksheet';
 import AirLeakageSheet from './components/AirLeakageSheet';
 import AIM2CalculatorSheet from "./components/AIM2CalculatorSheet";
+import FoundationThermalLoadCalculator from "./components/FoundationThermalLoadCalculator";
 import LibraryPage from './components/LibraryPage';
 import RoomManagement from './components/RoomManagement';
 import { initialState } from './state/projectState';
@@ -166,6 +167,7 @@ function App() {
             { id: 'rooms', label: 'Room Manager', icon: '🏠' },
             { id: 'air', label: 'Air & Vent', icon: '💨' },
             { id: 'aim2', label: 'AIM-2 Envelope', icon: '🏠' },
+            { id: 'foundation', label: 'Foundation Load', icon: '🧱' },
             { id: 'thgm', label: 'THGM Engine', icon: '☀️' },
             { id: 'report', label: 'Final Report', icon: '📄' },
             { id: 'library', label: 'Library', icon: '📚' }
@@ -535,6 +537,10 @@ function App() {
 
       {view === 'aim2' && (
         <AIM2CalculatorSheet />
+      )}
+
+      {view === 'foundation' && (
+        <FoundationThermalLoadCalculator />
       )}
 
       {view === 'air' && (
