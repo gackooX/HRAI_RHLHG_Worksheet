@@ -1,3 +1,4 @@
+import foundationCodes from '../data/foundationCodes.json';
 import React, { useState } from 'react';
 
 const FoundationInsulationModal = ({ isOpen, onClose, onSave, initialConfig }) => {
@@ -19,6 +20,8 @@ const FoundationInsulationModal = ({ isOpen, onClose, onSave, initialConfig }) =
     'Combination Wall and Slab Insulation'
   ];
   const bcinOptions = ['BCIN_1', 'BCIN_2', 'BCIN_3', 'BCIN_4'];
+
+  const selectedConfig = foundationCodes.find(c => c.code === bcinType) || {};
 
   const handleSave = () => {
     onSave({ constructionType, insulationType, bcinType, insulationDepth });
@@ -96,6 +99,13 @@ const FoundationInsulationModal = ({ isOpen, onClose, onSave, initialConfig }) =
               />
             </div>
 
+            <div className="flex items-center gap-4 font-bold text-lg mt-4">
+              <span>Insulation RSI (m²·K/W)</span>
+              <div className="w-20 bg-gray-900 border border-gray-600 p-1 text-center">
+                {selectedConfig.rsi || '0.0'}
+              </div>
+            </div>
+
             <div className="flex flex-col items-center">
               <button
                 onClick={handleSave}
@@ -109,10 +119,8 @@ const FoundationInsulationModal = ({ isOpen, onClose, onSave, initialConfig }) =
               </button>
             </div>
 
-            <div className="text-xs leading-relaxed text-gray-300 mt-auto">
-              - concrete walls and floor<br/>
-              - interior surface of wall insulated from top of wall to 0.6 m below grade<br/>
-              - first storey brick veneer placed directly on basement's concrete walls
+            <div className="text-xs leading-relaxed text-gray-300 mt-auto whitespace-pre-wrap">
+              {selectedConfig.description ? selectedConfig.description.split('\n').map((line, i) => <div key={i}>- {line}</div>) : 'No description available.'}
             </div>
           </div>
 

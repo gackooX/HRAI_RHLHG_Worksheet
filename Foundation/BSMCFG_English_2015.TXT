@@ -1,0 +1,858 @@
+HOT2000 Version 8 - Program documentation
+
+The following is a list of the BASESIMP systems currently implemented in
+HOT2000.  The first 67 systems are as documented in
+
+BASESIMP, A Simplified Foundation Energy-Loss Model Derived from
+          BASECALC (TM) Simultions
+Ian Beausoleil-Morrison, CANMET Energy Technology Centre,
+Natural Resources Canada, Draft May 17, 1996.
+
+Systems  68-72  were added in 1998.
+Systems  73-120 were added in August, 1999.
+         (A pdf file documents all current systems)
+Systems 121-145 were added in December, 1999
+
+The configuration #'s are used in HOT2000 to reference tables of heat-loss
+coefficients.  For example, to specify Configuration: #  2   = BCIN_2 for
+the first foundation, set
+
+ BSMT96.iFndatn[10][0] = 2
+
+-------------------------------------------
+
+  Configuration: #    1   = BCIN_1     4
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+  Configuration: #    2   = BCIN_2     4
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.2 m from floor
+    - any first storey construction type
+  Configuration: #    3   = BCIN_3     4
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #    4   = BCIN_4     5
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #    5   = BCEN_1     4
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #    6   = BCEN_2     5
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #    7   = BCEN_3     4
+    - concrete walls and floor
+    - exterior surface of wall insulated below grade
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #    8   = BCEN_4     5
+    - concrete walls and floor
+    - exterior surface of wall insulated below grade
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #    9   = BCNN_1     4
+    - concrete walls and floor
+    - no insulation
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #   10   = BCNN_2     5
+    - concrete walls and floor
+    - no insulation
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #   11   = BCCN_1     6
+    - concrete walls and floor
+    - exterior surface of wall insulated below grade
+    - interior surface of wall insulated from top of wall producing an overlap
+      with the exterior insulation
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #   12   = BCCN_2     7
+    - concrete walls and floor
+    - exterior surface of wall insulated below grade
+    - interior surface of wall insulated from top of wall producing an overlap
+      with the exterior insulation
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #   13   = BWNN_1     4
+    - wood walls and wood floor
+    - no insulation
+    - any first storey construction type
+  Configuration: #   14   = BWIN_1     4
+    - wood walls and wood floor
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+  Configuration: #   15   = BWIN_2     4
+    - wood walls and wood floor
+    - interior surface of wall insulated from top of wall to 0.2 m from floor
+    - any first storey construction type
+  Configuration: #   16   = BWIN_3     4
+    - wood walls and wood floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - any first storey construction type
+  Configuration: #   17   = BWEN_1     4
+    - wood walls and wood floor
+    - exterior surface of wall insulated over full-height
+    - any first storey construction type
+  Configuration: #   18   = BWEN_2     4
+    - wood walls and wood floor
+    - exterior surface of wall insulated below grade
+    - any first storey construction type
+  Configuration: #   19   = BCIB_1     5
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - any first storey construction type
+  Configuration: #   20   = BCIB_2     5
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - any first storey construction type
+  Configuration: #   21   = BCIB_3     5
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - any first storey construction type
+  Configuration: #   22   = BCIB_4     6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+    - any first storey construction type
+  Configuration: #   23   = BCIB_5     6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - thermal-break between walls and floor slab
+    - any first storey construction type
+  Configuration: #   24   = BCIB_6     6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - thermal-break between walls and floor slab
+    - any first storey construction type
+  Configuration: #   25   = BCEB_1     5
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #   26   = BCEB_2     5
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #   27   = BCEB_3     5
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #   28   = SCN_1      5
+    - concrete or soil (for crawl space) floor
+    - no insulation
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   29   = SCN_2      4
+    - concrete or soil (for crawl space) floor
+    - no insulation
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   30   = SCN_3      5
+    - concrete or soil (for crawl space) floor
+    - no insulation except for thermal break around edge of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   31   = SCN_4      4
+    - concrete or soil (for crawl space) floor
+    - thermal break around edge of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   32   = SCN_7      6
+    - concrete or soil (for crawl space) floor
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   33   = SCN_8      5
+    - concrete or soil (for crawl space) floor
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   34   = SCB_1      7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   35   = SCB_2      6
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   36   = SCB_3      7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - insulation also placed under footing creating a 0.85 m continuous section
+      of insulation
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   37   = SCB_4      6
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - insulation also placed under footing creating a 0.85 m continuous section
+      of insulation
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   38   = SCB_5      8
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   39   = SCB_6      7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   40   = SCB_9      9
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   41   = SCB_10     8
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   42   = SCB_11     8
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - horizontal skirt extends from slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   43   = SCB_12     7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 0.6 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - horizontal skirt extends from slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   44   = SCB_13     7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   45   = SCB_14     6
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   46   = SCB_17     8
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   47   = SCB_18     7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   48   = SCB_21     9
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   49   = SCB_22     8
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   50   = SCB_23     8
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - horizontal skirt extends from slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   51   = SCB_24     7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab insulated 1.0 m around perimeter
+    - no insulation under footing or foundation wall (ie. insulation starts
+      0.25 m from edge)
+    - horizontal skirt extends from slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   52   = SCB_25     6
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   53   = SCB_26     5
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   54   = SCB_29     7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - thermal break around edge of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   55   = SCB_30     6
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - thermal break around edge of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   56   = SCB_33     8
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   57   = SCB_34     7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   58   = SCB_35     7
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - horizontal skirt extends from slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   59   = SCB_36     6
+    - concrete or soil (for crawl space) floor
+    - bottom of slab fully insulated except under footing/foundation wall
+      (ie. insulation starts 0.25 m from edge)
+    - horizontal skirt extends from slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   60   = SCA_17     5
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   61   = SCA_18     4
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   62   = SCA_19     6
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - thermal break around edge of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   63   = SCA_20     5
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - thermal break around edge of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   64   = SCA_21     7
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   65   = SCA_22     6
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - thermal break around edge of slab
+    - vertical skirt extends from bottom of slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   66   = SCA_23     6
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - horizontal skirt extends from slab
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+  Configuration: #   67   = SCA_24     5
+    - concrete or soil (for crawl space) floor
+    - top of slab fully insulated
+    - horizontal skirt extends from slab
+    - first storey brick veneer placed directly on concrete slab
+  Configuration: #   68   = BCCN_3     6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - exterior surface of wall insulated over full-height
+    - thermal-break between walls and floor slab
+    - any first storey construction type
+  Configuration: #   69   = BCCB_4     7
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+    - any first storey construction type
+  Configuration: #   70   = BCEA_1     5
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - top of slab fully insulated
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #   71   = BCEA_4     6
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - top of slab fully insulated
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #   72   = BCIA_1     5
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - top of slab fully insulated
+    - any first storey construction type
+  Configuration: #   73   = BCIA_4     5
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.2 m from floor
+    - any first storey construction type
+    - top of slab fully insulated
+  Configuration: #   74   = BCEA_7     5
+    - concrete walls and floor
+    - first storey brick veneer placed directly on basement's concrete walls
+    - exterior surface of wall insulated below grade
+    - top of slab fully insulated
+  Configuration: #   75   = BCEA_8     6
+    - concrete walls and floor
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+    - exterior surface of wall insulated below grade
+    - top of slab fully insulated
+  Configuration: #   76   = BCEB_8     6
+    - concrete walls and floor
+    - first storey brick veneer placed directly on basement's concrete walls
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #   77   = BCEB_9     7
+    - concrete walls and floor
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #   78   = BWEN_3     4
+    - any first storey construction type
+    - wood walls and wood floor
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #   79   = BBIB_3     6
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+    - wood walls and concrete floor
+  Configuration: #   80   = BBIB_4     6
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - first storey brick veneer placed directly on basement's wooden walls
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+    - wood walls and concrete floor
+  Configuration: #   81   = SCB_31     7
+    - concrete or soil (for crawl space) floor
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+    - thermal break around edge of slab
+    - bottom of slab fully insulated including insulation under the
+      footings/foundation wall
+  Configuration: #   82   = SCB_32     6
+    - concrete or soil (for crawl space) floor
+    - first storey brick veneer placed directly on concrete slab
+    - thermal break around edge of slab
+    - bottom of slab fully insulated including insulation under the
+      footings/foundation wall
+  Configuration: #   83   = SCB_37     8
+    - concrete or soil (for crawl space) floor
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+    - thermal break around edge of slab
+    - bottom of slab insulated 0.35 m around perimeter
+    - insulation also placed under footing creating a 0.6 m continuous section
+      of insulation
+  Configuration: #   84   = SCB_38     7
+    - concrete or soil (for crawl space) floor
+    - first storey brick veneer placed directly on concrete slab
+    - thermal break around edge of slab
+    - bottom of slab insulated 0.35 m around perimeter
+    - insulation also placed under footing creating a 0.6 m continuous section
+      of insulation
+  Configuration: #   85   = SCB_39     8
+    - concrete or soil (for crawl space) floor
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+    - thermal break around edge of slab
+    - bottom of slab insulated 0.75 m around perimeter
+    - insulation also placed under footing creating a 1.0 m continuous section
+      of insulation
+  Configuration: #   86   = SCB_40     7
+    - concrete or soil (for crawl space) floor
+    - first storey brick veneer placed directly on concrete slab
+    - thermal break around edge of slab
+    - bottom of slab insulated 0.75 m around perimeter
+    - insulation also placed under footing creating a 1.0 m continuous section
+      of insulation
+  Configuration: #   87   = BBEB_1     5
+    - first storey brick veneer placed directly on basement's wooden walls
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - exterior surface of wall insulated to 0.6 m below grade
+    - wood walls and concrete floor
+  Configuration: #   88   = BBEN_1     4
+    - first storey brick veneer placed directly on basement's wooden walls
+    - exterior surface of wall insulated over full-height
+    - wood walls and concrete floor
+  Configuration: #   89   = BBEN_2     4
+    - first storey brick veneer placed directly on basement's wooden walls
+    - exterior surface of wall insulated to 0.6 m below grade
+    - wood walls and concrete floor
+  Configuration: #   90   = BBIA_2     5
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - top of slab fully insulated
+    - wood walls and concrete floor
+  Configuration: #   91   = BBIN_2     5
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's wooden walls
+    - wood walls and concrete floor
+  Configuration: #   92   = BCCB_8     6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+  Configuration: #   93   = BCCA_7     6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - top of slab fully insulated
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #   94   = BCCA_8     6
+    - concrete walls and floor
+    - any first storey construction type
+    - interior surface of wall insulated from top of wall to 0.2 m from floor
+    - exterior surface of wall insulated over full-height
+    - top of slab fully insulated
+  Configuration: #   95   = BCCN_4     5
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #   96   = BCCN_5     5
+    - concrete walls and floor
+    - any first storey construction type
+    - interior surface of wall insulated from top of wall to 0.2 m from floor
+    - exterior surface of wall insulated over full-height
+  Configuration: #   97   = BCEA_5     5
+    - concrete walls and floor
+    - first storey brick veneer placed directly on basement's concrete walls
+    - top of slab fully insulated
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #   98   = BCEA_6     6
+    - concrete walls and floor
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+    - top of slab fully insulated
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #   99   = BCEB_4     6
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  100   = BCEB_5     6
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  101   = BCEB_6     6
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  102   = BWIA_1     5
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - wood walls and wood floor
+    - top of slab insulated with a 0.6 m strip around perimeter
+  Configuration: #  103   = BWIA_2     5
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - wood walls and wood floor
+    - top of slab fully insulated
+  Configuration: #  104   = SCA_1      5
+    - concrete or soil (for crawl space) floor
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+    - top of slab insulated with a 0.6 m strip around perimeter
+  Configuration: #  105   = SCA_2      4
+    - concrete or soil (for crawl space) floor
+    - first storey brick veneer placed directly on concrete slab
+    - top of slab insulated with a 0.6 m strip around perimeter
+  Configuration: #  106   = SCA_9      5
+    - concrete or soil (for crawl space) floor
+    - first storey is non-brick veneer or bricks thermally broken from concrete
+      floor
+    - top of slab insulated with a 1.0 m strip around perimeter
+  Configuration: #  107   = SCA_10     4
+    - concrete or soil (for crawl space) floor
+    - first storey brick veneer placed directly on concrete slab
+    - top of slab insulated with a 1.0 m strip around perimeter
+  Configuration: #  108   = BBIN_1     5
+    - interior surface of wall insulated over full-height
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's wooden walls
+    - wood walls and concrete floor
+  Configuration: #  109   = BCEN_5     4
+    - concrete walls and floor
+    - first storey brick veneer placed directly on basement's concrete walls
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #  110   = BCEN_6     5
+    - concrete walls and floor
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #  111   = BBIA_1     5
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - top of slab insulated with a 0.6 m strip around perimeter
+    - wood walls and concrete floor
+  Configuration: #  112   = BBIB_1     5
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - wood walls and concrete floor
+  Configuration: #  113   = BBIB_2     5
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - wood walls and concrete floor
+  Configuration: #  114   = BCCB_9     6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #  115   = BCCB_10    6
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - any first storey construction type
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - exterior surface of wall insulated to 0.6 m below grade
+  Configuration: #  116   = BCCA_1     7
+    - concrete walls and floor
+    - first storey brick veneer placed directly on basement's concrete walls
+    - exterior surface of wall insulated below grade
+    - interior surface of wall insulated from top of wall producing an overlap
+      with the exterior insulation
+    - top of slab fully insulated
+  Configuration: #  117   = BCCA_4     8
+    - concrete walls and floor
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+    - exterior surface of wall insulated below grade
+    - interior surface of wall insulated from top of wall producing an overlap
+      with the exterior insulation
+    - top of slab fully insulated
+  Configuration: #  118   = BCIB_7     6
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - first storey brick veneer placed directly on basement's concrete walls
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+  Configuration: #  119   = BCIB_8     7
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+  Configuration: #  120   = BBEB_2     6
+    - first storey brick veneer placed directly on basement's wooden walls
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - thermal-break between walls and floor slab
+    - exterior surface of wall insulated to 0.6 m below grade
+    - wood walls and concrete floor
+  Configuration: #  121   = BCIA_3     5
+    - concrete walls and floor
+    - interior surface of wall insulated over full-height
+    - top of slab insulated with a 1.0 m strip around perimeter
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #  122   = BCIA_5     5
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - top of slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #  123   = BCIA_6     6
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - top of slab insulated with a 0.6 m strip around perimeter
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  124   = BCIB_9     6
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - thermal-break between walls and floor slab
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #  125   = BCIB_10    7
+    - concrete walls and floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - thermal-break between walls and floor slab
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  126   = BCEB_10    6
+    - concrete walls and floor
+    - exterior surface of wall insulated to 0.6 m below grade
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - thermal-break between walls and floor slab
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #  127   = BCEB_11    7
+    - concrete walls and floor
+    - exterior surface of wall insulated to 0.6 m below grade
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - thermal-break between walls and floor slab
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  128   = BCEA_3     5
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - top of slab insulated with a 1.0 m strip around perimeter
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #  129   = BCEA_9     6
+    - concrete walls and floor
+    - exterior surface of wall insulated over full-height
+    - top of slab insulated with a 1.0 m strip around perimeter
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  130   = BCEA_10    5
+    - concrete walls and floor
+    - exterior surface of wall insulated to 0.6 m below grade
+    - top of slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's concrete walls
+  Configuration: #  131   = BCEA_11    6
+    - concrete walls and floor
+    - exterior surface of wall insulated to 0.6 m below grade
+    - top of slab insulated with a 0.6 m strip around perimeter
+    - first storey is non-brick veneer or bricks thermally broken from
+      basement's concrete walls
+  Configuration: #  132   = BWIB_1     5
+    - wood walls and wood floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  133   = BWIB_2     5
+    - wood walls and wood floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  134   = BWIB_4     5
+    - wood walls and wood floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  135   = BWIA_3     5
+    - wood walls and wood floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - top of slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  136   = BWEB_1     5
+    - wood walls and wood floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  137   = BWEB_2     5
+    - wood walls and wood floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab fully insulated but no insulation under footings
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  138   = BWEB_3     5
+    - wood walls and wood floor
+    - exterior surface of wall insulated to 0.6 m below grade
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  139   = BWEB_4     5
+    - wood walls and wood floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  140   = BBIB_5     5
+    - wood walls and concrete floor
+    - interior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  141   = BBIB_6     5
+    - wood walls and concrete floor
+    - interior surface of wall insulated from top of wall to 0.6 m below grade
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  142   = BBEB_3     5
+    - wood walls and concrete floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 1.0 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  143   = BBEB_4     5
+    - wood walls and concrete floor
+    - exterior surface of wall insulated over full-height
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  144   = BBEB_5     5
+    - wood walls and concrete floor
+    - exterior surface of wall insulated to 0.6 m below grade
+    - sub-surface of floor slab insulated with a 0.6 m strip around perimeter
+    - first storey brick veneer placed directly on basement's wooden walls
+  Configuration: #  145   = BBEA_2     5
+    - wood walls and concrete floor
+    - exterior surface of wall insulated over full-height
+    - top of slab fully insulated
+    - first storey brick veneer placed directly on basement's wooden walls
+
+
+File created January  14, 1999
+Modified     August    9, 1999
+             August   17, 1999
+             November 23, 2000
+             July     27, 2015
+________________________________________
+Please report any errors or omissions to
+________________________________________
+Brian Bradley
+
+bbradley@NRCAN.gc.ca
+204-984-4920

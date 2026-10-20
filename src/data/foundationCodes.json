@@ -1,0 +1,727 @@
+[
+  {
+    "code": "BCIN_1",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCIN_2",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.2 m from floor\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCIN_3",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCIN_4",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEN_1",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCEN_2",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEN_3",
+    "description": "concrete walls and floor\nexterior surface of wall insulated below grade\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCEN_4",
+    "description": "concrete walls and floor\nexterior surface of wall insulated below grade\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCNN_1",
+    "description": "concrete walls and floor\nno insulation\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCNN_2",
+    "description": "concrete walls and floor\nno insulation\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCCN_1",
+    "description": "concrete walls and floor\nexterior surface of wall insulated below grade\ninterior surface of wall insulated from top of wall producing an overlap\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCCN_2",
+    "description": "concrete walls and floor\nexterior surface of wall insulated below grade\ninterior surface of wall insulated from top of wall producing an overlap\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 7.0
+  },
+  {
+    "code": "BWNN_1",
+    "description": "wood walls and wood floor\nno insulation\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BWIN_1",
+    "description": "wood walls and wood floor\ninterior surface of wall insulated over full-height\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BWIN_2",
+    "description": "wood walls and wood floor\ninterior surface of wall insulated from top of wall to 0.2 m from floor\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BWIN_3",
+    "description": "wood walls and wood floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BWEN_1",
+    "description": "wood walls and wood floor\nexterior surface of wall insulated over full-height\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BWEN_2",
+    "description": "wood walls and wood floor\nexterior surface of wall insulated below grade\nany first storey construction type",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCIB_1",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab fully insulated but no insulation under footings\nany first storey construction type",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCIB_2",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nany first storey construction type",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCIB_3",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nany first storey construction type",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCIB_4",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab\nany first storey construction type",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCIB_5",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nthermal-break between walls and floor slab\nany first storey construction type",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCIB_6",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nthermal-break between walls and floor slab\nany first storey construction type",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEB_1",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab fully insulated but no insulation under footings\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEB_2",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEB_3",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCN_1",
+    "description": "concrete or soil (for crawl space) floor\nno insulation\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCN_2",
+    "description": "concrete or soil (for crawl space) floor\nno insulation\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 4.0
+  },
+  {
+    "code": "SCN_3",
+    "description": "concrete or soil (for crawl space) floor\nno insulation except for thermal break around edge of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCN_4",
+    "description": "concrete or soil (for crawl space) floor\nthermal break around edge of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 4.0
+  },
+  {
+    "code": "SCN_7",
+    "description": "concrete or soil (for crawl space) floor\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCN_8",
+    "description": "concrete or soil (for crawl space) floor\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCB_1",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_2",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCB_3",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\ninsulation also placed under footing creating a 0.85 m continuous section\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_4",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\ninsulation also placed under footing creating a 0.85 m continuous section\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCB_5",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_6",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_9",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 9.0
+  },
+  {
+    "code": "SCB_10",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_11",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nhorizontal skirt extends from slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_12",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 0.6 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nhorizontal skirt extends from slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_13",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_14",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCB_17",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_18",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_21",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 9.0
+  },
+  {
+    "code": "SCB_22",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_23",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nhorizontal skirt extends from slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_24",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab insulated 1.0 m around perimeter\nno insulation under footing or foundation wall (ie. insulation starts\nhorizontal skirt extends from slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_25",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCB_26",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCB_29",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nthermal break around edge of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_30",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nthermal break around edge of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCB_33",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_34",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_35",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nhorizontal skirt extends from slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_36",
+    "description": "concrete or soil (for crawl space) floor\nbottom of slab fully insulated except under footing/foundation wall\nhorizontal skirt extends from slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCA_17",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCA_18",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 4.0
+  },
+  {
+    "code": "SCA_19",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nthermal break around edge of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCA_20",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nthermal break around edge of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCA_21",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCA_22",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nthermal break around edge of slab\nvertical skirt extends from bottom of slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCA_23",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nhorizontal skirt extends from slab\nfirst storey is non-brick veneer or bricks thermally broken from concrete",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCA_24",
+    "description": "concrete or soil (for crawl space) floor\ntop of slab fully insulated\nhorizontal skirt extends from slab\nfirst storey brick veneer placed directly on concrete slab",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCCN_3",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nexterior surface of wall insulated over full-height\nthermal-break between walls and floor slab\nany first storey construction type",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCCB_4",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nexterior surface of wall insulated over full-height\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab\nany first storey construction type",
+    "rsi": 7.0
+  },
+  {
+    "code": "BCEA_1",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\ntop of slab fully insulated\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEA_4",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\ntop of slab fully insulated\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCIA_1",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\ntop of slab fully insulated\nany first storey construction type",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCIA_4",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.2 m from floor\nany first storey construction type\ntop of slab fully insulated",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEA_7",
+    "description": "concrete walls and floor\nfirst storey brick veneer placed directly on basement's concrete walls\nexterior surface of wall insulated below grade\ntop of slab fully insulated",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEA_8",
+    "description": "concrete walls and floor\nfirst storey is non-brick veneer or bricks thermally broken from\nexterior surface of wall insulated below grade\ntop of slab fully insulated",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEB_8",
+    "description": "concrete walls and floor\nfirst storey brick veneer placed directly on basement's concrete walls\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEB_9",
+    "description": "concrete walls and floor\nfirst storey is non-brick veneer or bricks thermally broken from\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 7.0
+  },
+  {
+    "code": "BWEN_3",
+    "description": "any first storey construction type\nwood walls and wood floor\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 4.0
+  },
+  {
+    "code": "BBIB_3",
+    "description": "interior surface of wall insulated over full-height\nany first storey construction type\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab\nwood walls and concrete floor",
+    "rsi": 6.0
+  },
+  {
+    "code": "BBIB_4",
+    "description": "interior surface of wall insulated from top of wall to 0.6 m below grade\nfirst storey brick veneer placed directly on basement's wooden walls\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab\nwood walls and concrete floor",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCB_31",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey is non-brick veneer or bricks thermally broken from concrete\nthermal break around edge of slab\nbottom of slab fully insulated including insulation under the",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_32",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey brick veneer placed directly on concrete slab\nthermal break around edge of slab\nbottom of slab fully insulated including insulation under the",
+    "rsi": 6.0
+  },
+  {
+    "code": "SCB_37",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey is non-brick veneer or bricks thermally broken from concrete\nthermal break around edge of slab\nbottom of slab insulated 0.35 m around perimeter\ninsulation also placed under footing creating a 0.6 m continuous section",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_38",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey brick veneer placed directly on concrete slab\nthermal break around edge of slab\nbottom of slab insulated 0.35 m around perimeter\ninsulation also placed under footing creating a 0.6 m continuous section",
+    "rsi": 7.0
+  },
+  {
+    "code": "SCB_39",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey is non-brick veneer or bricks thermally broken from concrete\nthermal break around edge of slab\nbottom of slab insulated 0.75 m around perimeter\ninsulation also placed under footing creating a 1.0 m continuous section",
+    "rsi": 8.0
+  },
+  {
+    "code": "SCB_40",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey brick veneer placed directly on concrete slab\nthermal break around edge of slab\nbottom of slab insulated 0.75 m around perimeter\ninsulation also placed under footing creating a 1.0 m continuous section",
+    "rsi": 7.0
+  },
+  {
+    "code": "BBEB_1",
+    "description": "first storey brick veneer placed directly on basement's wooden walls\nsub-surface of floor slab fully insulated but no insulation under footings\nexterior surface of wall insulated to 0.6 m below grade\nwood walls and concrete floor",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBEN_1",
+    "description": "first storey brick veneer placed directly on basement's wooden walls\nexterior surface of wall insulated over full-height\nwood walls and concrete floor",
+    "rsi": 4.0
+  },
+  {
+    "code": "BBEN_2",
+    "description": "first storey brick veneer placed directly on basement's wooden walls\nexterior surface of wall insulated to 0.6 m below grade\nwood walls and concrete floor",
+    "rsi": 4.0
+  },
+  {
+    "code": "BBIA_2",
+    "description": "interior surface of wall insulated over full-height\nany first storey construction type\ntop of slab fully insulated\nwood walls and concrete floor",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBIN_2",
+    "description": "interior surface of wall insulated from top of wall to 0.6 m below grade\nfirst storey is non-brick veneer or bricks thermally broken from\nwood walls and concrete floor",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCCB_8",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nany first storey construction type\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCCA_7",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nany first storey construction type\ntop of slab fully insulated\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCCA_8",
+    "description": "concrete walls and floor\nany first storey construction type\ninterior surface of wall insulated from top of wall to 0.2 m from floor\nexterior surface of wall insulated over full-height\ntop of slab fully insulated",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCCN_4",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nany first storey construction type\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCCN_5",
+    "description": "concrete walls and floor\nany first storey construction type\ninterior surface of wall insulated from top of wall to 0.2 m from floor\nexterior surface of wall insulated over full-height",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEA_5",
+    "description": "concrete walls and floor\nfirst storey brick veneer placed directly on basement's concrete walls\ntop of slab fully insulated\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEA_6",
+    "description": "concrete walls and floor\nfirst storey is non-brick veneer or bricks thermally broken from\ntop of slab fully insulated\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEB_4",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab fully insulated but no insulation under footings\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEB_5",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEB_6",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 6.0
+  },
+  {
+    "code": "BWIA_1",
+    "description": "interior surface of wall insulated over full-height\nany first storey construction type\nwood walls and wood floor\ntop of slab insulated with a 0.6 m strip around perimeter",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWIA_2",
+    "description": "interior surface of wall insulated over full-height\nany first storey construction type\nwood walls and wood floor\ntop of slab fully insulated",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCA_1",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey is non-brick veneer or bricks thermally broken from concrete\ntop of slab insulated with a 0.6 m strip around perimeter",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCA_2",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey brick veneer placed directly on concrete slab\ntop of slab insulated with a 0.6 m strip around perimeter",
+    "rsi": 4.0
+  },
+  {
+    "code": "SCA_9",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey is non-brick veneer or bricks thermally broken from concrete\ntop of slab insulated with a 1.0 m strip around perimeter",
+    "rsi": 5.0
+  },
+  {
+    "code": "SCA_10",
+    "description": "concrete or soil (for crawl space) floor\nfirst storey brick veneer placed directly on concrete slab\ntop of slab insulated with a 1.0 m strip around perimeter",
+    "rsi": 4.0
+  },
+  {
+    "code": "BBIN_1",
+    "description": "interior surface of wall insulated over full-height\nfirst storey is non-brick veneer or bricks thermally broken from\nwood walls and concrete floor",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEN_5",
+    "description": "concrete walls and floor\nfirst storey brick veneer placed directly on basement's concrete walls\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 4.0
+  },
+  {
+    "code": "BCEN_6",
+    "description": "concrete walls and floor\nfirst storey is non-brick veneer or bricks thermally broken from\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBIA_1",
+    "description": "interior surface of wall insulated over full-height\nany first storey construction type\ntop of slab insulated with a 0.6 m strip around perimeter\nwood walls and concrete floor",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBIB_1",
+    "description": "interior surface of wall insulated over full-height\nany first storey construction type\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nwood walls and concrete floor",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBIB_2",
+    "description": "interior surface of wall insulated over full-height\nany first storey construction type\nsub-surface of floor slab fully insulated but no insulation under footings\nwood walls and concrete floor",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCCB_9",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nany first storey construction type\nsub-surface of floor slab fully insulated but no insulation under footings\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCCB_10",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\nany first storey construction type\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nexterior surface of wall insulated to 0.6 m below grade",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCCA_1",
+    "description": "concrete walls and floor\nfirst storey brick veneer placed directly on basement's concrete walls\nexterior surface of wall insulated below grade\ninterior surface of wall insulated from top of wall producing an overlap\ntop of slab fully insulated",
+    "rsi": 7.0
+  },
+  {
+    "code": "BCCA_4",
+    "description": "concrete walls and floor\nfirst storey is non-brick veneer or bricks thermally broken from\nexterior surface of wall insulated below grade\ninterior surface of wall insulated from top of wall producing an overlap\ntop of slab fully insulated",
+    "rsi": 8.0
+  },
+  {
+    "code": "BCIB_7",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nfirst storey brick veneer placed directly on basement's concrete walls\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCIB_8",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nfirst storey is non-brick veneer or bricks thermally broken from\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab",
+    "rsi": 7.0
+  },
+  {
+    "code": "BBEB_2",
+    "description": "first storey brick veneer placed directly on basement's wooden walls\nsub-surface of floor slab fully insulated but no insulation under footings\nthermal-break between walls and floor slab\nexterior surface of wall insulated to 0.6 m below grade\nwood walls and concrete floor",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCIA_3",
+    "description": "concrete walls and floor\ninterior surface of wall insulated over full-height\ntop of slab insulated with a 1.0 m strip around perimeter\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCIA_5",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\ntop of slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCIA_6",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\ntop of slab insulated with a 0.6 m strip around perimeter\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCIB_9",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nthermal-break between walls and floor slab\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCIB_10",
+    "description": "concrete walls and floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nthermal-break between walls and floor slab\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 7.0
+  },
+  {
+    "code": "BCEB_10",
+    "description": "concrete walls and floor\nexterior surface of wall insulated to 0.6 m below grade\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nthermal-break between walls and floor slab\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEB_11",
+    "description": "concrete walls and floor\nexterior surface of wall insulated to 0.6 m below grade\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nthermal-break between walls and floor slab\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 7.0
+  },
+  {
+    "code": "BCEA_3",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\ntop of slab insulated with a 1.0 m strip around perimeter\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEA_9",
+    "description": "concrete walls and floor\nexterior surface of wall insulated over full-height\ntop of slab insulated with a 1.0 m strip around perimeter\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 6.0
+  },
+  {
+    "code": "BCEA_10",
+    "description": "concrete walls and floor\nexterior surface of wall insulated to 0.6 m below grade\ntop of slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's concrete walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BCEA_11",
+    "description": "concrete walls and floor\nexterior surface of wall insulated to 0.6 m below grade\ntop of slab insulated with a 0.6 m strip around perimeter\nfirst storey is non-brick veneer or bricks thermally broken from",
+    "rsi": 6.0
+  },
+  {
+    "code": "BWIB_1",
+    "description": "wood walls and wood floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWIB_2",
+    "description": "wood walls and wood floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab fully insulated but no insulation under footings\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWIB_4",
+    "description": "wood walls and wood floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWIA_3",
+    "description": "wood walls and wood floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\ntop of slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWEB_1",
+    "description": "wood walls and wood floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWEB_2",
+    "description": "wood walls and wood floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab fully insulated but no insulation under footings\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWEB_3",
+    "description": "wood walls and wood floor\nexterior surface of wall insulated to 0.6 m below grade\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BWEB_4",
+    "description": "wood walls and wood floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBIB_5",
+    "description": "wood walls and concrete floor\ninterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBIB_6",
+    "description": "wood walls and concrete floor\ninterior surface of wall insulated from top of wall to 0.6 m below grade\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBEB_3",
+    "description": "wood walls and concrete floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 1.0 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBEB_4",
+    "description": "wood walls and concrete floor\nexterior surface of wall insulated over full-height\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBEB_5",
+    "description": "wood walls and concrete floor\nexterior surface of wall insulated to 0.6 m below grade\nsub-surface of floor slab insulated with a 0.6 m strip around perimeter\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  },
+  {
+    "code": "BBEA_2",
+    "description": "wood walls and concrete floor\nexterior surface of wall insulated over full-height\ntop of slab fully insulated\nfirst storey brick veneer placed directly on basement's wooden walls",
+    "rsi": 5.0
+  }
+]
