@@ -106,8 +106,8 @@ const AIM2CalculatorSheet = () => {
     const f_s_H = 0.000145 * Math.pow((H * 9.81) / Tin_heat_K, 0.5);
     const f_s_C = 0.000145 * Math.pow((H * 9.81) / Tin_cool_K, 0.5);
 
-    const Q_stack_H = f_s_H * ela10 * Math.sqrt(delta_T_H) * 1000;
-    const Q_stack_C = f_s_C * ela10 * Math.sqrt(delta_T_C) * 1000;
+    const Q_stack_H = f_s_H * ela10 * Math.sqrt(delta_T_H);
+    const Q_stack_C = f_s_C * ela10 * Math.sqrt(delta_T_C);
 
     // 3. Wind Factor (f_w)
     // For "City centre", the Shelter Factor (S_w) must be 0.32 (Do not use 1.0)
@@ -117,8 +117,8 @@ const AIM2CalculatorSheet = () => {
     }
     const f_w = 0.000185 * S_w;
 
-    const Q_wind_H = f_w * ela10 * V_wind_H * 1000;
-    const Q_wind_C = f_w * ela10 * V_wind_C * 1000;
+    const Q_wind_H = f_w * ela10 * V_wind_H;
+    const Q_wind_C = f_w * ela10 * V_wind_C;
 
     // 4. Flue Draft (Q_flue)
     let A_flue_m2 = 0;
